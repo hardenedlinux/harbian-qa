@@ -1,0 +1,431 @@
+Jun 22 18:20:00 hardenedlinux-QA kernel: [  733.331408] [drm] ib test on ring 3 succeeded in 0 usecs
+Jun 22 18:20:00 hardenedlinux-QA kernel: [  733.331486] [drm] ib test on ring 4 succeeded in 0 usecs
+Jun 22 18:20:02 hardenedlinux-QA kernel: [  735.540916] ecryptfs_encrypt_page: Error attempting to write lower page; rc = [-4]
+Jun 22 18:20:02 hardenedlinux-QA kernel: [  735.540928] ecryptfs_write: Error encrypting page; rc = [-4]
+Jun 22 18:20:02 hardenedlinux-QA kernel: [  735.540937] ecryptfs_write_begin: Error on attempt to truncate to (higher) offset [34359738368]; rc = [-4]
+Jun 22 18:21:48 hardenedlinux-QA kernel: [  841.825632] INFO: task trinity-c4:2156 blocked for more than 120 seconds.
+Jun 22 18:21:48 hardenedlinux-QA kernel: [  841.825643]       Not tainted 4.6.2 #3
+Jun 22 18:21:48 hardenedlinux-QA kernel: [  841.825648] "echo 0 > /proc/sys/kernel/hung_task_timeout_secs" disables this message.
+Jun 22 18:21:48 hardenedlinux-QA kernel: [  841.825654] trinity-c4      D ffff8801e5d4fa18     0  2156   2289 0x10000004
+Jun 22 18:21:48 hardenedlinux-QA kernel: [  841.825666]  ffff8801e5d4fa18 ffff8801e5d4f9d8 ffffffff829fc0a5 00ff8802106aae80
+Jun 22 18:21:48 hardenedlinux-QA kernel: [  841.825677]  ffff880216860558 ffff8802106ab258 0000000000000001 ffff88020e3c5d00
+Jun 22 18:21:48 hardenedlinux-QA kernel: [  841.825686]  ffff8802106aae80 ffff8801e5d48000 ffffed003cba9001 ffff8801e5d48008
+Jun 22 18:21:48 hardenedlinux-QA kernel: [  841.825696] Call Trace:
+Jun 22 18:21:48 hardenedlinux-QA kernel: [  841.825710]  [<ffffffff829fc0a5>] ? schedule+0x95/0x1b0
+Jun 22 18:21:48 hardenedlinux-QA kernel: [  841.825721]  [<ffffffff829fc0a5>] schedule+0x95/0x1b0
+Jun 22 18:21:48 hardenedlinux-QA kernel: [  841.825731]  [<ffffffff829fc80e>] schedule_preempt_disabled+0xe/0x10
+Jun 22 18:21:48 hardenedlinux-QA kernel: [  841.825742]  [<ffffffff82a00e22>] __mutex_lock_slowpath+0x1c2/0x380
+Jun 22 18:21:48 hardenedlinux-QA kernel: [  841.825752]  [<ffffffff82a00c60>] ? __ww_mutex_lock+0x1d0/0x1d0
+Jun 22 18:21:48 hardenedlinux-QA kernel: [  841.825764]  [<ffffffff81bf7098>] ? _atomic_dec_and_lock+0x68/0xd0
+Jun 22 18:21:48 hardenedlinux-QA kernel: [  841.825772]  [<ffffffff815c90be>] ? kasan_kmalloc+0x5e/0x70
+Jun 22 18:21:48 hardenedlinux-QA kernel: [  841.825782]  [<ffffffff82a01001>] mutex_lock+0x21/0x60
+Jun 22 18:21:48 hardenedlinux-QA kernel: [  841.825792]  [<ffffffff814b2bd7>] generic_file_write_iter+0xa7/0x6e0
+Jun 22 18:21:48 hardenedlinux-QA kernel: [  841.825803]  [<ffffffff81629967>] ? rw_copy_check_uvector+0x1b7/0x250
+Jun 22 18:21:48 hardenedlinux-QA kernel: [  841.825814]  [<ffffffff81623db9>] do_iter_readv_writev+0x1f9/0x2e0
+Jun 22 18:21:48 hardenedlinux-QA kernel: [  841.825824]  [<ffffffff814b2b30>] ? __generic_file_write_iter+0x5a0/0x5a0
+Jun 22 18:21:48 hardenedlinux-QA kernel: [  841.825834]  [<ffffffff81623bc0>] ? vfs_iter_write+0x390/0x390
+Jun 22 18:21:48 hardenedlinux-QA kernel: [  841.825845]  [<ffffffff81accb87>] ? apparmor_file_permission+0x27/0x30
+Jun 22 18:21:48 hardenedlinux-QA kernel: [  841.825855]  [<ffffffff812575f4>] ? percpu_down_read+0x14/0xb0
+Jun 22 18:21:48 hardenedlinux-QA kernel: [  841.825865]  [<ffffffff814b2b30>] ? __generic_file_write_iter+0x5a0/0x5a0
+Jun 22 18:21:48 hardenedlinux-QA kernel: [  841.825875]  [<ffffffff81626162>] do_readv_writev+0x402/0x740
+Jun 22 18:21:48 hardenedlinux-QA kernel: [  841.825885]  [<ffffffff812bf26b>] ? hrtimer_active+0x1db/0x280
+Jun 22 18:21:48 hardenedlinux-QA kernel: [  841.825894]  [<ffffffff81625d60>] ? vfs_write+0x4a0/0x4a0
+Jun 22 18:21:48 hardenedlinux-QA kernel: [  841.825905]  [<ffffffff812b3347>] ? ns_to_timeval+0x27/0xb0
+Jun 22 18:21:48 hardenedlinux-QA kernel: [  841.825916]  [<ffffffff812c4734>] ? do_setitimer+0x104/0x700
+Jun 22 18:21:48 hardenedlinux-QA kernel: [  841.825926]  [<ffffffff814174b1>] ? perf_syscall_enter+0xc1/0xd00
+Jun 22 18:21:48 hardenedlinux-QA kernel: [  841.825934]  [<ffffffff812bedb0>] ? run_local_timers+0x20/0x20
+Jun 22 18:21:48 hardenedlinux-QA kernel: [  841.825943]  [<ffffffff81007520>] ? syscall_trace_enter_phase1+0xf0/0x4c0
+Jun 22 18:21:48 hardenedlinux-QA kernel: [  841.825953]  [<ffffffff812c4dfe>] ? alarm_setitimer+0xce/0x140
+Jun 22 18:21:48 hardenedlinux-QA kernel: [  841.825963]  [<ffffffff816269f3>] vfs_writev+0x93/0xc0
+Jun 22 18:21:48 hardenedlinux-QA kernel: [  841.825973]  [<ffffffff81626de2>] do_pwritev+0x162/0x1a0
+Jun 22 18:21:48 hardenedlinux-QA kernel: [  841.825983]  [<ffffffff81629b75>] SyS_pwritev+0x35/0x40
+Jun 22 18:21:48 hardenedlinux-QA kernel: [  841.825993]  [<ffffffff81629b40>] ? SyS_preadv2+0x80/0x80
+Jun 22 18:21:48 hardenedlinux-QA kernel: [  841.826003]  [<ffffffff8100831b>] do_syscall_64+0x1ab/0x3e0
+Jun 22 18:21:48 hardenedlinux-QA kernel: [  841.826015]  [<ffffffff82a05de5>] entry_SYSCALL64_slow_path+0x25/0x25
+Jun 22 18:21:48 hardenedlinux-QA kernel: [  841.826024] INFO: task trinity-c5:9038 blocked for more than 120 seconds.
+Jun 22 18:21:48 hardenedlinux-QA kernel: [  841.826030]       Not tainted 4.6.2 #3
+Jun 22 18:21:48 hardenedlinux-QA kernel: [  841.826035] "echo 0 > /proc/sys/kernel/hung_task_timeout_secs" disables this message.
+Jun 22 18:21:48 hardenedlinux-QA kernel: [  841.826040] trinity-c5      D ffff88009993fa08     0  9038   2289 0x10000004
+Jun 22 18:21:48 hardenedlinux-QA kernel: [  841.826051]  ffff88009993fa08 ffff880216404d80 ffff88009a816e40 00ffea00026a0400
+Jun 22 18:21:48 hardenedlinux-QA kernel: [  841.826061]  ffff880216860558 ffff88020e3c03d8 0000000000000001 ffff880097414d80
+Jun 22 18:21:48 hardenedlinux-QA kernel: [  841.826071]  ffff88020e3c0000 ffff880099938000 ffffed0013327001 ffff880099938008
+Jun 22 18:21:48 hardenedlinux-QA kernel: [  841.826080] Call Trace:
+Jun 22 18:21:48 hardenedlinux-QA kernel: [  841.826091]  [<ffffffff829fc0a5>] schedule+0x95/0x1b0
+Jun 22 18:21:48 hardenedlinux-QA kernel: [  841.826100]  [<ffffffff829fc80e>] schedule_preempt_disabled+0xe/0x10
+Jun 22 18:21:48 hardenedlinux-QA kernel: [  841.826109]  [<ffffffff82a00e22>] __mutex_lock_slowpath+0x1c2/0x380
+Jun 22 18:21:48 hardenedlinux-QA kernel: [  841.826120]  [<ffffffff82a00c60>] ? __ww_mutex_lock+0x1d0/0x1d0
+Jun 22 18:21:48 hardenedlinux-QA kernel: [  841.826129]  [<ffffffff815c90be>] ? kasan_kmalloc+0x5e/0x70
+Jun 22 18:21:48 hardenedlinux-QA kernel: [  841.826139]  [<ffffffff82a01001>] mutex_lock+0x21/0x60
+Jun 22 18:21:48 hardenedlinux-QA kernel: [  841.826149]  [<ffffffff814b2bd7>] generic_file_write_iter+0xa7/0x6e0
+Jun 22 18:21:48 hardenedlinux-QA kernel: [  841.826160]  [<ffffffff81629967>] ? rw_copy_check_uvector+0x1b7/0x250
+Jun 22 18:21:48 hardenedlinux-QA kernel: [  841.826170]  [<ffffffff81623db9>] do_iter_readv_writev+0x1f9/0x2e0
+Jun 22 18:21:48 hardenedlinux-QA kernel: [  841.826180]  [<ffffffff814b2b30>] ? __generic_file_write_iter+0x5a0/0x5a0
+Jun 22 18:21:48 hardenedlinux-QA kernel: [  841.826190]  [<ffffffff81623bc0>] ? vfs_iter_write+0x390/0x390
+Jun 22 18:21:48 hardenedlinux-QA kernel: [  841.826200]  [<ffffffff81accb87>] ? apparmor_file_permission+0x27/0x30
+Jun 22 18:21:48 hardenedlinux-QA kernel: [  841.826210]  [<ffffffff812575f4>] ? percpu_down_read+0x14/0xb0
+Jun 22 18:21:48 hardenedlinux-QA kernel: [  841.826220]  [<ffffffff814b2b30>] ? __generic_file_write_iter+0x5a0/0x5a0
+Jun 22 18:21:48 hardenedlinux-QA kernel: [  841.826230]  [<ffffffff81626162>] do_readv_writev+0x402/0x740
+Jun 22 18:21:48 hardenedlinux-QA kernel: [  841.826240]  [<ffffffff81625d60>] ? vfs_write+0x4a0/0x4a0
+Jun 22 18:21:48 hardenedlinux-QA kernel: [  841.826251]  [<ffffffff81244676>] ? remove_wait_queue+0xc6/0x120
+Jun 22 18:21:48 hardenedlinux-QA kernel: [  841.826262]  [<ffffffff812b3347>] ? ns_to_timeval+0x27/0xb0
+Jun 22 18:21:48 hardenedlinux-QA kernel: [  841.826269]  [<ffffffff812c4734>] ? do_setitimer+0x104/0x700
+Jun 22 18:21:48 hardenedlinux-QA kernel: [  841.826279]  [<ffffffff814174b1>] ? perf_syscall_enter+0xc1/0xd00
+Jun 22 18:21:48 hardenedlinux-QA kernel: [  841.826289]  [<ffffffff812bedb0>] ? run_local_timers+0x20/0x20
+Jun 22 18:21:48 hardenedlinux-QA kernel: [  841.826299]  [<ffffffff81007520>] ? syscall_trace_enter_phase1+0xf0/0x4c0
+Jun 22 18:21:48 hardenedlinux-QA kernel: [  841.826309]  [<ffffffff816269f3>] vfs_writev+0x93/0xc0
+Jun 22 18:21:48 hardenedlinux-QA kernel: [  841.826318]  [<ffffffff81626de2>] do_pwritev+0x162/0x1a0
+Jun 22 18:21:48 hardenedlinux-QA kernel: [  841.826329]  [<ffffffff81629bc5>] SyS_pwritev2+0x45/0x80
+Jun 22 18:21:48 hardenedlinux-QA kernel: [  841.826338]  [<ffffffff81629b80>] ? SyS_pwritev+0x40/0x40
+Jun 22 18:21:48 hardenedlinux-QA kernel: [  841.826348]  [<ffffffff8100831b>] do_syscall_64+0x1ab/0x3e0
+Jun 22 18:21:48 hardenedlinux-QA kernel: [  841.826359]  [<ffffffff82a05de5>] entry_SYSCALL64_slow_path+0x25/0x25
+Jun 22 18:21:48 hardenedlinux-QA kernel: [  841.826368] INFO: task trinity-c8:13134 blocked for more than 120 seconds.
+Jun 22 18:21:48 hardenedlinux-QA kernel: [  841.826374]       Not tainted 4.6.2 #3
+Jun 22 18:21:48 hardenedlinux-QA kernel: [  841.826379] "echo 0 > /proc/sys/kernel/hung_task_timeout_secs" disables this message.
+Jun 22 18:21:48 hardenedlinux-QA kernel: [  841.826384] trinity-c8      D ffff88021067fb28     0 13134   2289 0x10000004
+Jun 22 18:21:48 hardenedlinux-QA kernel: [  841.826394]  ffff88021067fb28 ffffed0013280bb8 ffff88021067faf8 00ff88009a413540
+Jun 22 18:21:48 hardenedlinux-QA kernel: [  841.826404]  ffff880216860558 ffff8801e5f3b258 0000000000000001 ffff88009a6c6c80
+Jun 22 18:21:48 hardenedlinux-QA kernel: [  841.826414]  ffff8801e5f3ae80 ffff880210678000 ffffed00420cf001 ffff880210678008
+Jun 22 18:21:48 hardenedlinux-QA kernel: [  841.826424] Call Trace:
+Jun 22 18:21:48 hardenedlinux-QA kernel: [  841.826434]  [<ffffffff829fc0a5>] schedule+0x95/0x1b0
+Jun 22 18:21:48 hardenedlinux-QA kernel: [  841.826442]  [<ffffffff829fc80e>] schedule_preempt_disabled+0xe/0x10
+Jun 22 18:21:48 hardenedlinux-QA kernel: [  841.826452]  [<ffffffff82a00e22>] __mutex_lock_slowpath+0x1c2/0x380
+Jun 22 18:21:48 hardenedlinux-QA kernel: [  841.826463]  [<ffffffff82a00c60>] ? __ww_mutex_lock+0x1d0/0x1d0
+Jun 22 18:21:48 hardenedlinux-QA kernel: [  841.826473]  [<ffffffff81c15775>] ? timerqueue_add+0x1e5/0x2a0
+Jun 22 18:21:48 hardenedlinux-QA kernel: [  841.826483]  [<ffffffff82a01001>] mutex_lock+0x21/0x60
+Jun 22 18:21:48 hardenedlinux-QA kernel: [  841.826493]  [<ffffffff814b2bd7>] generic_file_write_iter+0xa7/0x6e0
+Jun 22 18:21:48 hardenedlinux-QA kernel: [  841.826503]  [<ffffffff812c17c0>] ? hrtimer_start_range_ns+0x5f0/0x10c0
+Jun 22 18:21:48 hardenedlinux-QA kernel: [  841.826513]  [<ffffffff816241c9>] __vfs_write+0x329/0x4f0
+Jun 22 18:21:48 hardenedlinux-QA kernel: [  841.826523]  [<ffffffff81623ea0>] ? do_iter_readv_writev+0x2e0/0x2e0
+Jun 22 18:21:48 hardenedlinux-QA kernel: [  841.826533]  [<ffffffff812c11d0>] ? hrtimer_init+0x140/0x140
+Jun 22 18:21:48 hardenedlinux-QA kernel: [  841.826542]  [<ffffffff812c0210>] ? __remove_hrtimer+0x250/0x250
+Jun 22 18:21:48 hardenedlinux-QA kernel: [  841.826552]  [<ffffffff81244676>] ? remove_wait_queue+0xc6/0x120
+Jun 22 18:21:48 hardenedlinux-QA kernel: [  841.826563]  [<ffffffff81accb87>] ? apparmor_file_permission+0x27/0x30
+Jun 22 18:21:48 hardenedlinux-QA kernel: [  841.826573]  [<ffffffff812575f4>] ? percpu_down_read+0x14/0xb0
+Jun 22 18:21:48 hardenedlinux-QA kernel: [  841.826583]  [<ffffffff81625a2c>] vfs_write+0x16c/0x4a0
+Jun 22 18:21:48 hardenedlinux-QA kernel: [  841.826593]  [<ffffffff81629788>] SyS_pwrite64+0x158/0x180
+Jun 22 18:21:48 hardenedlinux-QA kernel: [  841.826602]  [<ffffffff81629630>] ? SyS_pread64+0x180/0x180
+Jun 22 18:21:48 hardenedlinux-QA kernel: [  841.826611]  [<ffffffff81007a38>] ? syscall_trace_enter_phase2+0x148/0x5b0
+Jun 22 18:21:48 hardenedlinux-QA kernel: [  841.826621]  [<ffffffff81629630>] ? SyS_pread64+0x180/0x180
+Jun 22 18:21:48 hardenedlinux-QA kernel: [  841.826630]  [<ffffffff8100831b>] do_syscall_64+0x1ab/0x3e0
+Jun 22 18:21:48 hardenedlinux-QA kernel: [  841.826642]  [<ffffffff82a05de5>] entry_SYSCALL64_slow_path+0x25/0x25
+Jun 22 18:22:51 hardenedlinux-QA kernel: [  904.543152] [drm] probing gen 2 caps for device 8086:9c98 = 5323c42/0
+Jun 22 18:22:51 hardenedlinux-QA kernel: [  904.543164] [drm] PCIE gen 2 link speeds already enabled
+Jun 22 18:22:51 hardenedlinux-QA kernel: [  904.587412] [drm] PCIE GART of 2048M enabled (table at 0x0000000000040000).
+Jun 22 18:22:51 hardenedlinux-QA kernel: [  904.587678] radeon 0000:03:00.0: WB enabled
+Jun 22 18:22:51 hardenedlinux-QA kernel: [  904.587693] radeon 0000:03:00.0: fence driver on ring 0 use gpu addr 0x0000000080000c00 and cpu addr 0xffff8802091cfc00
+Jun 22 18:22:51 hardenedlinux-QA kernel: [  904.587704] radeon 0000:03:00.0: fence driver on ring 1 use gpu addr 0x0000000080000c04 and cpu addr 0xffff8802091cfc04
+Jun 22 18:22:51 hardenedlinux-QA kernel: [  904.587713] radeon 0000:03:00.0: fence driver on ring 2 use gpu addr 0x0000000080000c08 and cpu addr 0xffff8802091cfc08
+Jun 22 18:22:51 hardenedlinux-QA kernel: [  904.587723] radeon 0000:03:00.0: fence driver on ring 3 use gpu addr 0x0000000080000c0c and cpu addr 0xffff8802091cfc0c
+Jun 22 18:22:51 hardenedlinux-QA kernel: [  904.587734] radeon 0000:03:00.0: fence driver on ring 4 use gpu addr 0x0000000080000c10 and cpu addr 0xffff8802091cfc10
+Jun 22 18:22:51 hardenedlinux-QA kernel: [  904.587744] radeon 0000:03:00.0: VCE init error (-22).
+Jun 22 18:22:51 hardenedlinux-QA kernel: [  904.827730] [drm] ring test on 0 succeeded in 1 usecs
+Jun 22 18:22:51 hardenedlinux-QA kernel: [  904.827745] [drm] ring test on 1 succeeded in 1 usecs
+Jun 22 18:22:51 hardenedlinux-QA kernel: [  904.827756] [drm] ring test on 2 succeeded in 1 usecs
+Jun 22 18:22:51 hardenedlinux-QA kernel: [  904.827773] [drm] ring test on 3 succeeded in 4 usecs
+Jun 22 18:22:51 hardenedlinux-QA kernel: [  904.827786] [drm] ring test on 4 succeeded in 4 usecs
+Jun 22 18:22:51 hardenedlinux-QA kernel: [  904.827893] [drm] ib test on ring 0 succeeded in 0 usecs
+Jun 22 18:22:51 hardenedlinux-QA kernel: [  904.827984] [drm] ib test on ring 1 succeeded in 0 usecs
+Jun 22 18:22:51 hardenedlinux-QA kernel: [  904.828084] [drm] ib test on ring 2 succeeded in 0 usecs
+Jun 22 18:22:51 hardenedlinux-QA kernel: [  904.828161] [drm] ib test on ring 3 succeeded in 0 usecs
+Jun 22 18:22:51 hardenedlinux-QA kernel: [  904.828233] [drm] ib test on ring 4 succeeded in 0 usecs
+Jun 22 18:22:54 hardenedlinux-QA kernel: [  907.822542] irda_setsockopt: not allowed to set MAXSDUSIZE for this socket type!
+Jun 22 18:23:25 hardenedlinux-QA kernel: [  938.323971] can: request_module (can-proto-4) failed.
+Jun 22 18:23:34 hardenedlinux-QA kernel: [  947.667539] ecryptfs_write_inode_size_to_header: Error writing file size to header; rc = [-4]
+Jun 22 18:23:34 hardenedlinux-QA kernel: [  947.667549] Problem with ecryptfs_write_inode_size_to_metadata; rc = [-4]
+Jun 22 18:23:34 hardenedlinux-QA kernel: [  947.667557] ecryptfs_write_begin: Error on attempt to truncate to (higher) offset [572114825216]; rc = [-4]
+Jun 22 18:23:41 hardenedlinux-QA kernel: [  954.502447] ecryptfs_encrypt_page: Error attempting to write lower page; rc = [-27]
+Jun 22 18:23:41 hardenedlinux-QA kernel: [  954.502458] ecryptfs_write: Error encrypting page; rc = [-27]
+Jun 22 18:23:41 hardenedlinux-QA kernel: [  954.502474] Error attempting to zero out the remainder of the end page on reducing truncate; rc = [-27]
+Jun 22 18:23:51 hardenedlinux-QA kernel: [  964.844840] Netfilter messages via NETLINK v0.30.
+Jun 22 18:24:12 hardenedlinux-QA kernel: [  985.460496] [drm] probing gen 2 caps for device 8086:9c98 = 5323c42/0
+Jun 22 18:24:12 hardenedlinux-QA kernel: [  985.460507] [drm] PCIE gen 2 link speeds already enabled
+Jun 22 18:24:12 hardenedlinux-QA kernel: [  985.573156] [drm] PCIE GART of 2048M enabled (table at 0x0000000000040000).
+Jun 22 18:24:12 hardenedlinux-QA kernel: [  985.580521] radeon 0000:03:00.0: WB enabled
+Jun 22 18:24:12 hardenedlinux-QA kernel: [  985.580537] radeon 0000:03:00.0: fence driver on ring 0 use gpu addr 0x0000000080000c00 and cpu addr 0xffff8802091cfc00
+Jun 22 18:24:12 hardenedlinux-QA kernel: [  985.580549] radeon 0000:03:00.0: fence driver on ring 1 use gpu addr 0x0000000080000c04 and cpu addr 0xffff8802091cfc04
+Jun 22 18:24:12 hardenedlinux-QA kernel: [  985.580560] radeon 0000:03:00.0: fence driver on ring 2 use gpu addr 0x0000000080000c08 and cpu addr 0xffff8802091cfc08
+Jun 22 18:24:12 hardenedlinux-QA kernel: [  985.580570] radeon 0000:03:00.0: fence driver on ring 3 use gpu addr 0x0000000080000c0c and cpu addr 0xffff8802091cfc0c
+Jun 22 18:24:12 hardenedlinux-QA kernel: [  985.580581] radeon 0000:03:00.0: fence driver on ring 4 use gpu addr 0x0000000080000c10 and cpu addr 0xffff8802091cfc10
+Jun 22 18:24:12 hardenedlinux-QA kernel: [  985.580590] radeon 0000:03:00.0: VCE init error (-22).
+Jun 22 18:24:12 hardenedlinux-QA kernel: [  985.821242] [drm] ring test on 0 succeeded in 1 usecs
+Jun 22 18:24:12 hardenedlinux-QA kernel: [  985.821257] [drm] ring test on 1 succeeded in 1 usecs
+Jun 22 18:24:12 hardenedlinux-QA kernel: [  985.821269] [drm] ring test on 2 succeeded in 1 usecs
+Jun 22 18:24:12 hardenedlinux-QA kernel: [  985.821285] [drm] ring test on 3 succeeded in 4 usecs
+Jun 22 18:24:12 hardenedlinux-QA kernel: [  985.821298] [drm] ring test on 4 succeeded in 4 usecs
+Jun 22 18:24:12 hardenedlinux-QA kernel: [  985.823224] [drm] ib test on ring 0 succeeded in 0 usecs
+Jun 22 18:24:12 hardenedlinux-QA kernel: [  985.823318] [drm] ib test on ring 1 succeeded in 0 usecs
+Jun 22 18:24:12 hardenedlinux-QA kernel: [  985.823428] [drm] ib test on ring 2 succeeded in 0 usecs
+Jun 22 18:24:12 hardenedlinux-QA kernel: [  985.823503] [drm] ib test on ring 3 succeeded in 0 usecs
+Jun 22 18:24:12 hardenedlinux-QA kernel: [  985.823578] [drm] ib test on ring 4 succeeded in 0 usecs
+Jun 22 18:24:56 hardenedlinux-QA kernel: [ 1029.693055] [drm] probing gen 2 caps for device 8086:9c98 = 5323c42/0
+Jun 22 18:24:56 hardenedlinux-QA kernel: [ 1029.693067] [drm] PCIE gen 2 link speeds already enabled
+Jun 22 18:24:56 hardenedlinux-QA kernel: [ 1029.740834] [drm] PCIE GART of 2048M enabled (table at 0x0000000000040000).
+Jun 22 18:24:56 hardenedlinux-QA kernel: [ 1029.741289] radeon 0000:03:00.0: WB enabled
+Jun 22 18:24:56 hardenedlinux-QA kernel: [ 1029.741303] radeon 0000:03:00.0: fence driver on ring 0 use gpu addr 0x0000000080000c00 and cpu addr 0xffff8802091cfc00
+Jun 22 18:24:56 hardenedlinux-QA kernel: [ 1029.741314] radeon 0000:03:00.0: fence driver on ring 1 use gpu addr 0x0000000080000c04 and cpu addr 0xffff8802091cfc04
+Jun 22 18:24:56 hardenedlinux-QA kernel: [ 1029.741324] radeon 0000:03:00.0: fence driver on ring 2 use gpu addr 0x0000000080000c08 and cpu addr 0xffff8802091cfc08
+Jun 22 18:24:56 hardenedlinux-QA kernel: [ 1029.741335] radeon 0000:03:00.0: fence driver on ring 3 use gpu addr 0x0000000080000c0c and cpu addr 0xffff8802091cfc0c
+Jun 22 18:24:56 hardenedlinux-QA kernel: [ 1029.741346] radeon 0000:03:00.0: fence driver on ring 4 use gpu addr 0x0000000080000c10 and cpu addr 0xffff8802091cfc10
+Jun 22 18:24:56 hardenedlinux-QA kernel: [ 1029.741355] radeon 0000:03:00.0: VCE init error (-22).
+Jun 22 18:24:57 hardenedlinux-QA kernel: [ 1029.982324] [drm] ring test on 0 succeeded in 1 usecs
+Jun 22 18:24:57 hardenedlinux-QA kernel: [ 1029.982340] [drm] ring test on 1 succeeded in 1 usecs
+Jun 22 18:24:57 hardenedlinux-QA kernel: [ 1029.982351] [drm] ring test on 2 succeeded in 1 usecs
+Jun 22 18:24:57 hardenedlinux-QA kernel: [ 1029.982366] [drm] ring test on 3 succeeded in 4 usecs
+Jun 22 18:24:57 hardenedlinux-QA kernel: [ 1029.982378] [drm] ring test on 4 succeeded in 4 usecs
+Jun 22 18:24:57 hardenedlinux-QA kernel: [ 1029.982488] [drm] ib test on ring 0 succeeded in 0 usecs
+Jun 22 18:24:57 hardenedlinux-QA kernel: [ 1029.982596] [drm] ib test on ring 1 succeeded in 0 usecs
+Jun 22 18:24:57 hardenedlinux-QA kernel: [ 1029.982700] [drm] ib test on ring 2 succeeded in 0 usecs
+Jun 22 18:24:57 hardenedlinux-QA kernel: [ 1029.982778] [drm] ib test on ring 3 succeeded in 0 usecs
+Jun 22 18:24:57 hardenedlinux-QA kernel: [ 1029.982855] [drm] ib test on ring 4 succeeded in 0 usecs
+Jun 22 18:25:16 hardenedlinux-QA kernel: [ 1049.391197] can: request_module (can-proto-3) failed.
+Jun 22 18:25:59 hardenedlinux-QA kernel: [ 1092.488332] ecryptfs_encrypt_page: Error attempting to write lower page; rc = [-4]
+Jun 22 18:25:59 hardenedlinux-QA kernel: [ 1092.488344] ecryptfs_write: Error encrypting page; rc = [-4]
+Jun 22 18:25:59 hardenedlinux-QA kernel: [ 1092.488352] ecryptfs_write_begin: Error on attempt to truncate to (higher) offset [318365237248]; rc = [-4]
+Jun 22 18:26:01 hardenedlinux-QA kernel: [ 1094.176742] can: request_module (can-proto-4) failed.
+Jun 22 18:26:02 hardenedlinux-QA kernel: [ 1095.561464] [drm] probing gen 2 caps for device 8086:9c98 = 5323c42/0
+Jun 22 18:26:02 hardenedlinux-QA kernel: [ 1095.561476] [drm] PCIE gen 2 link speeds already enabled
+Jun 22 18:26:02 hardenedlinux-QA kernel: [ 1095.604792] [drm] PCIE GART of 2048M enabled (table at 0x0000000000040000).
+Jun 22 18:26:02 hardenedlinux-QA kernel: [ 1095.605056] radeon 0000:03:00.0: WB enabled
+Jun 22 18:26:02 hardenedlinux-QA kernel: [ 1095.605070] radeon 0000:03:00.0: fence driver on ring 0 use gpu addr 0x0000000080000c00 and cpu addr 0xffff8802091cfc00
+Jun 22 18:26:02 hardenedlinux-QA kernel: [ 1095.605081] radeon 0000:03:00.0: fence driver on ring 1 use gpu addr 0x0000000080000c04 and cpu addr 0xffff8802091cfc04
+Jun 22 18:26:02 hardenedlinux-QA kernel: [ 1095.605092] radeon 0000:03:00.0: fence driver on ring 2 use gpu addr 0x0000000080000c08 and cpu addr 0xffff8802091cfc08
+Jun 22 18:26:02 hardenedlinux-QA kernel: [ 1095.605103] radeon 0000:03:00.0: fence driver on ring 3 use gpu addr 0x0000000080000c0c and cpu addr 0xffff8802091cfc0c
+Jun 22 18:26:02 hardenedlinux-QA kernel: [ 1095.605113] radeon 0000:03:00.0: fence driver on ring 4 use gpu addr 0x0000000080000c10 and cpu addr 0xffff8802091cfc10
+Jun 22 18:26:02 hardenedlinux-QA kernel: [ 1095.605123] radeon 0000:03:00.0: VCE init error (-22).
+Jun 22 18:26:02 hardenedlinux-QA kernel: [ 1095.844780] [drm] ring test on 0 succeeded in 1 usecs
+Jun 22 18:26:02 hardenedlinux-QA kernel: [ 1095.844795] [drm] ring test on 1 succeeded in 1 usecs
+Jun 22 18:26:02 hardenedlinux-QA kernel: [ 1095.844807] [drm] ring test on 2 succeeded in 1 usecs
+Jun 22 18:26:02 hardenedlinux-QA kernel: [ 1095.844823] [drm] ring test on 3 succeeded in 4 usecs
+Jun 22 18:26:02 hardenedlinux-QA kernel: [ 1095.844836] [drm] ring test on 4 succeeded in 4 usecs
+Jun 22 18:26:02 hardenedlinux-QA kernel: [ 1095.844943] [drm] ib test on ring 0 succeeded in 0 usecs
+Jun 22 18:26:02 hardenedlinux-QA kernel: [ 1095.845046] [drm] ib test on ring 1 succeeded in 0 usecs
+Jun 22 18:26:02 hardenedlinux-QA kernel: [ 1095.845143] [drm] ib test on ring 2 succeeded in 0 usecs
+Jun 22 18:26:02 hardenedlinux-QA kernel: [ 1095.845257] [drm] ib test on ring 3 succeeded in 0 usecs
+Jun 22 18:26:02 hardenedlinux-QA kernel: [ 1095.845351] [drm] ib test on ring 4 succeeded in 0 usecs
+Jun 22 18:26:29 hardenedlinux-QA kernel: [ 1122.306934] ecryptfs_encrypt_page: Error attempting to write lower page; rc = [-4]
+Jun 22 18:26:29 hardenedlinux-QA kernel: [ 1122.306942] ecryptfs_write: Error encrypting page; rc = [-4]
+Jun 22 18:26:29 hardenedlinux-QA kernel: [ 1122.306947] ecryptfs_write_begin: Error on attempt to truncate to (higher) offset [399360000]; rc = [-4]
+Jun 22 18:26:53 hardenedlinux-QA kernel: [ 1146.506027] ptrace of pid 2001 was attempted by: trinity-c4 (pid 20018)
+Jun 22 18:26:54 hardenedlinux-QA kernel: [ 1147.017794] can: request_module (can-proto-3) failed.
+Jun 22 18:26:56 hardenedlinux-QA kernel: [ 1149.024076] ecryptfs_encrypt_page: Error attempting to write lower page; rc = [-4]
+Jun 22 18:26:56 hardenedlinux-QA kernel: [ 1149.024087] ecryptfs_write: Error encrypting page; rc = [-4]
+Jun 22 18:26:56 hardenedlinux-QA kernel: [ 1149.024095] ecryptfs_write_begin: Error on attempt to truncate to (higher) offset [1734828032]; rc = [-4]
+Jun 22 18:28:08 hardenedlinux-QA kernel: [ 1221.739286] ecryptfs_write_inode_size_to_header: Error writing file size to header; rc = [-4]
+Jun 22 18:28:08 hardenedlinux-QA kernel: [ 1221.739295] Problem with ecryptfs_write_inode_size_to_metadata; rc = [-4]
+Jun 22 18:28:08 hardenedlinux-QA kernel: [ 1221.739303] ecryptfs_write_begin: Error on attempt to truncate to (higher) offset [837782224896]; rc = [-4]
+Jun 22 18:28:21 hardenedlinux-QA kernel: [ 1234.322080] can: request_module (can-proto-3) failed.
+Jun 22 18:28:46 hardenedlinux-QA kernel: [ 1259.461725] [drm] probing gen 2 caps for device 8086:9c98 = 5323c42/0
+Jun 22 18:28:46 hardenedlinux-QA kernel: [ 1259.461736] [drm] PCIE gen 2 link speeds already enabled
+Jun 22 18:28:46 hardenedlinux-QA kernel: [ 1259.499230] [drm] PCIE GART of 2048M enabled (table at 0x0000000000040000).
+Jun 22 18:28:46 hardenedlinux-QA kernel: [ 1259.499428] radeon 0000:03:00.0: WB enabled
+Jun 22 18:28:46 hardenedlinux-QA kernel: [ 1259.499437] radeon 0000:03:00.0: fence driver on ring 0 use gpu addr 0x0000000080000c00 and cpu addr 0xffff8802091cfc00
+Jun 22 18:28:46 hardenedlinux-QA kernel: [ 1259.499443] radeon 0000:03:00.0: fence driver on ring 1 use gpu addr 0x0000000080000c04 and cpu addr 0xffff8802091cfc04
+Jun 22 18:28:46 hardenedlinux-QA kernel: [ 1259.499449] radeon 0000:03:00.0: fence driver on ring 2 use gpu addr 0x0000000080000c08 and cpu addr 0xffff8802091cfc08
+Jun 22 18:28:46 hardenedlinux-QA kernel: [ 1259.499455] radeon 0000:03:00.0: fence driver on ring 3 use gpu addr 0x0000000080000c0c and cpu addr 0xffff8802091cfc0c
+Jun 22 18:28:46 hardenedlinux-QA kernel: [ 1259.499460] radeon 0000:03:00.0: fence driver on ring 4 use gpu addr 0x0000000080000c10 and cpu addr 0xffff8802091cfc10
+Jun 22 18:28:46 hardenedlinux-QA kernel: [ 1259.499465] radeon 0000:03:00.0: VCE init error (-22).
+Jun 22 18:28:46 hardenedlinux-QA kernel: [ 1259.739397] [drm] ring test on 0 succeeded in 1 usecs
+Jun 22 18:28:46 hardenedlinux-QA kernel: [ 1259.739412] [drm] ring test on 1 succeeded in 1 usecs
+Jun 22 18:28:46 hardenedlinux-QA kernel: [ 1259.739423] [drm] ring test on 2 succeeded in 1 usecs
+Jun 22 18:28:46 hardenedlinux-QA kernel: [ 1259.739439] [drm] ring test on 3 succeeded in 4 usecs
+Jun 22 18:28:46 hardenedlinux-QA kernel: [ 1259.739452] [drm] ring test on 4 succeeded in 4 usecs
+Jun 22 18:28:46 hardenedlinux-QA kernel: [ 1259.739596] [drm] ib test on ring 0 succeeded in 0 usecs
+Jun 22 18:28:46 hardenedlinux-QA kernel: [ 1259.739676] [drm] ib test on ring 1 succeeded in 0 usecs
+Jun 22 18:28:46 hardenedlinux-QA kernel: [ 1259.739786] [drm] ib test on ring 2 succeeded in 0 usecs
+Jun 22 18:28:46 hardenedlinux-QA kernel: [ 1259.739839] [drm] ib test on ring 3 succeeded in 0 usecs
+Jun 22 18:28:46 hardenedlinux-QA kernel: [ 1259.739885] [drm] ib test on ring 4 succeeded in 0 usecs
+Jun 22 18:29:07 hardenedlinux-QA kernel: [ 1280.072779] 8021q: 802.1Q VLAN Support v1.8
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853245] INFO: task trinity-c12:12773 blocked for more than 120 seconds.
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853253]       Not tainted 4.6.2 #3
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853256] "echo 0 > /proc/sys/kernel/hung_task_timeout_secs" disables this message.
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853260] trinity-c12     D ffff88020f7a7d08     0 12773   2289 0x10000004
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853268]  ffff88020f7a7d08 1ffff10041e9e9b4 0000000000000040 0000000000000000
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853273]  ffff8802168a0558 ffff8800974122d8 0000000000000002 ffff88020e3c0f80
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853278]  ffff880097411f00 ffff88020f7a0000 ffffed0041ef4001 ffff88020f7a0008
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853283] Call Trace:
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853293]  [<ffffffff829fc0a5>] schedule+0x95/0x1b0
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853299]  [<ffffffff829fc80e>] schedule_preempt_disabled+0xe/0x10
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853304]  [<ffffffff82a00e22>] __mutex_lock_slowpath+0x1c2/0x380
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853310]  [<ffffffff82a00c60>] ? __ww_mutex_lock+0x1d0/0x1d0
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853316]  [<ffffffff816292e0>] ? SyS_read+0x1d0/0x1d0
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853321]  [<ffffffff82a01001>] mutex_lock+0x21/0x60
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853327]  [<ffffffff8168181c>] __fdget_pos+0x9c/0xc0
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853332]  [<ffffffff8162936b>] SyS_write+0x8b/0x1d0
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853338]  [<ffffffff810054c5>] ? do_audit_syscall_entry+0x65/0x350
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853343]  [<ffffffff816292e0>] ? SyS_read+0x1d0/0x1d0
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853349]  [<ffffffff81007a38>] ? syscall_trace_enter_phase2+0x148/0x5b0
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853354]  [<ffffffff816292e0>] ? SyS_read+0x1d0/0x1d0
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853359]  [<ffffffff8100831b>] do_syscall_64+0x1ab/0x3e0
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853365]  [<ffffffff82a05de5>] entry_SYSCALL64_slow_path+0x25/0x25
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853371] INFO: task trinity-c2:14028 blocked for more than 120 seconds.
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853374]       Not tainted 4.6.2 #3
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853376] "echo 0 > /proc/sys/kernel/hung_task_timeout_secs" disables this message.
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853379] trinity-c2      D ffff880098177c58     0 14028   2289 0x10000004
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853384]  ffff880098177c58 ffff880216857d90 ffffed0041e9ec74 00ff880216857d40
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853390]  ffff880216860558 ffff88020d6e1358 0000000000000001 ffff8801e5f3dd00
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853395]  ffff88020d6e0f80 ffff880098170000 ffffed001302e001 ffff880098170008
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853399] Call Trace:
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853405]  [<ffffffff829fc0a5>] schedule+0x95/0x1b0
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853410]  [<ffffffff829fc80e>] schedule_preempt_disabled+0xe/0x10
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853415]  [<ffffffff82a00e22>] __mutex_lock_slowpath+0x1c2/0x380
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853421]  [<ffffffff82a00c60>] ? __ww_mutex_lock+0x1d0/0x1d0
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853426]  [<ffffffff816845c2>] ? __mnt_is_readonly.part.8+0x12/0x70
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853431]  [<ffffffff81689c3e>] ? __mnt_want_write+0x16e/0x1f0
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853436]  [<ffffffff82a01001>] mutex_lock+0x21/0x60
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853441]  [<ffffffff8161c784>] chmod_common+0x234/0x430
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853446]  [<ffffffff8161c550>] ? SyS_close+0x90/0x90
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853451]  [<ffffffff81007520>] ? syscall_trace_enter_phase1+0xf0/0x4c0
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853457]  [<ffffffff812c4dfe>] ? alarm_setitimer+0xce/0x140
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853462]  [<ffffffff814173f0>] ? ftrace_syscall_exit+0x520/0x520
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853467]  [<ffffffff810054c5>] ? do_audit_syscall_entry+0x65/0x350
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853473]  [<ffffffff8167f6f6>] ? __fget_light+0xa6/0x1f0
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853477]  [<ffffffff8162017b>] SyS_fchmod+0xbb/0x110
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853482]  [<ffffffff816200c0>] ? SyS_chroot+0x2b0/0x2b0
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853487]  [<ffffffff8100831b>] do_syscall_64+0x1ab/0x3e0
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853493]  [<ffffffff82a05de5>] entry_SYSCALL64_slow_path+0x25/0x25
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853498] INFO: task trinity-c8:16708 blocked for more than 120 seconds.
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853501]       Not tainted 4.6.2 #3
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853503] "echo 0 > /proc/sys/kernel/hung_task_timeout_secs" disables this message.
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853506] trinity-c8      D ffff88020fed7b18     0 16708   2289 0x10000004
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853511]  ffff88020fed7b18 ffff88020fed7ad8 ffffffff829fc0a5 00ff880099899f00
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853516]  ffff8802168e0558 ffff88009989a2d8 0000000000000003 ffff88020e31cd80
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853521]  ffff880099899f00 ffff88020fed0000 ffffed0041fda001 ffff88020fed0008
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853526] Call Trace:
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853530]  [<ffffffff829fc0a5>] ? schedule+0x95/0x1b0
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853536]  [<ffffffff829fc0a5>] schedule+0x95/0x1b0
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853541]  [<ffffffff829fc80e>] schedule_preempt_disabled+0xe/0x10
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853546]  [<ffffffff82a00e22>] __mutex_lock_slowpath+0x1c2/0x380
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853552]  [<ffffffff82a00c60>] ? __ww_mutex_lock+0x1d0/0x1d0
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853557]  [<ffffffff82a01001>] mutex_lock+0x21/0x60
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853562]  [<ffffffff814b2bd7>] generic_file_write_iter+0xa7/0x6e0
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853568]  [<ffffffff816241c9>] __vfs_write+0x329/0x4f0
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853573]  [<ffffffff81623ea0>] ? do_iter_readv_writev+0x2e0/0x2e0
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853578]  [<ffffffff812c11d0>] ? hrtimer_init+0x140/0x140
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853583]  [<ffffffff812c0210>] ? __remove_hrtimer+0x250/0x250
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853589]  [<ffffffff81244676>] ? remove_wait_queue+0xc6/0x120
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853595]  [<ffffffff81accb87>] ? apparmor_file_permission+0x27/0x30
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853601]  [<ffffffff812575f4>] ? percpu_down_read+0x14/0xb0
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853606]  [<ffffffff81625a2c>] vfs_write+0x16c/0x4a0
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853611]  [<ffffffff816293c2>] SyS_write+0xe2/0x1d0
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853616]  [<ffffffff816292e0>] ? SyS_read+0x1d0/0x1d0
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853621]  [<ffffffff81007a38>] ? syscall_trace_enter_phase2+0x148/0x5b0
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853626]  [<ffffffff816292e0>] ? SyS_read+0x1d0/0x1d0
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853631]  [<ffffffff8100831b>] do_syscall_64+0x1ab/0x3e0
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853637]  [<ffffffff82a05de5>] entry_SYSCALL64_slow_path+0x25/0x25
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853641] INFO: task trinity-c1:17669 blocked for more than 120 seconds.
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853644]       Not tainted 4.6.2 #3
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853647] "echo 0 > /proc/sys/kernel/hung_task_timeout_secs" disables this message.
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853649] trinity-c1      D ffff88009884fa18     0 17669   2289 0x10000004
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853655]  ffff88009884fa18 ffff88009884f9d8 ffffffff829fc0a5 00ff880033e71f00
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853660]  ffff8802168a0558 ffff880033e722d8 0000000000000002 ffff880214799f00
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853664]  ffff880033e71f00 ffff880098848000 ffffed0013109001 ffff880098848008
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853669] Call Trace:
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853674]  [<ffffffff829fc0a5>] ? schedule+0x95/0x1b0
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853679]  [<ffffffff829fc0a5>] schedule+0x95/0x1b0
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853684]  [<ffffffff829fc80e>] schedule_preempt_disabled+0xe/0x10
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853690]  [<ffffffff82a00e22>] __mutex_lock_slowpath+0x1c2/0x380
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853695]  [<ffffffff82a00c60>] ? __ww_mutex_lock+0x1d0/0x1d0
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853701]  [<ffffffff81bf7098>] ? _atomic_dec_and_lock+0x68/0xd0
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853706]  [<ffffffff815c90be>] ? kasan_kmalloc+0x5e/0x70
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853711]  [<ffffffff82a01001>] mutex_lock+0x21/0x60
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853717]  [<ffffffff814b2bd7>] generic_file_write_iter+0xa7/0x6e0
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853722]  [<ffffffff81629967>] ? rw_copy_check_uvector+0x1b7/0x250
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853727]  [<ffffffff81623db9>] do_iter_readv_writev+0x1f9/0x2e0
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853732]  [<ffffffff814b2b30>] ? __generic_file_write_iter+0x5a0/0x5a0
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853737]  [<ffffffff81623bc0>] ? vfs_iter_write+0x390/0x390
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853743]  [<ffffffff81accb87>] ? apparmor_file_permission+0x27/0x30
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853748]  [<ffffffff812575f4>] ? percpu_down_read+0x14/0xb0
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853753]  [<ffffffff814b2b30>] ? __generic_file_write_iter+0x5a0/0x5a0
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853758]  [<ffffffff81626162>] do_readv_writev+0x402/0x740
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853763]  [<ffffffff812bf26b>] ? hrtimer_active+0x1db/0x280
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853768]  [<ffffffff81625d60>] ? vfs_write+0x4a0/0x4a0
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853774]  [<ffffffff812b3347>] ? ns_to_timeval+0x27/0xb0
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853779]  [<ffffffff812c4734>] ? do_setitimer+0x104/0x700
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853784]  [<ffffffff814174b1>] ? perf_syscall_enter+0xc1/0xd00
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853789]  [<ffffffff812bedb0>] ? run_local_timers+0x20/0x20
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853794]  [<ffffffff81007520>] ? syscall_trace_enter_phase1+0xf0/0x4c0
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853799]  [<ffffffff812c4dfe>] ? alarm_setitimer+0xce/0x140
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853804]  [<ffffffff816269f3>] vfs_writev+0x93/0xc0
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853809]  [<ffffffff81626de2>] do_pwritev+0x162/0x1a0
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853814]  [<ffffffff81629b75>] SyS_pwritev+0x35/0x40
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853819]  [<ffffffff81629b40>] ? SyS_preadv2+0x80/0x80
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853824]  [<ffffffff8100831b>] do_syscall_64+0x1ab/0x3e0
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853830]  [<ffffffff82a05de5>] entry_SYSCALL64_slow_path+0x25/0x25
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853834] INFO: task trinity-c11:22177 blocked for more than 120 seconds.
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853837]       Not tainted 4.6.2 #3
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853839] "echo 0 > /proc/sys/kernel/hung_task_timeout_secs" disables this message.
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853842] trinity-c11     D ffff8801e5e77c98     0 22177   2289 0x10000004
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853847]  ffff8801e5e77c98 ffff8801e5e77c58 ffffffff829fc0a5 00ff88009a9a9f00
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853852]  ffff8802168e0558 ffff88009a9aa2d8 ffff8802168e0580 ffff880214cd1f00
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853857]  ffff88009a9a9f00 ffff8801e5e70000 ffffed003cbce001 ffff8801e5e70008
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853862] Call Trace:
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853867]  [<ffffffff829fc0a5>] ? schedule+0x95/0x1b0
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853872]  [<ffffffff829fc0a5>] schedule+0x95/0x1b0
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853877]  [<ffffffff829fc80e>] schedule_preempt_disabled+0xe/0x10
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853883]  [<ffffffff82a00e22>] __mutex_lock_slowpath+0x1c2/0x380
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853888]  [<ffffffff82a00c60>] ? __ww_mutex_lock+0x1d0/0x1d0
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853893]  [<ffffffff82a01001>] mutex_lock+0x21/0x60
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853898]  [<ffffffff8161e097>] do_truncate+0x127/0x1f0
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853903]  [<ffffffff8161df70>] ? file_open_root+0x2b0/0x2b0
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853908]  [<ffffffff812c4dfe>] ? alarm_setitimer+0xce/0x140
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853912]  [<ffffffff814173f0>] ? ftrace_syscall_exit+0x520/0x520
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853918]  [<ffffffff8161eb00>] do_sys_ftruncate.constprop.11+0x350/0x510
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853923]  [<ffffffff8161ed20>] ? compat_SyS_truncate+0x30/0x30
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853928]  [<ffffffff8161ed41>] SyS_ftruncate+0x21/0x30
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853933]  [<ffffffff8100831b>] do_syscall_64+0x1ab/0x3e0
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853939]  [<ffffffff82a05de5>] entry_SYSCALL64_slow_path+0x25/0x25
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853945]  [<ffffffff81ff0001>] ? agp_amd64_probe+0x1091/0x1390
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853949] INFO: task trinity-c5:26900 blocked for more than 120 seconds.
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853952]       Not tainted 4.6.2 #3
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853955] "echo 0 > /proc/sys/kernel/hung_task_timeout_secs" disables this message.
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853957] trinity-c5      D ffff8800981cfcd8     0 26900   2289 0x10000004
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853963]  ffff8800981cfcd8 ffffffff812bf26b ffff880210680bc0 00fff10013039f9c
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853968]  ffff8802168a0558 ffff88021479c1d8 ffff8802168a0580 ffff880214cd5d00
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853973]  ffff88021479be00 ffff8800981c8000 ffffed0013039001 ffff8800981c8008
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853977] Call Trace:
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853982]  [<ffffffff812bf26b>] ? hrtimer_active+0x1db/0x280
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853987]  [<ffffffff829fc0a5>] schedule+0x95/0x1b0
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853993]  [<ffffffff829fc80e>] schedule_preempt_disabled+0xe/0x10
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.853998]  [<ffffffff82a00e22>] __mutex_lock_slowpath+0x1c2/0x380
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.854003]  [<ffffffff82a00c60>] ? __ww_mutex_lock+0x1d0/0x1d0
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.854008]  [<ffffffff812c4734>] ? do_setitimer+0x104/0x700
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.854013]  [<ffffffff82a01001>] mutex_lock+0x21/0x60
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.854019]  [<ffffffff8168181c>] __fdget_pos+0x9c/0xc0
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.854024]  [<ffffffff816265f1>] do_readv+0x91/0x260
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.854029]  [<ffffffff81626560>] ? vfs_readv+0xc0/0xc0
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.854034]  [<ffffffff81007a38>] ? syscall_trace_enter_phase2+0x148/0x5b0
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.854039]  [<ffffffff81629a2c>] SyS_readv+0x2c/0x40
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.854045]  [<ffffffff81629a00>] ? rw_copy_check_uvector+0x250/0x250
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.854049]  [<ffffffff8100831b>] do_syscall_64+0x1ab/0x3e0
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.854055]  [<ffffffff82a05de5>] entry_SYSCALL64_slow_path+0x25/0x25
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.854059] INFO: task trinity-c10:28805 blocked for more than 120 seconds.
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.854062]       Not tainted 4.6.2 #3
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.854065] "echo 0 > /proc/sys/kernel/hung_task_timeout_secs" disables this message.
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.854067] trinity-c10     D ffff8801e5df7b28     0 28805   2289 0x10000004
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.854073]  ffff8801e5df7b28 ffff8801e5df7ae8 ffffffff829fc0a5 00ff88020d6e4d80
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.854078]  ffff880216860558 ffff88020d6e5158 ffff880216860580 ffff880214cd0f80
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.854083]  ffff88020d6e4d80 ffff8801e5df0000 ffffed003cbbe001 ffff8801e5df0008
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.854087] Call Trace:
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.854092]  [<ffffffff829fc0a5>] ? schedule+0x95/0x1b0
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.854097]  [<ffffffff829fc0a5>] schedule+0x95/0x1b0
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.854103]  [<ffffffff829fc80e>] schedule_preempt_disabled+0xe/0x10
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.854108]  [<ffffffff82a00e22>] __mutex_lock_slowpath+0x1c2/0x380
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.854113]  [<ffffffff82a00c60>] ? __ww_mutex_lock+0x1d0/0x1d0
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.854119]  [<ffffffff81c15775>] ? timerqueue_add+0x1e5/0x2a0
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.854124]  [<ffffffff82a01001>] mutex_lock+0x21/0x60
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.854129]  [<ffffffff814b2bd7>] generic_file_write_iter+0xa7/0x6e0
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.854134]  [<ffffffff812c17c0>] ? hrtimer_start_range_ns+0x5f0/0x10c0
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.854139]  [<ffffffff816241c9>] __vfs_write+0x329/0x4f0
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.854145]  [<ffffffff81623ea0>] ? do_iter_readv_writev+0x2e0/0x2e0
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.854149]  [<ffffffff812c11d0>] ? hrtimer_init+0x140/0x140
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.854154]  [<ffffffff812c0210>] ? __remove_hrtimer+0x250/0x250
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.854160]  [<ffffffff81244676>] ? remove_wait_queue+0xc6/0x120
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.854165]  [<ffffffff81accb87>] ? apparmor_file_permission+0x27/0x30
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.854170]  [<ffffffff812575f4>] ? percpu_down_read+0x14/0xb0
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.854175]  [<ffffffff81625a2c>] vfs_write+0x16c/0x4a0
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.854181]  [<ffffffff81629788>] SyS_pwrite64+0x158/0x180
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.854186]  [<ffffffff81629630>] ? SyS_pread64+0x180/0x180
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.854191]  [<ffffffff81007a38>] ? syscall_trace_enter_phase2+0x148/0x5b0
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.854196]  [<ffffffff81629630>] ? SyS_pread64+0x180/0x180
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.854201]  [<ffffffff8100831b>] do_syscall_64+0x1ab/0x3e0
+Jun 22 18:31:48 hardenedlinux-QA kernel: [ 1441.854207]  [<ffffffff82a05de5>] entry_SYSCALL64_slow_path+0x25/0x25

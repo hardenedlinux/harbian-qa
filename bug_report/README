@@ -1,0 +1,2 @@
+You'll need GCC 6.x to build KCOV support:
+https://gcc.gnu.org/wiki/InstallingGCC
