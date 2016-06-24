@@ -1,2 +1,5 @@
 You'll need GCC 6.x to build KCOV support:
 https://gcc.gnu.org/wiki/InstallingGCC
+
+Linux Kernel panic issue: How to fix hung_task_timeout_secs and blocked for more than 120 seconds problem
+https://www.blackmoreops.com/2014/09/22/linux-kernel-panic-issue-fix-hung_task_timeout_secs-blocked-120-seconds-problem/
