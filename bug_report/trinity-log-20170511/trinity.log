@@ -1,0 +1,894 @@
+[main] shm is at 0x78d824099000
+[main] Using getrandom() for seeds.
+[main] Initial random seed: 1330228049
+[main] 32-bit syscalls: 379 enabled, 1 disabled.  64-bit syscalls: 331 enabled, 1 disabled.
+[main] Using pid_max = 32768
+[main] There are 12 entries in the 0 list (@0xba8ff6e9e90).
+[main]  start: 0x78d824097000 size:4KB  name: anon(PROT_READ | PROT_WRITE)
+[main]  start: 0x78d824096000 size:4KB  name: anon(PROT_READ)
+[main]  start: 0x78d824095000 size:4KB  name: anon(PROT_WRITE)
+[main]  start: 0x78d823f5b000 size:1MB  name: anon(PROT_READ | PROT_WRITE)
+[main]  start: 0x78d822471000 size:1MB  name: anon(PROT_READ)
+[main]  start: 0x78d822371000 size:1MB  name: anon(PROT_WRITE)
+[main]  start: 0x78d822171000 size:2MB  name: anon(PROT_READ | PROT_WRITE)
+[main]  start: 0x78d821f71000 size:2MB  name: anon(PROT_READ)
+[main]  start: 0x78d821d71000 size:2MB  name: anon(PROT_WRITE)
+[main]  start: 0x78d823f5a000 size:4KB  name: anon(PROT_READ | PROT_WRITE)
+[main]  start: 0x78d823f59000 size:4KB  name: anon(PROT_READ)
+[main]  start: 0x78d823f58000 size:4KB  name: anon(PROT_WRITE)
+[main] Parsed 0 char devices, 0 block devices, 11 misc devices.
+[main] Reserved/initialized 10 futexes.
+[main] fd[12] = epoll
+[main] fd[13] = epoll
+[main] fd[14] = epoll
+[main] fd[15] = epoll
+[main] fd[16] = epoll
+[main] fd[17] = epoll
+[main] fd[18] = epoll
+[main] fd[19] = epoll
+[main] fd[20] = epoll
+[main] fd[21] = epoll
+[main] fd[22] = eventfd
+[main] fd[23] = eventfd
+[main] fd[24] = eventfd
+[main] fd[25] = eventfd
+[main] fd[26] = eventfd
+[main] fd[27] = eventfd
+[main] fd[28] = eventfd
+[main] fd[29] = eventfd
+[main] Generating file descriptors
+[main] Added 38 filenames from /dev
+[main] Added 2093 filenames from /proc
+[main] Added 28 filenames from /sys
+[main] fd[30] = open /proc/1270/mem (read-write) flags:2
+[main] fd[31] = fopen /proc/sys/net/ipv6/conf/lo/autoconf (read-only) flags:0 fcntl_flags:0
+[main] fd[32] = fopen /proc/sys/net/ipv6/conf/lo/hop_limit (read-only) flags:0 fcntl_flags:400
+[main] fd[33] = fopen /proc/irq/5/node (read-only) flags:0 fcntl_flags:40400
+[main] fd[34] = fopen /proc/sys/net/ipv6/icmp (read-only) flags:0 fcntl_flags:2400
+[main] fd[35] = fopen /proc/sys/fs/inotify/max_user_instances (read-only) flags:0 fcntl_flags:0
+[main] fd[36] = fopen /proc/sys/net/core/wmem_max (read-only) flags:0 fcntl_flags:4000
+[main] fd[37] = open /sys/devices/system/cpu/power/runtime_suspended_time (read-only) flags:0
+[main] fd[38] = open /proc/731/fdinfo/6 (read-only) flags:61000
+[main] fd[39] = open /proc/1270/task/1270/fdinfo/25 (read-only) flags:2a0000
+[main] fd[40] = fopen /proc/735/net/netstat (read-only) flags:0 fcntl_flags:4c00
+[main] fd[41] = fopen /proc/sys/net/ipv6/neigh/lo/locktime (read-only) flags:0 fcntl_flags:42800
+[main] fd[42] = fopen /proc/1270/net/ip6_mr_vif (read-only) flags:0 fcntl_flags:4800
+[main] fd[43] = fopen /proc/sys/net/ipv6/conf/lo/mc_forwarding (read-only) flags:0 fcntl_flags:40000
+[main] fd[44] = fopen /proc/731/task/731/fdinfo/13 (read-only) flags:0 fcntl_flags:46400
+[main] fd[45] = fopen /proc/735/task/735/net/mcfilter (read-only) flags:0 fcntl_flags:2800
+[main] fd[46] = open /proc/732/stat (read-only) flags:2000
+[main] fd[47] = fopen /proc/sys/net/ipv6/conf/all/mc_forwarding (read-only) flags:0 fcntl_flags:46400
+[main] fd[48] = fopen /proc/735/task/735/net/snmp6 (read-only) flags:0 fcntl_flags:6400
+[main] fd[49] = open /proc/sys/kernel/acct (read-only) flags:0
+[main] fd[50] = fopen /proc/731/task/731/net/arp (read-only) flags:0 fcntl_flags:42400
+[main] fd[51] = fopen /proc/sys/fs/aio-max-nr (read-only) flags:0 fcntl_flags:0
+[main] fd[52] = fopen /proc/731/net/ip_mr_cache (read-only) flags:0 fcntl_flags:40c00
+[main] fd[53] = open /proc/sys/vm/dirty_bytes (read-only) flags:20c80
+[main] fd[54] = fopen /sys/devices/system/cpu/cpuidle (read-only) flags:0 fcntl_flags:44400
+[main] fd[55] = fopen /proc/735/net/ip6_flowlabel (read-only) flags:0 fcntl_flags:0
+[main] fd[56] = fopen /proc/sys/net/ipv4/tcp_ecn_fallback (read-only) flags:0 fcntl_flags:0
+[main] fd[57] = fopen /proc/sys/net/ipv4/conf/lo/forwarding (read-only) flags:0 fcntl_flags:42800
+[main] fd[58] = fopen /proc/sys/fs/quota/allocated_dquots (read-only) flags:0 fcntl_flags:6000
+[main] fd[59] = fopen /proc/sys/net/ipv4/conf/all/accept_local (read-only) flags:0 fcntl_flags:0
+[main] fd[60] = open /proc/735/attr (read-only) flags:2f1c00
+[main] fd[61] = fopen /proc/731/task/731/net/dev_mcast (read-only) flags:0 fcntl_flags:40c00
+[main] fd[62] = fopen /proc/1270/task/1270/fdinfo/10 (read-only) flags:0 fcntl_flags:2c00
+[main] fd[63] = open /proc/sys/net/ipv4/inet_peer_threshold (read-only) flags:203400
+[main] fd[64] = fopen /proc/sys/net/ipv4/conf/all/igmpv3_unsolicited_report_interval (read-only) flags:0 fcntl_flags:6000
+[main] fd[65] = open /proc/sys/kernel/sched_domain/cpu1/domain0/max_interval (read-only) flags:101000
+[main] fd[66] = fopen /proc/732/task/732/net/udplite6 (read-only) flags:0 fcntl_flags:4c00
+[main] fd[67] = fopen /proc/734/task/734/projid_map (read-only) flags:0 fcntl_flags:2000
+[main] fd[68] = fopen /proc/sys/net/ipv4/conf/eth0/bootp_relay (read-only) flags:0 fcntl_flags:6c00
+[main] fd[69] = open /proc/735/task/735/mounts (read-only) flags:0
+[main] fd[70] = open /proc/loadavg (read-only) flags:0
+[main] fd[71] = fopen /proc/sys/kernel/sched_domain/cpu1/domain0/cache_nice_tries (read-only) flags:0 fcntl_flags:40000
+[main] fd[72] = open /proc/735/timerslack_ns (read-write) flags:347282
+[main] fd[73] = open /proc/sys/kernel/sched_rr_timeslice_ms (read-only) flags:0
+[main] fd[74] = open /proc/734/net/dev_snmp6 (read-only) flags:200800
+[main] fd[75] = fopen /proc/732/task/732/net/unix (read-only) flags:0 fcntl_flags:46000
+[main] fd[76] = fopen /proc/1270/task/1270/net/ip_mr_vif (read-only) flags:0 fcntl_flags:46400
+[main] Couldn't open /proc/731/task/731/mem : Bad file descriptor
+[main] fd[77] = fopen /proc/sys/dev/scsi/logging_level (read-only) flags:0 fcntl_flags:42400
+[main] fd[78] = fopen /proc/sys/net/ipv6/neigh/eth0/delay_first_probe_time (read-only) flags:0 fcntl_flags:4c00
+[main] fd[79] = fopen /proc/732/net (read-only) flags:0 fcntl_flags:44400
+[main] fd[80] = open /proc/1270/task/1270/net/mcfilter (read-only) flags:3e7900
+[main] fd[81] = fopen /proc/sys/net/ipv4/conf/lo (read-only) flags:0 fcntl_flags:400
+[main] fd[82] = fopen /proc/735/net/icmp6 (read-only) flags:0 fcntl_flags:6000
+[main] fd[83] = fopen /proc/sys/net/core/somaxconn (read-only) flags:0 fcntl_flags:40400
+[main] fd[84] = fopen /proc/sys/net/ipv4/neigh/eth0/locktime (read-only) flags:0 fcntl_flags:4400
+[main] fd[85] = fopen /proc/sys/kernel/perf_event_mlock_kb (read-only) flags:0 fcntl_flags:6400
+[main] fd[86] = fopen /proc/731/task/731/mounts (read-only) flags:0 fcntl_flags:6800
+[main] fd[87] = fopen /proc/sys/net/ipv4/conf/all/arp_filter (read-only) flags:0 fcntl_flags:44400
+[main] fd[88] = fopen /proc/1270/net/connector (read-only) flags:0 fcntl_flags:4000
+[main] fd[89] = fopen /proc/sys/vm/memory_failure_early_kill (read-only) flags:0 fcntl_flags:4000
+[main] fd[90] = fopen /proc/1270/task/1270/net/fib_trie (read-only) flags:0 fcntl_flags:46800
+[main] fd[91] = fopen /proc/731/net/tcp (read-only) flags:0 fcntl_flags:800
+[main] fd[92] = open /proc/sys/net/core/dev_weight (read-only) flags:20480
+[main] fd[93] = fopen /proc/1270/task/1270/fdinfo (read-only) flags:0 fcntl_flags:40000
+[main] fd[94] = fopen /proc/1270/task/1270/fdinfo/21 (read-only) flags:0 fcntl_flags:40000
+[main] fd[95] = fopen /proc/irq/2/affinity_hint (read-only) flags:0 fcntl_flags:42400
+[main] fd[96] = fopen /proc/sys/net/ipv6/neigh/eth0/anycast_delay (read-only) flags:0 fcntl_flags:6800
+[main] fd[97] = fopen /proc/731/task/731/net/ax25 (read-only) flags:0 fcntl_flags:2000
+[main] fd[98] = fopen /proc/731/gid_map (read-write) flags:2 fcntl_flags:42800
+[main] fd[99] = fopen /proc/sys/net/ipv6/conf/lo/dad_transmits (read-only) flags:0 fcntl_flags:2400
+[main] fd[100] = fopen /proc/734/task/734/uid_map (read-only) flags:0 fcntl_flags:400
+[main] fd[101] = open /proc/sys/vm/percpu_pagelist_fraction (read-only) flags:3e7c00
+[main] fd[102] = fopen /proc/sys/net/ipv6/conf/all/accept_ra_min_hop_limit (read-only) flags:0 fcntl_flags:40400
+[main] fd[103] = fopen /proc/tty/ldisc (read-only) flags:0 fcntl_flags:46400
+[main] fd[104] = open /proc/734/task/734/net/psched (read-only) flags:21000
+[main] fd[105] = fopen /proc/irq/2/affinity_hint (read-only) flags:0 fcntl_flags:2800
+[main] fd[106] = open /proc/731/net/if_inet6 (read-only) flags:0
+[main] fd[107] = fopen /proc/1270/net/psched (read-only) flags:0 fcntl_flags:46000
+[main] fd[108] = open /proc/1270/task/1270/attr/sockcreate (read-write) flags:c1002
+[main] fd[109] = fopen /proc/735/task/735/net/ip_mr_vif (read-only) flags:0 fcntl_flags:44c00
+[main] fd[110] = fopen /proc/sys/net/ipv4/conf/eth0/accept_local (read-only) flags:0 fcntl_flags:42400
+[main] fd[111] = fopen /proc/sys/dev/cdrom/check_media (read-only) flags:0 fcntl_flags:44c00
+[main] fd[112] = fopen /proc/sys/net/ipv6/conf/eth0/force_tllao (read-only) flags:0 fcntl_flags:0
+[main] fd[113] = fopen /proc/732/net/raw6 (read-only) flags:0 fcntl_flags:6800
+[main] fd[114] = fopen /proc/731/cpuset (read-only) flags:0 fcntl_flags:42c00
+[main] fd[115] = fopen /proc/sys/net/ipv6/route/gc_interval (read-only) flags:0 fcntl_flags:800
+[main] fd[116] = fopen /proc/sys/dev/mac_hid/mouse_button2_keycode (read-only) flags:0 fcntl_flags:2000
+[main] fd[117] = fopen /proc/731/task/731/net/ax25_route (read-only) flags:0 fcntl_flags:0
+[main] fd[118] = open /proc/1270/task/1270/fdinfo/34 (read-only) flags:365680
+[main] fd[119] = open /proc/sys/net/ipv6/conf/all/suppress_frag_ndisc (read-only) flags:400
+[main] fd[120] = fopen /proc/sys/kernel/random/urandom_min_reseed_secs (read-only) flags:0 fcntl_flags:0
+[main] fd[121] = fopen /proc/sys/net/ipv4 (read-only) flags:0 fcntl_flags:42400
+[main] fd[122] = fopen /proc/sys/net/ipv4/neigh/default/base_reachable_time_ms (read-only) flags:0 fcntl_flags:4c00
+[main] fd[123] = open /proc/734/task/734/net/unix (read-only) flags:287100
+[main] fd[124] = fopen /proc/735/task/735/uid_map (read-write) flags:2 fcntl_flags:0
+[main] fd[125] = fopen /proc/sys (read-only) flags:0 fcntl_flags:46000
+[main] fd[126] = fopen /proc/irq/3/node (read-only) flags:0 fcntl_flags:0
+[main] fd[127] = fopen /proc/sys/net/ipv4/neigh/default (read-only) flags:0 fcntl_flags:46000
+[main] fd[128] = fopen /proc/sys/net/ipv4/neigh/default/proxy_delay (read-only) flags:0 fcntl_flags:2000
+[main] fd[129] = open /proc/1270/statm (read-only) flags:100
+[main] fd[130] = open /proc/731/task/731/projid_map (read-write) flags:227902
+[main] fd[131] = fopen /proc/735/loginuid (read-write) flags:2 fcntl_flags:4400
+[main] fd[132] = fopen /proc/sys/net/ipv4/conf/all/route_localnet (read-only) flags:0 fcntl_flags:46000
+[main] fd[133] = open /proc/sys/net/ipv4/conf/default/force_igmp_version (read-only) flags:80000
+[main] fd[134] = fopen /proc/732/net/dev (read-only) flags:0 fcntl_flags:40400
+[main] fd[135] = fopen /proc/732/task/732/stat (read-only) flags:0 fcntl_flags:4000
+[main] fd[136] = fopen /proc/735/net/ip_mr_cache (read-only) flags:0 fcntl_flags:40800
+[main] fd[137] = fopen /proc/732/attr/keycreate (read-write) flags:2 fcntl_flags:800
+[main] fd[138] = fopen /proc/1270/task/1270/net/mcfilter6 (read-only) flags:0 fcntl_flags:0
+[main] fd[139] = fopen /proc/1270/fdinfo/24 (read-only) flags:0 fcntl_flags:40400
+[main] fd[140] = open /proc/1270/fdinfo/4 (read-only) flags:200500
+[main] fd[141] = fopen /proc/sys/net/ipv6/route/gc_min_interval (read-only) flags:0 fcntl_flags:40000
+[main] fd[142] = open /proc/sys/net/ipv6/conf/eth0/accept_dad (read-only) flags:0
+[main] fd[143] = fopen /proc/loadavg (read-only) flags:0 fcntl_flags:40400
+[main] fd[144] = fopen /proc/sys/net/dccp/default/seq_window (read-only) flags:0 fcntl_flags:0
+[main] fd[145] = fopen /proc/sys/net/ipv6/neigh/lo/delay_first_probe_time (read-only) flags:0 fcntl_flags:40000
+[main] fd[146] = fopen /dev/null (read-write) flags:2 fcntl_flags:4c00
+[main] fd[147] = fopen /proc/1270/fdinfo/4 (read-only) flags:0 fcntl_flags:44000
+[main] fd[148] = fopen /proc/1270/task/1270/fdinfo/30 (read-only) flags:0 fcntl_flags:0
+[main] fd[149] = open /proc/735/net/sockstat6 (read-only) flags:200880
+[main] fd[150] = fopen /proc/732/net/ip6_flowlabel (read-only) flags:0 fcntl_flags:40000
+[main] fd[151] = fopen /proc/sys/net/ipv4/tcp_moderate_rcvbuf (read-only) flags:0 fcntl_flags:6800
+[main] fd[152] = fopen /proc/sys/net/ipv4/conf/all/disable_xfrm (read-only) flags:0 fcntl_flags:42c00
+[main] fd[153] = fopen /proc/1270/auxv (read-only) flags:0 fcntl_flags:0
+[main] fd[154] = fopen /proc/irq/4/spurious (read-only) flags:0 fcntl_flags:42800
+[main] fd[155] = fopen /proc/sys/kernel/bootloader_version (read-only) flags:0 fcntl_flags:40c00
+[main] fd[156] = fopen /proc/734/net/igmp (read-only) flags:0 fcntl_flags:400
+[main] fd[157] = fopen /proc/731/net/packet (read-only) flags:0 fcntl_flags:4c00
+[main] fd[158] = fopen /proc/sys/net/ipv4/tcp_frto (read-only) flags:0 fcntl_flags:2800
+[main] fd[159] = fopen /proc/sys/net/ipv6/conf/all/keep_addr_on_down (read-only) flags:0 fcntl_flags:40800
+[main] fd[160] = fopen /proc/sys/dev/cdrom/debug (read-only) flags:0 fcntl_flags:42c00
+[main] fd[161] = open /proc/735/task/735/mountinfo (read-only) flags:c1c00
+[main] fd[162] = fopen /proc/732/net/snmp6 (read-only) flags:0 fcntl_flags:0
+[main] fd[163] = fopen /proc/sys/net/ipv6/conf/default/regen_max_retry (read-only) flags:0 fcntl_flags:40c00
+[main] fd[164] = fopen /proc/732/task/732/net/rt_acct (read-only) flags:0 fcntl_flags:2000
+[main] fd[165] = fopen /proc/731/net/dev_mcast (read-only) flags:0 fcntl_flags:46400
+[main] fd[166] = fopen /proc/735/task/735/schedstat (read-only) flags:0 fcntl_flags:46000
+[main] fd[167] = fopen /proc/735/task/735/net/mcfilter6 (read-only) flags:0 fcntl_flags:40800
+[main] fd[168] = fopen /proc/735/task/735/net/mcfilter (read-only) flags:0 fcntl_flags:4c00
+[main] fd[169] = fopen /proc/sys/net/ipv4/route/redirect_silence (read-only) flags:0 fcntl_flags:40800
+[main] fd[170] = fopen /proc/irq/25/node (read-only) flags:0 fcntl_flags:0
+[main] fd[171] = fopen /proc/sys/net/ipv4/neigh/eth0/base_reachable_time_ms (read-only) flags:0 fcntl_flags:2000
+[main] fd[172] = fopen /proc/sys/net/ipv6/neigh/lo/base_reachable_time_ms (read-only) flags:0 fcntl_flags:42000
+[main] fd[173] = open /proc/fb (read-only) flags:0
+[main] fd[174] = fopen /proc/irq/27/smp_affinity (read-only) flags:0 fcntl_flags:44400
+[main] fd[175] = fopen /proc/irq/1 (read-only) flags:0 fcntl_flags:2c00
+[main] fd[176] = fopen /proc/735/net/connector (read-only) flags:0 fcntl_flags:40400
+[main] fd[177] = fopen /proc/1270/task/1270/mem (read-write) flags:2 fcntl_flags:0
+[main] fd[178] = fopen /proc/sys/dev/cdrom/debug (read-only) flags:0 fcntl_flags:2c00
+[main] fd[179] = fopen /proc/1270/task/1270/fdinfo/32 (read-only) flags:0 fcntl_flags:0
+[main] fd[180] = fopen /proc/1270/net/dev_snmp6 (read-only) flags:0 fcntl_flags:2000
+[main] fd[181] = open /proc/sys/kernel/sched_domain/cpu0/domain0/forkexec_idx (read-only) flags:80
+[main] fd[182] = fopen /proc/1270/task/1270/net/protocols (read-only) flags:0 fcntl_flags:40800
+[main] fd[183] = open /proc/731/task/731/oom_score (read-only) flags:1e1000
+[main] fd[184] = fopen /proc/sys/net/ipv4/neigh/default/ucast_solicit (read-only) flags:0 fcntl_flags:0
+[main] fd[185] = open /proc/sys/net/ipv4/igmp_max_memberships (read-only) flags:900
+[main] fd[186] = open /proc/sys/net/ipv4/neigh/eth0 (read-only) flags:210800
+[main] fd[187] = fopen /proc/sys/net/ipv6/ip6frag_low_thresh (read-only) flags:0 fcntl_flags:2000
+[main] fd[188] = fopen /proc/sys/net/ipv6/conf/lo/mtu (read-only) flags:0 fcntl_flags:0
+[main] fd[189] = fopen /proc/1270/net/rt_cache (read-only) flags:0 fcntl_flags:0
+[main] fd[190] = fopen /proc/731/task/731/net/stat (read-only) flags:0 fcntl_flags:0
+[main] fd[191] = open /proc/sys/net/core/default_qdisc (read-only) flags:20000
+[main] fd[192] = fopen /proc/sys/net/ipv4/conf/default (read-only) flags:0 fcntl_flags:400
+[main] fd[193] = fopen /proc/735/net/if_inet6 (read-only) flags:0 fcntl_flags:0
+[main] fd[194] = fopen /proc/734/net/netstat (read-only) flags:0 fcntl_flags:0
+[main] fd[195] = fopen /proc/sys/kernel/random/urandom_min_reseed_secs (read-only) flags:0 fcntl_flags:4800
+[main] fd[196] = fopen /proc/734/net/protocols (read-only) flags:0 fcntl_flags:44000
+[main] fd[197] = fopen /proc/sys/net/ipv4/tcp_invalid_ratelimit (read-only) flags:0 fcntl_flags:2800
+[main] fd[198] = fopen /proc/sys/net/ipv6/conf/eth0/disable_ipv6 (read-only) flags:0 fcntl_flags:40000
+[main] fd[199] = fopen /proc/735/environ (read-only) flags:0 fcntl_flags:40000
+[main] fd[200] = open /proc/sys/net/ipv6/conf/default/max_desync_factor (read-only) flags:0
+[main] fd[201] = fopen /proc/735/attr/exec (read-write) flags:2 fcntl_flags:44c00
+[main] fd[202] = fopen /proc/irq/5/affinity_hint (read-only) flags:0 fcntl_flags:42000
+[main] fd[203] = open /proc/sys/net/ipv4/ip_default_ttl (read-only) flags:23580
+[main] fd[204] = open /proc/sys/vm/lowmem_reserve_ratio (read-only) flags:0
+[main] fd[205] = fopen /proc/irq/9/node (read-only) flags:0 fcntl_flags:40000
+[main] fd[206] = fopen /proc/irq/7/spurious (read-only) flags:0 fcntl_flags:400
+[main] fd[207] = open /dev/null (read-write) flags:1002
+[main] fd[208] = fopen /proc/1270/net/netstat (read-only) flags:0 fcntl_flags:6000
+[main] fd[209] = open /proc/sys/fs/inotify/max_queued_events (read-only) flags:0
+[main] fd[210] = fopen /proc/1270/task/1270/net/route (read-only) flags:0 fcntl_flags:0
+[main] fd[211] = fopen /proc/sys/kernel/random/read_wakeup_threshold (read-only) flags:0 fcntl_flags:0
+[main] fd[212] = fopen /proc/sys/kernel/pty (read-only) flags:0 fcntl_flags:40800
+[main] fd[213] = open /proc/1270/task/1270/net/ax25 (read-only) flags:121080
+[main] fd[214] = open /proc/sys/net/ipv6/conf/eth0/accept_ra_rtr_pref (read-only) flags:0
+[main] fd[215] = fopen /proc/sys/net/ipv4/route/min_pmtu (read-only) flags:0 fcntl_flags:46800
+[main] fd[216] = fopen /proc/sys/net/ipv6/conf/lo/router_solicitation_delay (read-only) flags:0 fcntl_flags:40800
+[main] fd[217] = fopen /proc/sys/fs/mqueue/queues_max (read-only) flags:0 fcntl_flags:44400
+[main] fd[218] = open /proc/731/task/731/cmdline (read-only) flags:321580
+[main] fd[219] = open /proc/irq/10/ehci_hcd:usb2 (read-only) flags:333580
+[main] fd[220] = fopen /proc/1270/io (read-only) flags:0 fcntl_flags:4800
+[main] fd[221] = fopen /proc/irq/7/smp_affinity (read-only) flags:0 fcntl_flags:6000
+[main] fd[222] = fopen /proc/735/net/dev_snmp6 (read-only) flags:0 fcntl_flags:2000
+[main] fd[223] = open /dev/disk/by-id (read-only) flags:3180
+[main] fd[224] = fopen /proc/1270/net/protocols (read-only) flags:0 fcntl_flags:6400
+[main] fd[225] = open /proc/sys/net/ipv6/conf/default/temp_prefered_lft (read-only) flags:183900
+[main] fd[226] = open /proc/732/task/732/net/softnet_stat (read-only) flags:284d00
+[main] fd[227] = fopen /proc/735/task/735/auxv (read-only) flags:0 fcntl_flags:44800
+[main] fd[228] = open /proc/734/gid_map (read-only) flags:203000
+[main] fd[229] = open /proc/irq/6/spurious (read-only) flags:0
+[main] fd[230] = fopen /proc/731/net/dev_snmp6 (read-only) flags:0 fcntl_flags:44800
+[main] fd[231] = fopen /proc/sys/net/ipv4/neigh/lo/proxy_delay (read-only) flags:0 fcntl_flags:0
+[main] fd[232] = fopen /proc/sys/net/ipv4/conf/eth0/ignore_routes_with_linkdown (read-only) flags:0 fcntl_flags:2800
+[main] fd[233] = fopen /sys/devices/system/cpu/power/control (read-only) flags:0 fcntl_flags:800
+[main] fd[234] = open /proc/1270/attr/sockcreate (read-write) flags:20402
+[main] fd[235] = open /proc/732/mountinfo (read-only) flags:0
+[main] fd[236] = fopen /proc/735/cgroup (read-only) flags:0 fcntl_flags:42000
+[main] fd[237] = fopen /proc/irq/14/spurious (read-only) flags:0 fcntl_flags:2c00
+[main] fd[238] = open /proc/734/schedstat (read-only) flags:2e0400
+[main] fd[239] = open /proc/sys/net/ipv6/conf/lo/router_solicitation_max_interval (read-only) flags:101400
+[main] fd[240] = fopen /proc/irq/default_smp_affinity (read-only) flags:0 fcntl_flags:44c00
+[main] fd[241] = fopen /proc/735/attr/keycreate (read-write) flags:2 fcntl_flags:46c00
+[main] fd[242] = fopen /proc/fs/ext4/vda1/mb_groups (read-only) flags:0 fcntl_flags:42400
+[main] fd[243] = fopen /proc/731/task/731/oom_score (read-only) flags:0 fcntl_flags:400
+[main] fd[244] = fopen /proc/irq/2/affinity_hint (read-only) flags:0 fcntl_flags:0
+[main] fd[245] = open /proc/sys/net/ipv6/neigh/eth0/anycast_delay (read-only) flags:200000
+[main] fd[246] = fopen /proc/sys/kernel/sched_domain/cpu0/domain0 (read-only) flags:0 fcntl_flags:0
+[main] fd[247] = fopen /proc/735/task/735/cgroup (read-only) flags:0 fcntl_flags:0
+[main] fd[248] = fopen /proc/1270/task/1270/net/unix (read-only) flags:0 fcntl_flags:42c00
+[main] fd[249] = fopen /proc/1270/task/1270/net/dev (read-only) flags:0 fcntl_flags:0
+[main] fd[250] = fopen /proc/731/task/731/maps (read-only) flags:0 fcntl_flags:4c00
+[main] fd[251] = fopen /proc/sys/net/ipv4/conf/eth0/ignore_routes_with_linkdown (read-only) flags:0 fcntl_flags:6c00
+[main] fd[252] = fopen /proc/1270/fdinfo/10 (read-only) flags:0 fcntl_flags:44c00
+[main] fd[253] = fopen /proc/sys/net/ipv4/neigh/default/unres_qlen (read-only) flags:0 fcntl_flags:44c00
+[main] fd[254] = fopen /proc/734/net/tcp (read-only) flags:0 fcntl_flags:6400
+[main] fd[255] = fopen /proc/734/net/sockstat6 (read-only) flags:0 fcntl_flags:c00
+[main] fd[256] = open /proc/735/mounts (read-only) flags:101100
+[main] fd[257] = fopen /proc/sys/net/ipv4/igmp_qrv (read-only) flags:0 fcntl_flags:42000
+[main] fd[258] = fopen /proc/sys/kernel/sched_domain/cpu1 (read-only) flags:0 fcntl_flags:40000
+[main] fd[259] = fopen /proc/735/task/735/net/connector (read-only) flags:0 fcntl_flags:2800
+[main] fd[260] = fopen /proc/sys/net/ipv4/icmp_msgs_burst (read-only) flags:0 fcntl_flags:42c00
+[main] fd[261] = fopen /proc/sys/fs/quota/free_dquots (read-only) flags:0 fcntl_flags:42c00
+[main] fd[262] = fopen /proc/sys/net/ipv6/conf/eth0/mc_forwarding (read-only) flags:0 fcntl_flags:800
+[main] fd[263] = fopen /proc/sys/vm/heap_stack_gap (read-only) flags:0 fcntl_flags:40c00
+[main] fd[264] = fopen /proc/sys/net/ipv4/tcp_min_rtt_wlen (read-only) flags:0 fcntl_flags:46800
+[main] fd[265] = open /proc/sys/net/ipv6/conf/lo/accept_source_route (read-only) flags:0
+[main] fd[266] = open /proc/sys/net/ipv4/inet_peer_maxttl (read-only) flags:80
+[main] fd[267] = fopen /proc/1270/task/1270/net/softnet_stat (read-only) flags:0 fcntl_flags:40000
+[main] fd[268] = fopen /proc/732/task/732/net/rt6_stats (read-only) flags:0 fcntl_flags:0
+[main] fd[269] = fopen /proc/irq/11/spurious (read-only) flags:0 fcntl_flags:0
+[main] fd[270] = fopen /proc/731/task/731/net/snmp6 (read-only) flags:0 fcntl_flags:0
+[main] fd[271] = fopen /proc/irq/27/affinity_hint (read-only) flags:0 fcntl_flags:2800
+[main] fd[272] = fopen /proc/731/task/731/maps (read-only) flags:0 fcntl_flags:42400
+[main] fd[273] = fopen /dev/bus/usb/003/001 (read-only) flags:0 fcntl_flags:0
+[main] fd[274] = open /proc/735/net/udp (read-only) flags:262c80
+[main] fd[275] = fopen /proc/sys/net/ipv6/conf/default/temp_valid_lft (read-only) flags:0 fcntl_flags:4000
+[main] fd[276] = fopen /dev/urandom (read-write) flags:2 fcntl_flags:4800
+[main] fd[277] = open /proc/sys/net/ipv6/neigh/default/gc_thresh1 (read-only) flags:101800
+[main] fd[278] = fopen /proc/731/fdinfo/13 (read-only) flags:0 fcntl_flags:0
+[main] fd[279] = fopen /proc/734/net/netstat (read-only) flags:0 fcntl_flags:42000
+[main] fd[285] = memfd
+[main] fd[286] = memfd
+[main] fd[287] = memfd
+[main] fd[288] = memfd
+[main] Couldn't open enough perf events, got EPERM too much. Giving up.
+[main] fd[289] = pipe([reader] flags:0)
+[main] fd[290] = pipe([writer] flags:0)
+[main] fd[291] = pipe([reader] flags:800)
+[main] fd[292] = pipe([writer] flags:800)
+[main] fd[293] = pipe([reader] flags:80000)
+[main] fd[294] = pipe([writer] flags:80000)
+[main] fd[295] = pipe([reader] flags:80800)
+[main] fd[296] = pipe([writer] flags:80800)
+[main] There are 8 entries in the 3 list (@0xba8ff6f2620).
+[main] pipefd:289
+[main] pipefd:290
+[main] pipefd:291
+[main] pipefd:292
+[main] pipefd:293
+[main] pipefd:294
+[main] pipefd:295
+[main] pipefd:296
+[main] Couldn't find socket cachefile. Regenerating.
+[main] fd[298] = domain:1 (LOCAL) type:0x2 protocol:0 
+[main] setsockopt(1 15 ba8ff76f220 10) on fd 298 [1:2:0]
+[main] fd[299] = domain:1 (LOCAL) type:0x5 protocol:0 
+[main] setsockopt(1 35 ba8ff76f2e0 4) on fd 299 [1:5:0]
+[main] fd[300] = domain:1 (LOCAL) type:0x1 protocol:0 
+[main] setsockopt(1 e ba8ff76f2e0 4) on fd 300 [1:1:0]
+[main] fd[301] = domain:2 (INET) type:0x2 protocol:0 
+[main] setsockopt(0 22 ba8ff76f2e0 1) on fd 301 [2:2:0]
+[main] Couldn't open socket 2:5:0. Socket type not supported
+[main] fd[302] = domain:2 (INET) type:0x1 protocol:0 
+[main] setsockopt(0 15 ba8ff76f320 4) on fd 302 [2:1:0]
+[main] fd[303] = domain:2 (INET) type:0x1 protocol:6 
+[main] setsockopt(6 12 ba8ff76f360 4) on fd 303 [2:1:6]
+[main] fd[304] = domain:2 (INET) type:0x2 protocol:17 
+[main] setsockopt(0 6 ba8ff76f3a0 1) on fd 304 [2:2:17]
+[main] fd[305] = domain:2 (INET) type:0x6 protocol:33 
+[main] setsockopt(10d 4 ba8ff76f3e0 4) on fd 305 [2:6:33]
+[main] Couldn't open socket 2:5:132. Socket type not supported
+[main] Couldn't open socket 2:1:132. Protocol not supported
+[main] fd[306] = domain:2 (INET) type:0x2 protocol:136 
+[main] setsockopt(0 d ba8ff76f420 4) on fd 306 [2:2:136]
+[main] fd[307] = domain:3 (AX25) type:0x2 protocol:0 
+[main] setsockopt(101 7 ba8ff76f460 4) on fd 307 [3:2:0]
+[main] fd[308] = domain:3 (AX25) type:0x3 protocol:0 
+[main] setsockopt(101 c ba8ff76f520 4) on fd 308 [3:3:0]
+[main] fd[309] = domain:3 (AX25) type:0x5 protocol:0 
+[main] setsockopt(101 7 ba8ff76f560 4) on fd 309 [3:5:0]
+[main] fd[310] = domain:3 (AX25) type:0x5 protocol:1 
+[main] setsockopt(101 9 ba8ff76f560 4) on fd 310 [3:5:1]
+[main] fd[311] = domain:3 (AX25) type:0x5 protocol:207 
+[main] setsockopt(101 7 ba8ff76f560 4) on fd 311 [3:5:207]
+[main] Couldn't open socket 4:2:0. Address family not supported by protocol
+[main] Couldn't open socket 5:2:0. Address family not supported by protocol
+[main] Couldn't open socket 5:3:0. Address family not supported by protocol
+[main] Couldn't open socket 6:5:0. Address family not supported by protocol
+[main] Couldn't open socket 8:2:0. Address family not supported by protocol
+[main] Couldn't open socket 9:5:0. Address family not supported by protocol
+[main] fd[312] = domain:10 (INET6) type:0x2 protocol:0 
+[main] setsockopt(29 31 ba8ff76f5a0 4) on fd 312 [10:2:0]
+[main] Couldn't open socket 10:5:0. Socket type not supported
+[main] fd[313] = domain:10 (INET6) type:0x1 protocol:0 
+[main] setsockopt(29 3e 0 1) on fd 313 [10:1:0]
+[main] fd[314] = domain:10 (INET6) type:0x1 protocol:6 
+[main] setsockopt(29 4 0 4) on fd 314 [10:1:6]
+[main] fd[315] = domain:10 (INET6) type:0x2 protocol:17 
+[main] setsockopt(29 35 0 4) on fd 315 [10:2:17]
+[main] Couldn't open socket 10:6:33. Socket type not supported
+[main] Couldn't open socket 10:5:132. Socket type not supported
+[main] fd[316] = domain:10 (INET6) type:0x2 protocol:136 
+[main] setsockopt(29 49 ba8ff76f720 4) on fd 316 [10:2:136]
+[main] Couldn't open socket 12:5:2. Address family not supported by protocol
+[main] Couldn't open socket 12:1:2. Address family not supported by protocol
+[main] Couldn't open socket 26:2:0. Address family not supported by protocol
+[main] Couldn't open socket 26:1:0. Address family not supported by protocol
+[main] fd[317] = domain:16 (NETLINK) type:0x2 protocol:9 
+[main] setsockopt(10e 3 ba8ff76f720 1) on fd 317 [16:2:9]
+[main] fd[318] = domain:16 (NETLINK) type:0x2 protocol:11 
+[main] setsockopt(10e 4 ba8ff76f720 4) on fd 318 [16:2:11]
+[main] Couldn't open socket 16:2:14. Protocol not supported
+[main] fd[319] = domain:16 (NETLINK) type:0x2 protocol:10 
+[main] setsockopt(10e a ba8ff76f7e0 1) on fd 319 [16:2:10]
+[main] fd[320] = domain:16 (NETLINK) type:0x2 protocol:16 
+[main] setsockopt(10e 5 ba8ff76f7e0 4) on fd 320 [16:2:16]
+[main] Couldn't open socket 16:2:8. Protocol not supported
+[main] fd[321] = domain:16 (NETLINK) type:0x2 protocol:15 
+[main] setsockopt(10e 3 ba8ff76f7e0 4) on fd 321 [16:2:15]
+[main] Couldn't open socket 16:2:12. Protocol not supported
+[main] fd[322] = domain:16 (NETLINK) type:0x2 protocol:0 
+[main] setsockopt(10e a ba8ff76f820 4) on fd 322 [16:2:0]
+[main] fd[323] = domain:16 (NETLINK) type:0x2 protocol:18 
+[main] setsockopt(10e a 0 1) on fd 323 [16:2:18]
+[main] fd[324] = domain:16 (NETLINK) type:0x2 protocol:7 
+[main] setsockopt(10e 4 ba8ff76f8a0 4) on fd 324 [16:2:7]
+[main] fd[325] = domain:16 (NETLINK) type:0x2 protocol:4 
+[main] setsockopt(10e 3 ba8ff76f8e0 1) on fd 325 [16:2:4]
+[main] fd[326] = domain:16 (NETLINK) type:0x2 protocol:2 
+[main] setsockopt(10e 5 ba8ff76f920 4) on fd 326 [16:2:2]
+[main] Couldn't open socket 16:2:6. Protocol not supported
+[main] fd[327] = domain:16 (NETLINK) type:0x3 protocol:9 
+[main] setsockopt(10e 3 ba8ff76f9e0 4) on fd 327 [16:3:9]
+[main] fd[328] = domain:16 (NETLINK) type:0x3 protocol:11 
+[main] setsockopt(10e 4 0 1) on fd 328 [16:3:11]
+[main] Couldn't open socket 16:3:14. Protocol not supported
+[main] fd[329] = domain:16 (NETLINK) type:0x3 protocol:10 
+[main] setsockopt(10e 5 ba8ff76f9e0 4) on fd 329 [16:3:10]
+[main] fd[330] = domain:16 (NETLINK) type:0x3 protocol:16 
+[main] setsockopt(10e a ba8ff76faa0 1) on fd 330 [16:3:16]
+[main] Couldn't open socket 16:3:8. Protocol not supported
+[main] fd[331] = domain:16 (NETLINK) type:0x3 protocol:15 
+[main] setsockopt(10e a ba8ff76faa0 4) on fd 331 [16:3:15]
+[main] Couldn't open socket 16:3:12. Protocol not supported
+[main] fd[332] = domain:16 (NETLINK) type:0x3 protocol:0 
+[main] setsockopt(10e 4 ba8ff76faa0 4) on fd 332 [16:3:0]
+[main] fd[333] = domain:16 (NETLINK) type:0x3 protocol:18 
+[main] setsockopt(10e 4 0 1) on fd 333 [16:3:18]
+[main] fd[334] = domain:16 (NETLINK) type:0x3 protocol:7 
+[main] setsockopt(10e a 0 1) on fd 334 [16:3:7]
+[main] fd[335] = domain:16 (NETLINK) type:0x3 protocol:4 
+[main] setsockopt(10e 3 ba8ff76fb60 4) on fd 335 [16:3:4]
+[main] fd[336] = domain:16 (NETLINK) type:0x3 protocol:2 
+[main] setsockopt(10e 4 0 1) on fd 336 [16:3:2]
+[main] Couldn't open socket 16:3:6. Protocol not supported
+[main] Couldn't open socket 17:10:768. Operation not permitted
+[main] Couldn't open socket 17:3:768. Operation not permitted
+[main] Couldn't open socket 19:5:0. Address family not supported by protocol
+[main] Couldn't open socket 20:2:0. Address family not supported by protocol
+[main] Couldn't open socket 21:5:0. Address family not supported by protocol
+[main] Couldn't open socket 23:2:0. Address family not supported by protocol
+[main] Couldn't open socket 23:2:1. Address family not supported by protocol
+[main] Couldn't open socket 23:5:0. Address family not supported by protocol
+[main] Couldn't open socket 23:1:0. Address family not supported by protocol
+[main] Couldn't open socket 24:2:0. Address family not supported by protocol
+[main] Couldn't open socket 24:3:0. Address family not supported by protocol
+[main] Couldn't open socket 24:5:0. Address family not supported by protocol
+[main] Couldn't open socket 24:1:0. Address family not supported by protocol
+[main] Couldn't open socket 24:2:1. Address family not supported by protocol
+[main] Couldn't open socket 24:3:1. Address family not supported by protocol
+[main] Couldn't open socket 24:5:1. Address family not supported by protocol
+[main] Couldn't open socket 24:1:1. Address family not supported by protocol
+[main] Couldn't open socket 24:2:2. Address family not supported by protocol
+[main] Couldn't open socket 24:3:2. Address family not supported by protocol
+[main] Couldn't open socket 24:5:2. Address family not supported by protocol
+[main] Couldn't open socket 24:1:2. Address family not supported by protocol
+[main] Couldn't open socket 24:9:1. Address family not supported by protocol
+[main] Couldn't open socket 24:9:2. Address family not supported by protocol
+[main] Couldn't open socket 26:2:0. Address family not supported by protocol
+[main] Couldn't open socket 26:1:0. Address family not supported by protocol
+[main] Couldn't open socket 29:3:1. Address family not supported by protocol
+[main] Couldn't open socket 29:2:2. Address family not supported by protocol
+[main] Couldn't open socket 30:2:0. Address family not supported by protocol
+[main] Couldn't open socket 30:5:0. Address family not supported by protocol
+[main] Couldn't open socket 30:1:0. Address family not supported by protocol
+[main] Couldn't open socket 31:5:0. Address family not supported by protocol
+[main] Couldn't open socket 31:5:2. Address family not supported by protocol
+[main] Couldn't open socket 31:1:0. Address family not supported by protocol
+[main] Couldn't open socket 31:1:3. Address family not supported by protocol
+[main] Couldn't open socket 31:3:0. Address family not supported by protocol
+[main] Couldn't open socket 31:3:1. Address family not supported by protocol
+[main] Couldn't open socket 31:3:3. Address family not supported by protocol
+[main] Couldn't open socket 31:3:4. Address family not supported by protocol
+[main] Couldn't open socket 31:3:5. Address family not supported by protocol
+[main] Couldn't open socket 31:3:6. Address family not supported by protocol
+[main] Couldn't open socket 31:3:7. Address family not supported by protocol
+[main] Couldn't open socket 31:2:0. Address family not supported by protocol
+[main] Couldn't open socket 33:2:2. Address family not supported by protocol
+[main] Couldn't open socket 35:2:0. Address family not supported by protocol
+[main] Couldn't open socket 35:5:0. Address family not supported by protocol
+[main] Couldn't open socket 35:2:1. Address family not supported by protocol
+[main] Couldn't open socket 35:5:2. Address family not supported by protocol
+[main] Couldn't open socket 37:5:0. Address family not supported by protocol
+[main] Couldn't open socket 37:5:1. Address family not supported by protocol
+[main] Couldn't open socket 37:5:2. Address family not supported by protocol
+[main] Couldn't open socket 37:5:3. Address family not supported by protocol
+[main] Couldn't open socket 37:5:4. Address family not supported by protocol
+[main] Couldn't open socket 37:5:5. Address family not supported by protocol
+[main] Couldn't open socket 37:1:0. Address family not supported by protocol
+[main] Couldn't open socket 37:1:1. Address family not supported by protocol
+[main] Couldn't open socket 37:1:2. Address family not supported by protocol
+[main] Couldn't open socket 37:1:3. Address family not supported by protocol
+[main] Couldn't open socket 37:1:4. Address family not supported by protocol
+[main] Couldn't open socket 37:1:5. Address family not supported by protocol
+[main] Couldn't open socket 38:5:0. Address family not supported by protocol
+[main] Couldn't open socket 39:5:0. Address family not supported by protocol
+[main] Couldn't open socket 39:3:0. Address family not supported by protocol
+[main] Couldn't open socket 39:2:1. Address family not supported by protocol
+[main] Couldn't open socket 39:1:1. Address family not supported by protocol
+[main] Couldn't open socket 39:3:1. Address family not supported by protocol
+[main] Couldn't open socket 41:10:0. Address family not supported by protocol
+[main] Couldn't open socket 41:2:0. Address family not supported by protocol
+[main] Couldn't open socket (21:5:0). Address family not supported by protocol
+[main] Couldn't open socket (21:5:0). Address family not supported by protocol
+[main] Couldn't open socket (21:5:0). Address family not supported by protocol
+[main] Couldn't open socket (21:5:0). Address family not supported by protocol
+[main] Couldn't open socket (21:5:0). Address family not supported by protocol
+[main] Couldn't open socket (21:5:0). Address family not supported by protocol
+[main] Couldn't open socket (21:5:0). Address family not supported by protocol
+[main] Couldn't open socket (21:5:0). Address family not supported by protocol
+[main] Couldn't open socket (21:5:0). Address family not supported by protocol
+[main] Couldn't open socket (21:5:0). Address family not supported by protocol
+[main] Couldn't open socket (38:5:0). Address family not supported by protocol
+[main] Couldn't open socket (38:5:0). Address family not supported by protocol
+[main] Couldn't open socket (38:5:0). Address family not supported by protocol
+[main] Couldn't open socket (38:5:0). Address family not supported by protocol
+[main] Couldn't open socket (38:5:0). Address family not supported by protocol
+[main] Couldn't open socket (38:5:0). Address family not supported by protocol
+[main] Couldn't open socket (38:5:0). Address family not supported by protocol
+[main] Couldn't open socket (38:5:0). Address family not supported by protocol
+[main] Couldn't open socket (38:5:0). Address family not supported by protocol
+[main] Couldn't open socket (38:5:0). Address family not supported by protocol
+[main] Couldn't open socket (9:5:0). Address family not supported by protocol
+[main] Couldn't open socket (9:5:0). Address family not supported by protocol
+[main] Couldn't open socket (9:5:0). Address family not supported by protocol
+[main] Couldn't open socket (9:5:0). Address family not supported by protocol
+[main] Couldn't open socket (9:5:0). Address family not supported by protocol
+[main] Couldn't open socket (9:5:0). Address family not supported by protocol
+[main] Couldn't open socket (9:5:0). Address family not supported by protocol
+[main] Couldn't open socket (9:5:0). Address family not supported by protocol
+[main] Couldn't open socket (9:5:0). Address family not supported by protocol
+[main] Couldn't open socket (9:5:0). Address family not supported by protocol
+[main] Couldn't open socket (22:5:6). Address family not supported by protocol
+[main] Couldn't open socket (22:5:3). Address family not supported by protocol
+[main] Couldn't open socket (22:5:4). Address family not supported by protocol
+[main] Couldn't open socket (22:5:5). Address family not supported by protocol
+[main] Couldn't open socket (22:5:3). Address family not supported by protocol
+[main] Couldn't open socket (22:5:5). Address family not supported by protocol
+[main] Couldn't open socket (22:5:1). Address family not supported by protocol
+[main] Couldn't open socket (22:5:2). Address family not supported by protocol
+[main] Couldn't open socket (22:5:2). Address family not supported by protocol
+[main] Couldn't open socket (22:5:10). Address family not supported by protocol
+[main] Couldn't open socket (7:5:1). Address family not supported by protocol
+[main] Couldn't open socket (7:5:1). Address family not supported by protocol
+[main] Couldn't open socket (7:5:4). Address family not supported by protocol
+[main] Couldn't open socket (7:5:5). Address family not supported by protocol
+[main] Couldn't open socket (7:5:3). Address family not supported by protocol
+[main] Couldn't open socket (7:5:2). Address family not supported by protocol
+[main] Couldn't open socket (7:5:3). Address family not supported by protocol
+[main] Couldn't open socket (7:5:3). Address family not supported by protocol
+[main] Couldn't open socket (7:5:2). Address family not supported by protocol
+[main] Couldn't open socket (7:5:4). Address family not supported by protocol
+[main] Couldn't open socket (40:5:3). Address family not supported by protocol
+[main] Couldn't open socket (40:5:10). Address family not supported by protocol
+[main] Couldn't open socket (40:5:5). Address family not supported by protocol
+[main] Couldn't open socket (40:5:1). Address family not supported by protocol
+[main] Couldn't open socket (40:5:5). Address family not supported by protocol
+[main] Couldn't open socket (40:5:3). Address family not supported by protocol
+[main] Couldn't open socket (40:5:6). Address family not supported by protocol
+[main] Couldn't open socket (40:5:5). Address family not supported by protocol
+[main] Couldn't open socket (40:5:3). Address family not supported by protocol
+[main] Couldn't open socket (40:5:10). Address family not supported by protocol
+[main] Couldn't open socket (37:5:3). Address family not supported by protocol
+[main] Couldn't open socket (37:5:2). Address family not supported by protocol
+[main] Couldn't open socket (37:1:2). Address family not supported by protocol
+[main] Couldn't open socket (37:1:2). Address family not supported by protocol
+[main] Couldn't open socket (37:1:1). Address family not supported by protocol
+[main] Couldn't open socket (37:1:5). Address family not supported by protocol
+[main] Couldn't open socket (37:1:5). Address family not supported by protocol
+[main] Couldn't open socket (37:5:3). Address family not supported by protocol
+[main] Couldn't open socket (37:5:2). Address family not supported by protocol
+[main] Couldn't open socket (37:5:1). Address family not supported by protocol
+[main] Couldn't open socket (30:5:0). Address family not supported by protocol
+[main] Couldn't open socket (30:5:0). Address family not supported by protocol
+[main] Couldn't open socket (30:1:0). Address family not supported by protocol
+[main] Couldn't open socket (30:5:0). Address family not supported by protocol
+[main] Couldn't open socket (30:5:0). Address family not supported by protocol
+[main] Couldn't open socket (30:1:0). Address family not supported by protocol
+[main] Couldn't open socket (30:1:0). Address family not supported by protocol
+[main] Couldn't open socket (30:1:0). Address family not supported by protocol
+[main] Couldn't open socket (30:5:0). Address family not supported by protocol
+[main] Couldn't open socket (30:2:0). Address family not supported by protocol
+[main] Couldn't open socket (25:2:4). Address family not supported by protocol
+[main] Couldn't open socket (25:2:6). Address family not supported by protocol
+[main] Couldn't open socket (25:2:10). Address family not supported by protocol
+[main] Couldn't open socket (25:2:6). Address family not supported by protocol
+[main] Couldn't open socket (25:2:1). Address family not supported by protocol
+[main] Couldn't open socket (25:2:10). Address family not supported by protocol
+[main] Couldn't open socket (25:2:6). Address family not supported by protocol
+[main] Couldn't open socket (25:2:3). Address family not supported by protocol
+[main] Couldn't open socket (25:2:1). Address family not supported by protocol
+[main] Couldn't open socket (25:2:2). Address family not supported by protocol
+[main] Couldn't open socket (15:2:10). Address family not supported by protocol
+[main] Couldn't open socket (15:2:3). Address family not supported by protocol
+[main] Couldn't open socket (15:2:10). Address family not supported by protocol
+[main] Couldn't open socket (15:2:2). Address family not supported by protocol
+[main] Couldn't open socket (15:2:2). Address family not supported by protocol
+[main] Couldn't open socket (15:2:5). Address family not supported by protocol
+[main] Couldn't open socket (15:2:5). Address family not supported by protocol
+[main] Couldn't open socket (15:2:10). Address family not supported by protocol
+[main] Couldn't open socket (15:2:10). Address family not supported by protocol
+[main] Couldn't open socket (15:2:4). Address family not supported by protocol
+[main] Couldn't open socket (33:2:2). Address family not supported by protocol
+[main] Couldn't open socket (33:2:2). Address family not supported by protocol
+[main] Couldn't open socket (33:2:2). Address family not supported by protocol
+[main] Couldn't open socket (33:2:2). Address family not supported by protocol
+[main] Couldn't open socket (33:2:2). Address family not supported by protocol
+[main] Couldn't open socket (33:2:2). Address family not supported by protocol
+[main] Couldn't open socket (33:2:2). Address family not supported by protocol
+[main] Couldn't open socket (33:2:2). Address family not supported by protocol
+[main] Couldn't open socket (33:2:2). Address family not supported by protocol
+[main] Couldn't open socket (33:2:2). Address family not supported by protocol
+[main] Couldn't open socket (39:3:1). Address family not supported by protocol
+[main] Couldn't open socket (39:3:0). Address family not supported by protocol
+[main] Couldn't open socket (39:3:1). Address family not supported by protocol
+[main] Couldn't open socket (39:1:1). Address family not supported by protocol
+[main] Couldn't open socket (39:3:0). Address family not supported by protocol
+[main] Couldn't open socket (39:5:0). Address family not supported by protocol
+[main] Couldn't open socket (39:1:1). Address family not supported by protocol
+[main] Couldn't open socket (39:2:1). Address family not supported by protocol
+[main] Couldn't open socket (39:3:1). Address family not supported by protocol
+[main] Couldn't open socket (39:2:1). Address family not supported by protocol
+[main] Couldn't open socket (32:2:3). Address family not supported by protocol
+[main] Couldn't open socket (32:2:10). Address family not supported by protocol
+[main] Couldn't open socket (32:2:3). Address family not supported by protocol
+[main] Couldn't open socket (32:2:5). Address family not supported by protocol
+[main] Couldn't open socket (32:2:10). Address family not supported by protocol
+[main] Couldn't open socket (32:2:6). Address family not supported by protocol
+[main] Couldn't open socket (32:2:10). Address family not supported by protocol
+[main] Couldn't open socket (32:2:4). Address family not supported by protocol
+[main] Couldn't open socket (32:2:1). Address family not supported by protocol
+[main] Couldn't open socket (32:2:3). Address family not supported by protocol
+[main] Couldn't open socket (11:2:6). Address family not supported by protocol
+[main] Couldn't open socket (11:2:2). Address family not supported by protocol
+[main] Couldn't open socket (11:2:5). Address family not supported by protocol
+[main] Couldn't open socket (11:2:10). Address family not supported by protocol
+[main] Couldn't open socket (11:2:2). Address family not supported by protocol
+[main] Couldn't open socket (11:2:2). Address family not supported by protocol
+[main] Couldn't open socket (11:2:1). Address family not supported by protocol
+[main] Couldn't open socket (11:2:5). Address family not supported by protocol
+[main] Couldn't open socket (11:2:5). Address family not supported by protocol
+[main] Couldn't open socket (11:2:10). Address family not supported by protocol
+[main] Couldn't open socket (27:2:5). Address family not supported by protocol
+[main] Couldn't open socket (27:2:6). Address family not supported by protocol
+[main] Couldn't open socket (27:2:2). Address family not supported by protocol
+[main] Couldn't open socket (27:2:10). Address family not supported by protocol
+[main] Couldn't open socket (27:2:2). Address family not supported by protocol
+[main] Couldn't open socket (27:2:10). Address family not supported by protocol
+[main] Couldn't open socket (27:2:1). Address family not supported by protocol
+[main] Couldn't open socket (27:2:5). Address family not supported by protocol
+[main] Couldn't open socket (27:2:6). Address family not supported by protocol
+[main] Couldn't open socket (27:2:6). Address family not supported by protocol
+[main] Couldn't open socket (32:2:4). Address family not supported by protocol
+[main] Couldn't open socket (32:2:1). Address family not supported by protocol
+[main] Couldn't open socket (32:2:5). Address family not supported by protocol
+[main] Couldn't open socket (32:2:10). Address family not supported by protocol
+[main] Couldn't open socket (32:2:3). Address family not supported by protocol
+[main] Couldn't open socket (32:2:6). Address family not supported by protocol
+[main] Couldn't open socket (32:2:2). Address family not supported by protocol
+[main] Couldn't open socket (32:2:6). Address family not supported by protocol
+[main] Couldn't open socket (32:2:4). Address family not supported by protocol
+[main] Couldn't open socket (32:2:10). Address family not supported by protocol
+[main] Couldn't open socket (2:1:132). Protocol not supported
+[main] fd[337] = domain:2 (INET) type:0x2 protocol:17 
+[main] setsockopt(11 64 ba8ff76fbe0 4) on fd 337 [2:2:17]
+[main] fd[338] = domain:2 (INET) type:0x1 protocol:6 
+[main] setsockopt(6 9 ba8ff76fc20 4) on fd 338 [2:1:6]
+[main] Couldn't open socket (2:5:0). Socket type not supported
+[main] fd[339] = domain:2 (INET) type:0x6 protocol:33 
+[main] setsockopt(0 12 ba8ff76fc60 4) on fd 339 [2:6:33]
+[main] Couldn't open socket (2:5:132). Socket type not supported
+[main] fd[340] = domain:2 (INET) type:0x6 protocol:33 
+[main] setsockopt(10d 1 0 4) on fd 340 [2:6:33]
+[main] fd[341] = domain:2 (INET) type:0x2 protocol:17 
+[main] setsockopt(11 1 ba8ff76fce0 4) on fd 341 [2:2:17]
+[main] fd[342] = domain:2 (INET) type:0x2 protocol:17 
+[main] setsockopt(11 64 ba8ff76fd20 4) on fd 342 [2:2:17]
+[main] fd[343] = domain:2 (INET) type:0x6 protocol:33 
+[main] setsockopt(10d 1 0 4) on fd 343 [2:6:33]
+[main] Couldn't open socket (34:6:1). Address family not supported by protocol
+[main] Couldn't open socket (34:6:6). Address family not supported by protocol
+[main] Couldn't open socket (34:6:1). Address family not supported by protocol
+[main] Couldn't open socket (34:6:6). Address family not supported by protocol
+[main] Couldn't open socket (34:6:2). Address family not supported by protocol
+[main] Couldn't open socket (34:6:4). Address family not supported by protocol
+[main] Couldn't open socket (34:6:2). Address family not supported by protocol
+[main] Couldn't open socket (34:6:5). Address family not supported by protocol
+[main] Couldn't open socket (34:6:5). Address family not supported by protocol
+[main] Couldn't open socket (34:6:3). Address family not supported by protocol
+[main] Couldn't open socket (21:5:0). Address family not supported by protocol
+[main] Couldn't open socket (21:5:0). Address family not supported by protocol
+[main] Couldn't open socket (21:5:0). Address family not supported by protocol
+[main] Couldn't open socket (21:5:0). Address family not supported by protocol
+[main] Couldn't open socket (21:5:0). Address family not supported by protocol
+[main] Couldn't open socket (21:5:0). Address family not supported by protocol
+[main] Couldn't open socket (21:5:0). Address family not supported by protocol
+[main] Couldn't open socket (21:5:0). Address family not supported by protocol
+[main] Couldn't open socket (21:5:0). Address family not supported by protocol
+[main] Couldn't open socket (21:5:0). Address family not supported by protocol
+[main] Couldn't open socket (34:5:10). Address family not supported by protocol
+[main] Couldn't open socket (34:5:3). Address family not supported by protocol
+[main] Couldn't open socket (34:5:4). Address family not supported by protocol
+[main] Couldn't open socket (34:5:2). Address family not supported by protocol
+[main] Couldn't open socket (34:5:3). Address family not supported by protocol
+[main] Couldn't open socket (34:5:4). Address family not supported by protocol
+[main] Couldn't open socket (34:5:6). Address family not supported by protocol
+[main] Couldn't open socket (34:5:4). Address family not supported by protocol
+[main] Couldn't open socket (34:5:5). Address family not supported by protocol
+[main] Couldn't open socket (34:5:4). Address family not supported by protocol
+[main] Couldn't open socket (33:2:2). Address family not supported by protocol
+[main] Couldn't open socket (33:2:2). Address family not supported by protocol
+[main] Couldn't open socket (33:2:2). Address family not supported by protocol
+[main] Couldn't open socket (33:2:2). Address family not supported by protocol
+[main] Couldn't open socket (33:2:2). Address family not supported by protocol
+[main] Couldn't open socket (33:2:2). Address family not supported by protocol
+[main] Couldn't open socket (33:2:2). Address family not supported by protocol
+[main] Couldn't open socket (33:2:2). Address family not supported by protocol
+[main] Couldn't open socket (33:2:2). Address family not supported by protocol
+[main] Couldn't open socket (33:2:2). Address family not supported by protocol
+[main] Couldn't open socket (38:5:0). Address family not supported by protocol
+[main] Couldn't open socket (38:5:0). Address family not supported by protocol
+[main] Couldn't open socket (38:5:0). Address family not supported by protocol
+[main] Couldn't open socket (38:5:0). Address family not supported by protocol
+[main] Couldn't open socket (38:5:0). Address family not supported by protocol
+[main] Couldn't open socket (38:5:0). Address family not supported by protocol
+[main] Couldn't open socket (38:5:0). Address family not supported by protocol
+[main] Couldn't open socket (38:5:0). Address family not supported by protocol
+[main] Couldn't open socket (38:5:0). Address family not supported by protocol
+[main] Couldn't open socket (38:5:0). Address family not supported by protocol
+[main] Couldn't open socket (36:5:3). Address family not supported by protocol
+[main] Couldn't open socket (36:5:5). Address family not supported by protocol
+[main] Couldn't open socket (36:5:5). Address family not supported by protocol
+[main] Couldn't open socket (36:5:4). Address family not supported by protocol
+[main] Couldn't open socket (36:5:4). Address family not supported by protocol
+[main] Couldn't open socket (36:5:3). Address family not supported by protocol
+[main] Couldn't open socket (36:5:5). Address family not supported by protocol
+[main] Couldn't open socket (36:5:5). Address family not supported by protocol
+[main] Couldn't open socket (36:5:4). Address family not supported by protocol
+[main] Couldn't open socket (36:5:4). Address family not supported by protocol
+[main] Couldn't open socket (17:10:768). Operation not permitted
+[main] Couldn't open socket (17:10:768). Operation not permitted
+[main] Couldn't open socket (17:10:768). Operation not permitted
+[main] Couldn't open socket (17:3:768). Operation not permitted
+[main] Couldn't open socket (17:3:768). Operation not permitted
+[main] Couldn't open socket (17:3:768). Operation not permitted
+[main] Couldn't open socket (17:3:768). Operation not permitted
+[main] Couldn't open socket (17:10:768). Operation not permitted
+[main] Couldn't open socket (17:10:768). Operation not permitted
+[main] Couldn't open socket (17:10:768). Operation not permitted
+[main] Couldn't open socket (34:10:1). Address family not supported by protocol
+[main] Couldn't open socket (34:10:5). Address family not supported by protocol
+[main] Couldn't open socket (34:10:4). Address family not supported by protocol
+[main] Couldn't open socket (34:10:3). Address family not supported by protocol
+[main] Couldn't open socket (34:10:1). Address family not supported by protocol
+[main] Couldn't open socket (34:10:2). Address family not supported by protocol
+[main] Couldn't open socket (34:10:2). Address family not supported by protocol
+[main] Couldn't open socket (34:10:10). Address family not supported by protocol
+[main] Couldn't open socket (34:10:6). Address family not supported by protocol
+[main] Couldn't open socket (34:10:6). Address family not supported by protocol
+[main] Couldn't open socket (8:2:0). Address family not supported by protocol
+[main] Couldn't open socket (8:2:0). Address family not supported by protocol
+[main] Couldn't open socket (8:2:0). Address family not supported by protocol
+[main] Couldn't open socket (8:2:0). Address family not supported by protocol
+[main] Couldn't open socket (8:2:0). Address family not supported by protocol
+[main] Couldn't open socket (8:2:0). Address family not supported by protocol
+[main] Couldn't open socket (8:2:0). Address family not supported by protocol
+[main] Couldn't open socket (8:2:0). Address family not supported by protocol
+[main] Couldn't open socket (8:2:0). Address family not supported by protocol
+[main] Couldn't open socket (8:2:0). Address family not supported by protocol
+[main] Couldn't open socket (36:2:10). Address family not supported by protocol
+[main] Couldn't open socket (36:2:10). Address family not supported by protocol
+[main] Couldn't open socket (36:2:6). Address family not supported by protocol
+[main] Couldn't open socket (36:2:2). Address family not supported by protocol
+[main] Couldn't open socket (36:2:5). Address family not supported by protocol
+[main] Couldn't open socket (36:2:3). Address family not supported by protocol
+[main] Couldn't open socket (36:2:1). Address family not supported by protocol
+[main] Couldn't open socket (36:2:6). Address family not supported by protocol
+[main] Couldn't open socket (36:2:4). Address family not supported by protocol
+[main] Couldn't open socket (36:2:5). Address family not supported by protocol
+[main] Couldn't open socket (4:2:0). Address family not supported by protocol
+[main] Couldn't open socket (4:2:0). Address family not supported by protocol
+[main] Couldn't open socket (4:2:0). Address family not supported by protocol
+[main] Couldn't open socket (4:2:0). Address family not supported by protocol
+[main] Couldn't open socket (4:2:0). Address family not supported by protocol
+[main] Couldn't open socket (4:2:0). Address family not supported by protocol
+[main] Couldn't open socket (4:2:0). Address family not supported by protocol
+[main] Couldn't open socket (4:2:0). Address family not supported by protocol
+[main] Couldn't open socket (4:2:0). Address family not supported by protocol
+[main] Couldn't open socket (4:2:0). Address family not supported by protocol
+[main] Couldn't open socket (33:2:2). Address family not supported by protocol
+[main] Couldn't open socket (33:2:2). Address family not supported by protocol
+[main] Couldn't open socket (33:2:2). Address family not supported by protocol
+[main] Couldn't open socket (33:2:2). Address family not supported by protocol
+[main] Couldn't open socket (33:2:2). Address family not supported by protocol
+[main] Couldn't open socket (33:2:2). Address family not supported by protocol
+[main] Couldn't open socket (33:2:2). Address family not supported by protocol
+[main] Couldn't open socket (33:2:2). Address family not supported by protocol
+[main] Couldn't open socket (33:2:2). Address family not supported by protocol
+[main] Couldn't open socket (33:2:2). Address family not supported by protocol
+[main] Couldn't open socket (20:2:0). Address family not supported by protocol
+[main] Couldn't open socket (20:2:0). Address family not supported by protocol
+[main] Couldn't open socket (20:2:0). Address family not supported by protocol
+[main] Couldn't open socket (20:2:0). Address family not supported by protocol
+[main] Couldn't open socket (20:2:0). Address family not supported by protocol
+[main] Couldn't open socket (20:2:0). Address family not supported by protocol
+[main] Couldn't open socket (20:2:0). Address family not supported by protocol
+[main] Couldn't open socket (20:2:0). Address family not supported by protocol
+[main] Couldn't open socket (20:2:0). Address family not supported by protocol
+[main] Couldn't open socket (20:2:0). Address family not supported by protocol
+[main] Couldn't open socket (25:2:3). Address family not supported by protocol
+[main] Couldn't open socket (25:2:6). Address family not supported by protocol
+[main] Couldn't open socket (25:2:6). Address family not supported by protocol
+[main] Couldn't open socket (25:2:6). Address family not supported by protocol
+[main] Couldn't open socket (25:2:6). Address family not supported by protocol
+[main] Couldn't open socket (25:2:3). Address family not supported by protocol
+[main] Couldn't open socket (25:2:1). Address family not supported by protocol
+[main] Couldn't open socket (25:2:5). Address family not supported by protocol
+[main] Couldn't open socket (25:2:6). Address family not supported by protocol
+[main] Couldn't open socket (25:2:2). Address family not supported by protocol
+[main] Couldn't open socket (19:5:0). Address family not supported by protocol
+[main] Couldn't open socket (19:5:0). Address family not supported by protocol
+[main] Couldn't open socket (19:5:0). Address family not supported by protocol
+[main] Couldn't open socket (19:5:0). Address family not supported by protocol
+[main] Couldn't open socket (19:5:0). Address family not supported by protocol
+[main] Couldn't open socket (19:5:0). Address family not supported by protocol
+[main] Couldn't open socket (19:5:0). Address family not supported by protocol
+[main] Couldn't open socket (19:5:0). Address family not supported by protocol
+[main] Couldn't open socket (19:5:0). Address family not supported by protocol
+[main] Couldn't open socket (19:5:0). Address family not supported by protocol
+[main] Couldn't open socket (13:2:0). Address family not supported by protocol
+[main] Couldn't open socket (13:2:0). Address family not supported by protocol
+[main] Couldn't open socket (13:1:0). Address family not supported by protocol
+[main] Couldn't open socket (13:2:0). Address family not supported by protocol
+[main] Couldn't open socket (13:2:0). Address family not supported by protocol
+[main] Couldn't open socket (13:2:0). Address family not supported by protocol
+[main] Couldn't open socket (13:1:0). Address family not supported by protocol
+[main] Couldn't open socket (13:2:0). Address family not supported by protocol
+[main] Couldn't open socket (13:1:0). Address family not supported by protocol
+[main] Couldn't open socket (13:2:0). Address family not supported by protocol
+[main] fd[344] = domain:10 (INET6) type:0x2 protocol:136 
+[main] setsockopt(29 4 ba8ff76fda0 4) on fd 344 [10:2:136]
+[main] fd[345] = domain:10 (INET6) type:0x1 protocol:0 
+[main] setsockopt(29 46 0 1) on fd 345 [10:1:0]
+[main] fd[346] = domain:10 (INET6) type:0x1 protocol:6 
+[main] setsockopt(29 5 ba8ff76fe20 4) on fd 346 [10:1:6]
+[main] Couldn't open socket (10:5:132). Socket type not supported
+[main] fd[347] = domain:10 (INET6) type:0x1 protocol:0 
+[main] setsockopt(29 31 0 4) on fd 347 [10:1:0]
+[main] fd[348] = domain:10 (INET6) type:0x2 protocol:17 
+[main] setsockopt(29 10 ba8ff76fee0 4) on fd 348 [10:2:17]
+[main] fd[349] = domain:10 (INET6) type:0x1 protocol:6 
+[main] setsockopt(29 49 ba8ff76fee0 4) on fd 349 [10:1:6]
+[main] fd[350] = domain:10 (INET6) type:0x2 protocol:136 
+[main] setsockopt(29 12 0 4) on fd 350 [10:2:136]
+[main] Couldn't open socket (10:6:33). Socket type not supported
+[main] fd[351] = domain:10 (INET6) type:0x1 protocol:0 
+[main] setsockopt(29 6 0 0) on fd 351 [10:1:0]
+[main] created 54 sockets
+[main] fd[297] = fopen("trinity-testfile1", O_RDWR)
+[main] fd[352] = open("trinity-testfile2", flags:101000)
+[main] fd[353] = open("trinity-testfile3", flags:0)
+[main] fd[354] = open("trinity-testfile4", flags:0)
+[main] fd[355] = open("trinity-testfile1", flags:5000)
+[main] fd[356] = open("trinity-testfile2", flags:105000)
+[main] fd[357] = open("trinity-testfile3", flags:5000)
+[main] fd[358] = fopen("trinity-testfile4", O_RDWR)
+[main] fd[359] = fopen("trinity-testfile1", O_RDWR)
+[main] fd[360] = fopen("trinity-testfile2", O_RDWR)
+[main] fd[361] = fopen("trinity-testfile3", O_RDWR)
+[main] fd[362] = open("trinity-testfile4", flags:5000)
+[main] fd[363] = fopen("trinity-testfile1", O_RDWR)
+[main] fd[364] = fopen("trinity-testfile2", O_RDWR)
+[main] fd[365] = fopen("trinity-testfile3", O_RDWR)
+[main] fd[366] = open("trinity-testfile4", flags:1000)
+[main] fd[367] = fopen("trinity-testfile1", O_RDWR)
+[main] fd[368] = fopen("trinity-testfile2", O_RDWR)
+[main] fd[369] = fopen("trinity-testfile3", O_RDWR)
+[main] fd[370] = open("trinity-testfile4", flags:105000)
+[main] There are 20 entries in the 2 list (@0xba8ff7702a0).
+[main]  start: 0x78d823f54000 size:4KB  name: trinity-testfile1
+[main]  start: 0x78d823f53000 size:4KB  name: trinity-testfile2
+[main]  start: 0x78d823f52000 size:4KB  name: trinity-testfile3
+[main]  start: 0x78d823f51000 size:4KB  name: trinity-testfile4
+[main]  start: 0x78d823f50000 size:4KB  name: trinity-testfile1
+[main]  start: 0x78d823f4f000 size:4KB  name: trinity-testfile2
+[main]  start: 0x78d823f4e000 size:4KB  name: trinity-testfile3
+[main]  start: 0x78d823f4d000 size:4KB  name: trinity-testfile4
+[main]  start: 0x402c8000 size:4KB  name: trinity-testfile1
+[main]  start: 0x78d823f4c000 size:4KB  name: trinity-testfile2
+[main]  start: 0x78d823f4b000 size:4KB  name: trinity-testfile3
+[main]  start: 0x78d823f4a000 size:4KB  name: trinity-testfile4
+[main]  start: 0x78d823f49000 size:4KB  name: trinity-testfile1
+[main]  start: 0x78d823f48000 size:4KB  name: trinity-testfile2
+[main]  start: 0x78d823f47000 size:4KB  name: trinity-testfile3
+[main]  start: 0x78d823f46000 size:4KB  name: trinity-testfile4
+[main]  start: 0x78d823f45000 size:4KB  name: trinity-testfile1
+[main]  start: 0x78d823f44000 size:4KB  name: trinity-testfile2
+[main]  start: 0x78d823f43000 size:4KB  name: trinity-testfile3
+[main]  start: 0x78d823f42000 size:4KB  name: trinity-testfile4
+[main] fd[371] = timerfd
+[main] fd[372] = timerfd
+[main] fd[373] = timerfd
+[main] fd[374] = timerfd
+[main] fd[375] = timerfd
+[main] fd[376] = timerfd
+[main] fd[377] = timerfd
+[main] fd[378] = timerfd
+[main] Enabled 12/14 fd providers. initialized:12.
+[main] 11117 iterations. [F:8397 S:2670 HI:1971]
+[main] 22576 iterations. [F:17133 S:5344 HI:2830]
+[main] exit_reason=6, but 7 children still running.

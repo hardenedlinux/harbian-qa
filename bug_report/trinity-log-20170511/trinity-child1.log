@@ -1,0 +1,1303 @@
+[child1:1689] [0] mkdirat(dfd=285, pathname="/proc/sys/net/ipv6/conf/default/disable_ipv6", mode=307) = -1 (File exists)
+[child1:1689] [1] memfd_create(uname=0x78d823f56000, flag=0x2) = 380
+[child1:1689] [2] [32BIT] truncate(path="/proc/1270/task/1270/net/fib_triestat", length=1) = -1 (Bad address)
+[child1:1689] [3] times(tbuf=0x78d823f57000) = 0x66660fb5
+[child1:1689] [4] clock_settime(which_clock=0xbcbcbcbcbcbcbc, tp=0x4) = -1 (Bad address)
+[child1:1689] [5] waitid(which=0xfffffff7, upid=0, infop=0x78d821d71000, options=0xfffffff8, ru=0x78d821d71004) = -1 (Invalid argument)
+[child1:1689] [6] mq_timedsend(mqdes=285, u_msg_ptr=0x8, msg_len=0x50e9, msg_prio=11565, u_abs_timeout=0x78d823f57000) = -1 (Bad file descriptor)
+[child1:1689] [7] acct(name=0x78d823f56000) = -1 (Operation not permitted)
+[child1:1689] [8] rt_sigaction(sig=34, act=0x8, oact=0x0, sigsetsize=128) = -1 (Invalid argument)
+[child1:1689] [9] getrlimit(resource=0x5, rlim=0x8) = -1 (Bad address)
+[child1:1689] [10] getgroups(gidsetsize=0x7a7a7a7a7a, grouplist=0x0) = -1 (Bad address)
+[child1:1689] [11] pwritev(fd=285, vec=0xba8ff779a10, vlen=120, pos_l=0x5e1323388791, pos_h=4094) = 0x2dd7a76
+[child1:1689] [12] io_getevents(ctx_id=0x5050505050505, min_nr=66, nr=0x41002a3c, events=0x8, timeout=0x9) = -1 (Invalid argument)
+[child1:1689] [13] socketpair(family=1, type=0x1057684c4279, protocol=-10, usockvec=0xba8ff7352e0) = -1 (Invalid argument)
+[child1:1689] [14] mount(dev_name="/proc/stat", dir_name="/proc/1270/net/rpc", type=0x8, flags=0xffffffff80000004, data=0x8) = -1 (Bad address)
+[child1:1689] [15] recvmsg(fd=325, msg=0x78d821f71000, flags=0x8001f29f) = -1 (Invalid argument)
+[child1:1689] [16] getresgid(rgid=0x78d823f5a000, egid=0x78d823f5a000, sgid=0x78d823f59000) = 0
+[child1:1689] [17] setsockopt(fd=312, level=1, optname=30, optval=0, optlen=0) = -1 (Invalid argument)
+[child1:1689] [18] fdatasync(fd=21) = -1 (Invalid argument)
+[child1:1689] [19] [32BIT] llseek(fd=21, offset_high=0x30008540184010, offset_low=0xfff6, result=105, origin=255) = -1 (Invalid argument)
+[child1:1689] [20] semtimedop(semid=0, tsops=0x8, nsops=0x616161616161, timeout=0x10) = -1 (Argument list too long)
+[child1:1689] [21] timer_delete(timer_id=0x22e6405e7cd0) = -1 (Invalid argument)
+[child1:1689] [22] listxattr(pathname="/proc/734/schedstat", list=0x78d822371000, size=139) = 0
+[child1:1689] [23] [32BIT] io_setup(nr_events=182, ctxp=0x78d824097000) = -1 (Bad address)
+[child1:1689] [24] rt_sigaction(sig=35, act=0x78d823f57000, oact=0x0, sigsetsize=128) = -1 (Invalid argument)
+[child1:1689] [25] shmget(key=0x80000000ffffe000, size=56, shmflg=176) = -1 (No such file or directory)
+[child1:1689] [26] lremovexattr(pathname="/proc/irq/25/smp_affinity", name=0x78d822171000) = -1 (Numerical result out of range)
+[child1:1689] [27] setpriority(which=0, who=203, niceval=230) = -1 (No such process)
+[child1:1689] [28] io_submit(ctx_id=30, nr=4096, iocbpp=0x78d821f71000) = -1 (Invalid argument)
+[child1:1689] [29] [32BIT] sendfile(out_fd=21, in_fd=295, offset=0x78d824095000, count=0xffffffffff7f7f80) = -1 (Bad address)
+[child1:1689] [30] accept4(fd=323, upeer_sockaddr=0xba8ff779a10, upeer_addrlen=110, flags=0x800) = -1 (Operation not supported)
+[child1:1689] [31] rt_sigpending(set=0x78d823f56000, sigsetsize=-4097) = -1 (Invalid argument)
+[child1:1689] [32] timer_create(which_clock=0x5c0010414314244, timer_event_spec=0x8, create_timer_id=0x78d821f71000) = -1 (Invalid argument)
+[child1:1689] [33] mq_getsetattr(mqdes=21, u_mqstat=0x4, u_omqstat=0x5) = -1 (Bad address)
+[child1:1689] [34] getresuid(ruid=0x78d823f56000, euid=0x78d823f56008, suid=0x78d822171000) = 0
+[child1:1689] [35] fstatat64(dfd=21, filename="/proc/sys/net/ipv4/neigh/lo/app_solicit", statbuf=0x0, flag=0xffffefff00000000) = -1 (Bad address)
+[child1:1689] [36] clock_nanosleep(which_clock=0x2, flags=0x0, rqtp=0x8, rmtp=0x78d823f58000) = -1 (Bad address)
+[child1:1689] [37] getsockname(fd=305, usockaddr=0xba8ff779a90, usockaddr_len=110) = -1 (Bad address)
+[child1:1689] [38] delete_module(name_user=0x78d824097000, flags=0x4ec1cb5d5f81351e) = -1 (Operation not permitted)
+[child1:1689] [39] mq_notify(mqdes=295, u_notification=0x78d824095000) = -1 (Bad file descriptor)
+[child1:1689] [40] setuid(uid=0xfffffffd) = -1 (Operation not permitted)
+[child1:1689] [41] vmsplice(fd=294, iov=0xba8ff779b10, nr_segs=774, flags=0x0) = -1 (Bad address)
+[child1:1689] [42] mlock2(start=0x78d824096000, len=0) = 0
+[child1:1689] [43] lgetxattr(pathname="/proc/sys/dev/mac_hid/mouse_button3_keycode", name=0x8, value=0x10, size=4096) = -1 (Bad address)
+[child1:1689] [44] [32BIT] setreuid16(ruid=0xffff8800000ffff0, euid=48) = -1 (Operation not permitted)
+[child1:1689] [45] sysinfo(info=0x78d822171000) = 0
+[child1:1689] [46] gettid() = 1689
+[child1:1689] [47] [32BIT] shutdown(fd=282, how=0x1) = -1 (Socket operation on non-socket)
+[child1:1689] [48] [32BIT] setfsuid(uid=0x3680424c80) = 1000
+[child1:1689] [49] sched_get_priority_min(policy=0x8000000000ff0000) = -1 (Invalid argument)
+[child1:1689] [50] setfsgid(gid=0x120265a0810325) = 1000
+[child1:1689] [51] getresuid(ruid=0x78d821d71000, euid=0x78d821d71001, suid=0x78d822371000) = 0
+[child1:1689] [52] move_pages(pid=1695, nr_pages=218, pages=0xba8ff779b10, nodes=0xba8ff77ab20, status=0xba8ff77ae90, flags=0x2) = -1 (No such device)
+[child1:1689] [53] sigaltstack(uss=0x78d823f5b000, uoss=0x78d823f5b001, regs=0x78d821f71000) = -1 (Invalid argument)
+[child1:1689] [54] memfd_create(uname=0x78d823f56000, flag=0x3) = 381
+[child1:1689] [55] epoll_create1(flags=0x0) = 382
+[child1:1689] [56] epoll_wait(epfd=27, events=0x78d823f56000, maxevents=244, timeout=0xfffffffb975dfefd) = -1 (Invalid argument)
+[child1:1689] [57] [32BIT] writev(fd=27, vec=0xba8ff779b50, vlen=8) = -1 (Bad address)
+[child1:1689] [58] sysfs(option=0x1, arg1=8192, arg2=0x670bec7639dde1bb) = -1 (Bad address)
+[child1:1689] [59] [32BIT] fchmod(fd=27, mode=7) = -1 (Operation not permitted)
+[child1:1689] [60] setgid(gid=76) = -1 (Operation not permitted)
+[child1:1689] [61] lseek(fd=27, offset=0xb000001200, whence=0x4) = -1 (Illegal seek)
+[child1:1689] [62] epoll_ctl(epfd=27, op=0x2, fd=378, event=0xba8ff735220) = -1 (Invalid argument)
+[child1:1689] [63] pkey_mprotect(start=0x78d823f5b000, len=0x43000, prot=0x6, key=7) = -1 (Invalid argument)
+[child1:1689] [64] clock_getres(which_clock=-9, tp=0x1) = -1 (Invalid argument)
+[child1:1689] [65] epoll_wait(epfd=366, events=0x0, maxevents=207, timeout=0x4310b82746e61038) = -1 (Invalid argument)
+[child1:1689] [66] msgget(key=-5, msgflg=-1) = 0x6000c
+[child1:1689] [67] geteuid() = 1000
+[child1:1689] [68] chdir(filename=".//proc/sys/net/netfilter/nf_log/6/") = -1 (No such file or directory)
+[child1:1689] [69] chown(filename="/proc/sys/net/ipv4/route/error_burst", user=0xb924ebc68c, group=102) = -1 (Operation not permitted)
+[child1:1689] [70] mq_getsetattr(mqdes=366, u_mqstat=0x1, u_omqstat=0x78d822171000) = -1 (Bad address)
+[child1:1689] [71] accept(fd=303, upeer_sockaddr=0xba8ff779b50, upeer_addrlen=110) = -1 (Invalid argument)
+[child1:1689] [72] newlstat(filename="/sys/devices/system/cpu/offline/", statbuf=0x78d821f71000) = -1 (Not a directory)
+[child1:1689] [73] io_getevents(ctx_id=150, min_nr=4, nr=1, events=0x0, timeout=0x78d823f5a000) = -1 (Invalid argument)
+[child1:1689] [74] [32BIT] uname(name=0x78d823f5b000) = -1 (Bad address)
+[child1:1689] [75] swapoff(path="/proc/sys/kernel/msgmni") = -1 (Operation not permitted)
+[child1:1689] [76] clock_settime(which_clock=0xffffffffffff4d4e, tp=0x4) = -1 (Bad address)
+[child1:1689] [77] sync_file_range(fd=366, offset=0xaeaeaeaeaeaeae, nbytes=249, flags=0xa443c47907) = -1 (Invalid argument)
+[child1:1689] [78] move_pages(pid=0, nr_pages=183, pages=0xba8ff779bd0, nodes=0xba8ff77abe0, status=0xba8ff77aed0, flags=0x2) = -1 (No such device)
+[child1:1689] [79] semtimedop(semid=0xff03030303030303, tsops=0x78d821d71000, nsops=0xa0a00008220, timeout=0x78d824096000) = -1 (Argument list too long)
+[child1:1689] [80] getppid() = 1270
+[child1:1689] [81] fdatasync(fd=141) = -1 (Invalid argument)
+[child1:1689] [82] lseek(fd=141, offset=0x552b402689f8, whence=0x0) = 0x552b402689f8
+[child1:1689] [83] getdents64(fd=141, dirent=0x78d824096000, count=0) = -1 (Not a directory)
+[child1:1689] [84] getpriority(which=0x0, who=1695) = 20
+[child1:1689] [85] sched_yield() = 0
+[child1:1689] [86] pwrite64(fd=141, buf=0xba8ff779bd0, count=2753, pos=0x96c147868e1d) = -1 (Bad file descriptor)
+[child1:1689] [87] fchown(fd=141, user=113, group=25) = -1 (Operation not permitted)
+[child1:1689] [88] splice(fd_in=141, off_in=0x8, fd_out=24, off_out=0x10, len=4096, flags=0x6) = -1 (Invalid argument)
+[child1:1689] [89] [32BIT] link(oldname="/proc/sys/net/ipv6/ip_nonlocal_bind", newname="/proc/1270/projid_map") = -1 (Bad address)
+[child1:1689] [90] delete_module(name_user=0x78d821d71000, flags=0x6050505050505050) = -1 (Operation not permitted)
+[child1:1689] [91] read(fd=141, buf=0x78d823f56000, count=3607) = 0
+[child1:1689] [92] setsockopt(fd=319, level=270, optname=5, optval=0, optlen=4) = -1 (Bad address)
+[child1:1689] [93] lseek(fd=141, offset=187, whence=0x0) = 187
+[child1:1689] [94] sethostname(name=0x78d824097000, len=0xc9a485a) = -1 (Operation not permitted)
+[child1:1689] [95] remap_file_pages(start=0x78d823f59000, size=3656, prot=0, pgoff=0, flags=0x10000) = -1 (Invalid argument)
+[child1:1689] [96] perf_event_open(attr_uptr=0xba8ff779bd0, pid=-1, cpu=-1, group_fd=-1, flags=0xffffffff81000003) = -1 (Invalid argument)
+[child1:1689] [97] memfd_create(uname=0x78d823f56000, flag=0x1) = 383
+[child1:1689] [98] mbind(start=0x78d824096000, len=0, mode=0x3, nmask=0x78d823f56000, maxnode=0x8000, flags=0x3) = -1 (Invalid argument)
+[child1:1689] [99] splice(fd_in=292, off_in=0x4, fd_out=229, off_out=0xc, len=0xff4e, flags=0x6) = -1 (Bad file descriptor)
+[child1:1689] [100] openat(dfd=292, filename="/proc/sys/net/ipv6/conf/default/disable_ipv6", flags=0x775e00, mode=666) = -1 (Invalid argument)
+[child1:1689] [101] mkdirat(dfd=292, pathname="/proc/irq/3/affinity_hint", mode=44) = -1 (File exists)
+[child1:1689] [102] newlstat(filename="/proc/732/cmdline", statbuf=0x1) = -1 (Bad address)
+[child1:1689] [103] mq_unlink(u_name=0x78d821f71000) = -1 (No such file or directory)
+[child1:1689] [104] setxattr(pathname="/proc/731/task/731/setgroups", name=0x78d823f5b000, value=0x78d822371000, size=1, flags=0x1) = -1 (Numerical result out of range)
+[child1:1689] [105] fremovexattr(fd=292, name=0x78d823f5b000) = -1 (Numerical result out of range)
+[child1:1689] [106] truncate(path="/proc/732/task/732/attr/prev", length=4096) = -1 (Permission denied)
+[child1:1689] [107] getresgid(rgid=0x78d821d71000, egid=0x78d823f59000, sgid=0x78d823f59000) = 0
+[child1:1689] [108] ioprio_set(which=0xfafac4c5, who=0xd4e21eee4569, ioprio=-4097) = -1 (Invalid argument)
+[child1:1689] [109] getsockopt(fd=339, level=0x8000000040000, optname=0x7d79797979797979, optval=0x78d823f5b000, optlen=1024) = -1 (Operation not supported)
+[child1:1689] [110] sched_setaffinity(pid=0, len=0, user_mask_ptr=0x78d821d71000) = -1 (Invalid argument)
+[child1:1689] [111] move_pages(pid=0, nr_pages=121, pages=0xba8ff779bd0, nodes=0xba8ff77abe0, status=0xba8ff77add0, flags=0x2) = -1 (No such device)
+[child1:1689] [112] shmctl(shmid=0x8000000000000000, cmd=0xb, buf=0x78d823f56000) = 0
+[child1:1689] [113] add_key(_type=0xba8fdfa4bff, _description=0x78d824097004, _payload=0x78d824097004, plen=8, ringid=0xfffffffffffffff9) = -1 (Required key not available)
+[child1:1689] [114] lookup_dcookie(cookie64=0xffff800000000ff0, buf=0x0, len=4) = -1 (Operation not permitted)
+[child1:1689] [115] readv(fd=26, vec=0xba8ff779bd0, vlen=34) = 8
+[child1:1689] [116] sysfs(option=0x2, arg1=192, arg2=0xffffffffa000ff00) = -1 (Invalid argument)
+[child1:1689] [117] timer_gettime(timer_id=0xb755a35ad1, setting=0x8) = -1 (Invalid argument)
+[child1:1689] [118] ftruncate(fd=375, length=0x8a8a) = -1 (Invalid argument)
+[child1:1689] [119] set_robust_list(head=0x78d823f57000, len=24) = 0
+[child1:1689] [120] umask(mask=0x10000) = 18
+[child1:1689] [121] epoll_ctl(epfd=375, op=0x2, fd=290, event=0xba8ff7350f0) = -1 (Invalid argument)
+[child1:1689] [122] waitid(which=0x110000000000008b, upid=1, infop=0x78d823f5b000, options=8192, ru=0x78d823f5b001) = -1 (Invalid argument)
+[child1:1689] [123] getrusage(who=0, ru=0x78d822171000) = 0
+[child1:1689] [124] mlock2(start=0x78d824096000, len=0) = 0
+[child1:1689] [125] semctl(semid=-4097, semnum=0x2028000c61, cmd=0x14000000000, arg=0x98989898989898) = -1 (Invalid argument)
+[child1:1689] [126] timer_getoverrun(timer_id=0x610c0080144) = -1 (Invalid argument)
+[child1:1689] [127] flock(fd=378, cmd=0x1040004100013062) = 0
+[child1:1689] [128] set_mempolicy(mode=0xfffffffc, nmask=0x78d824097000, maxnode=5) = -1 (Invalid argument)
+[child1:1689] [129] pivot_root(new_root=0x78d824095000, put_old=0x78d823f59000) = -1 (Operation not permitted)
+[child1:1689] [130] symlinkat(oldname="/proc/sys/net/netfilter/nf_log", newdfd=378, newname="/proc/irq/8/spurious") = -1 (File exists)
+[child1:1689] [131] chmod(filename="/proc/sys/net/ipv6/conf/default/accept_ra_rtr_pref", mode=100) = -1 (Operation not permitted)
+[child1:1689] [132] getpgid(pid=1) = 1
+[child1:1689] [133] io_getevents(ctx_id=0x7f1edac273e7dfc2, min_nr=1, nr=1, events=0x78d821d71000, timeout=0x78d823f58000) = -1 (Invalid argument)
+[child1:1689] [134] signalfd4(ufd=378, user_mask=0x78d821f71000, sizemask=-3, flags=0x0) = -1 (Invalid argument)
+[child1:1689] [135] setreuid(ruid=-10, euid=0xaaaaaaaaaaaa) = -1 (Operation not permitted)
+[child1:1689] [136] timer_gettime(timer_id=0xa100301d3827269a, setting=0x8) = -1 (Invalid argument)
+[child1:1689] [137] mmap(addr=0, len=0, prot=0x0[PROT_NONE], flags=0x400d112, fd=378, off=4096) = -1 (Invalid argument)
+[child1:1689] [138] setns(fd=15, nstype=0x0) = -1 (Invalid argument)
+[child1:1689] [139] readahead(fd=15, offset=0x200000, count=48) = -1 (Invalid argument)
+[child1:1689] [140] truncate(path="/proc/1270/fdinfo/4", length=8) = -1 (Permission denied)
+[child1:1689] [141] sysfs(option=0x3, arg1=0xff00, arg2=0x4c2a155db333f3) = 22
+[child1:1689] [142] delete_module(name_user=0x78d823f56000, flags=0x40000000000) = -1 (Operation not permitted)
+[child1:1689] [143] recvmsg(fd=337, msg=0x78d821d71000, flags=0x1) [child1:1689] [143] inotify_add_watch(fd=376, pathname="/proc/sys/kernel/sched_domain/cpu1/domain0/max_newidle_lb_cost", mask=0x5) = -1 (Invalid argument)
+[child1:1689] [144] unshare(unshare_flags=0x20000) = -1 (Operation not permitted)
+[child1:1689] [145] epoll_create(size=1) = 384
+[child1:1689] [146] symlink(oldname="/proc/sys/user", newname="/proc/sys/net/ipv4/tcp_autocorking") = -1 (File exists)
+[child1:1689] [147] mremap(addr=0x78d822471000, old_len=0x9e000, new_len=0x100000, flags=0x0, new_addr=0) = -1 (Cannot allocate memory)
+[child1:1689] [148] getuid() = 1000
+[child1:1689] [149] lsetxattr(pathname="/proc/sys/net/ipv6/conf/default/temp_prefered_lft", name=0x78d823f58000, value=0x78d822471000, size=1, flags=0x1) = -1 (Permission denied)
+[child1:1689] [150] getuid() = 1000
+[child1:1689] [151] fsetxattr(fd=376, name=0x4, value=0x78d821d71000, size=4, flags=0x3) = -1 (Bad address)
+[child1:1689] [152] getsockname(fd=317, usockaddr=0xba8ff779c10, usockaddr_len=3215) = -1 (Bad address)
+[child1:1689] [153] lsetxattr(pathname="/proc/731/net/softnet_stat", name=0x1, value=0x78d822171000, size=15, flags=0x1) = -1 (Bad address)
+[child1:1689] [154] mlock2(start=0x78d821f71000, len=0x1af000) = -1 (Cannot allocate memory)
+[child1:1689] [155] semtimedop(semid=52, tsops=0x78d823f56000, nsops=0xc8906000200090, timeout=0x78d823f56000) = -1 (Argument list too long)
+[child1:1689] [156] get_robust_list(pid=1, head_ptr=0x78d823f5a000, len_ptr=0x78d823f5a000) = -1 (Operation not permitted)
+[child1:1689] [157] getsockname(fd=351, usockaddr=0xba8ff77ac20, usockaddr_len=110) = -1 (Bad address)
+[child1:1689] [158] [32BIT] utimensat(dfd=376, filename="/proc/sys/net/ipv4/igmp_link_local_mcast_reports", utimes=0x4, flags=0x100) = -1 (Bad address)
+[child1:1689] [159] madvise(start=0x78d823f58000, len_in=0, advice=0x11) = 0
+[child1:1689] [160] get_robust_list(pid=1, head_ptr=0x78d823f5a000, len_ptr=0x78d821f71000) = -1 (Operation not permitted)
+[child1:1689] [161] name_to_handle_at(fd=376, name=0x78d821d71000, handle=0x78d823f5b000, mnt_id=0x78d823f5b000, flag=0x0) = -1 (File name too long)
+[child1:1689] [162] fdatasync(fd=376) = -1 (Invalid argument)
+[child1:1689] [163] linkat(olddfd=376, oldname="/proc/731/task/731/net/udplite", newdfd=294, newname=".//proc/1270/task/1270/attr/prev", flags=0x400) = -1 (Not a directory)
+[child1:1689] [164] open_by_handle_at(mountdirfd=376, handle=0x8, flags=0x470ac0) = -1 (Operation not permitted)
+[child1:1689] [165] sysinfo(info=0x78d823f56000) = 0
+[child1:1689] [166] [32BIT] getgid16() = 1000
+[child1:1689] [167] syslog(type=0x0, buf=0x78d824096000, len=0) = -1 (Operation not permitted)
+[child1:1689] [168] rt_sigprocmask(how=0xe5108943082814, set=0x78d823f5a000, oset=0x78d823f5a008, sigsetsize=128) = -1 (Invalid argument)
+[child1:1689] [169] getcpu(cpup=0x78d822171000, nodep=0x78d822171000, unused=0x78d822171000) = 0
+[child1:1689] [170] init_module(umod=0x78d821d71000, len=4096, uargs=0x78d823f57000) = -1 (Operation not permitted)
+[child1:1689] [171] [32BIT] mq_open(u_name=0x78d822471000, oflag=0x8000000000000001, mode=300, u_attr=0x78d823f57000) = -1 (Bad address)
+[child1:1689] [172] [32BIT] mremap(addr=0x78d823f5a000, old_len=0, new_len=4096, flags=0x2, new_addr=0x5400200000) = -1 (Invalid argument)
+[child1:1689] [173] faccessat(dfd=376, filename="/proc/734/net/route", mode=2) = -1 (Permission denied)
+[child1:1689] [174] faccessat(dfd=28, filename="/proc/1270/task/1270/loginuid", mode=0) = 0
+[child1:1689] [175] sched_getscheduler(pid=1695) = 0
+[child1:1689] [176] llistxattr(pathname="/proc/sys/net/ipv6/conf/default/keep_addr_on_down", list=0x78d821f71000, size=0) = 0
+[child1:1689] [177] [32BIT] newfstat(fd=28, statbuf=0x78d823f56000) = -1 (Bad address)
+[child1:1689] [178] [32BIT] getuid16() = 1000
+[child1:1689] [179] mknodat(dfd=28, filename="/proc/sys/net/netfilter/nf_log/12", mode=-1, dev=0xff0000) = -1 (Invalid argument)
+[child1:1689] [180] listxattr(pathname="/proc/sys/net/ipv6/conf/eth0/hop_limit", list=0x78d823f57000, size=0xfff7) = 0
+[child1:1689] [181] epoll_create1(flags=0x80000) = 385
+[child1:1689] [182] getxattr(pathname=".//proc/sys/net/ipv6/conf", name=0x78d823f57000, value=0x78d823f5b000, size=0) = -1 (No such file or directory)
+[child1:1689] [183] preadv2(fd=28, vec=0xba8ff77ace0, vlen=113, pos_l=16384, pos_h=0x800000, flags=0x6) = -1 (Illegal seek)
+[child1:1689] [184] syslog(type=0x2, buf=0x78d823f58000, len=0) = -1 (Operation not permitted)
+[child1:1689] [185] setsockopt(fd=309, level=257, optname=12, optval=0, optlen=1) = -1 (Invalid argument)
+[child1:1689] [186] mq_notify(mqdes=28, u_notification=0x78d823f56000) = -1 (Invalid argument)
+[child1:1689] [187] llistxattr(pathname="/proc/irq/8/node/", list=0x8, size=4) = -1 (Not a directory)
+[child1:1689] [188] syncfs(fd=28) = 0
+[child1:1689] [189] getresgid(rgid=0x78d823f56000, egid=0x78d823f56001, sgid=0x78d823f56001) = 0
+[child1:1689] [190] fallocate(fd=28, mode=0x49, offset=255, len=1024) = -1 (Invalid argument)
+[child1:1689] [191] munlockall() = 0
+[child1:1689] [192] uname(name=0x78d822171000) = 0
+[child1:1689] [193] sched_getscheduler(pid=0) = 0
+[child1:1689] [194] setfsuid(uid=0xa97b79f90036) = 1000
+[child1:1689] [195] mq_open(u_name=0x78d822371000, oflag=0x430030030500, mode=0, u_attr=0x78d823f56000) = -1 (No such file or directory)
+[child1:1689] [196] semtimedop(semid=0, tsops=0x78d822371000, nsops=0x100000000000020, timeout=0x78d822371000) = -1 (Argument list too long)
+[child1:1689] [197] [32BIT] sysfs(option=0x1, arg1=0, arg2=0x4f0c124035) = -1 (Bad address)
+[child1:1689] [198] unlinkat(dfd=280, pathname=".//proc/734/net/wireless", flag=-10204) = -1 (Invalid argument)
+[child1:1689] [199] mremap(addr=0x78d824095000, old_len=0, new_len=4096, flags=0x1, new_addr=0) = 0x78d823f41000
+[child1:1689] [200] setfsuid(uid=0x20000e62768a516) = 1000
+[child1:1689] [201] rt_sigpending(set=0x78d822371000, sigsetsize=0x7fffffff0000ffff) = -1 (Invalid argument)
+[child1:1689] [202] setns(fd=280, nstype=0x44000000) = -1 (Invalid argument)
+[child1:1689] [203] getpgid(pid=1) = 1
+[child1:1689] [204] semop(semid=0x14040800000, tsops=0x78d822471000, nsops=0xc00028002000400) = -1 (Argument list too long)
+[child1:1689] [205] epoll_create1(flags=0x0) = 386
+[child1:1689] [206] io_setup(nr_events=0xce4cab3d47a01d, ctxp=0x1) = -1 (Bad address)
+[child1:1689] [207] pkey_alloc(flags=0, init_val=0x0) = -1 (Invalid argument)
+[child1:1689] [208] [32BIT] getgid() = 1000
+[child1:1689] [209] writev(fd=280, vec=0xba8ff77ad20, vlen=81) = -1 (Bad file descriptor)
+[child1:1689] [210] timer_getoverrun(timer_id=0xffffffff8100ffff) = -1 (Invalid argument)
+[child1:1689] [211] rt_sigtimedwait(uthese=1, uinfo=0x78d821f71000, uts=0x78d821f71004, sigsetsize=0x78d821f71004) = -1 (Invalid argument)
+[child1:1689] [212] getrusage(who=0xfff8000000000000, ru=0x0) = -1 (Bad address)
+[child1:1689] [213] getrandom(buf=0x78d823f5b000, count=0x87000, flags=0x1) = -1 (Invalid argument)
+[child1:1689] [214] rt_sigaction(sig=18, act=0x0, oact=0x78d823f56000, sigsetsize=128) = -1 (Invalid argument)
+[child1:1689] [215] mlock(addr=0x78d823f41000, len=0) = 0
+[child1:1689] [216] fstatfs(fd=280, buf=0x78d822371000) = 0
+[child1:1689] [217] [32BIT] io_submit(ctx_id=0x10d0d0d0d0d0d0d, nr=4096, iocbpp=0x4) = -1 (Bad address)
+[child1:1689] [218] dup3(oldfd=280, newfd=280, flags=0x80000) = -1 (Invalid argument)
+[child1:1689] [219] listen(fd=280, backlog=0x4679ae002426282) = -1 (Socket operation on non-socket)
+[child1:1689] [220] vmsplice(fd=292, iov=0xba8ff77ad20, nr_segs=50, flags=0x3) = 0xfe05
+[child1:1689] [221] renameat2(olddfd=280, oldname="/proc/731/net/if_inet6", newdfd=368, newname="/proc/sys/net/ipv4/neigh/eth0/gc_stale_time", flags=0x0) = -1 (Permission denied)
+[child1:1689] [222] preadv(fd=280, vec=0xba8ff77ad20, vlen=118, pos_l=0xd3012551900020, pos_h=0xd90905924099) = -1 (Illegal seek)
+[child1:1689] [223] chmod(filename="/proc/734/oom_score", mode=4000) = -1 (Operation not permitted)
+[child1:1689] [224] sync_file_range(fd=373, offset=0xf0f0f10, nbytes=0x40081000801, flags=0xfff880ffffffff0) = -1 (Invalid argument)
+[child1:1689] [225] sched_yield() = 0
+[child1:1689] [226] getgroups(gidsetsize=16384, grouplist=0x8) = -1 (Bad address)
+[child1:1689] [227] uname(name=0x78d822371000) = 0
+[child1:1689] [228] [32BIT] setuid16(uid=70) = -1 (Operation not permitted)
+[child1:1689] [229] listen(fd=373, backlog=0x986f65b224d1) = -1 (Socket operation on non-socket)
+[child1:1689] [230] clock_getres(which_clock=-9, tp=0x8) = -1 (Invalid argument)
+[child1:1689] [231] time(tloc=0x78d823f5a000) = 0x59133dff
+[child1:1689] [232] sigaltstack(uss=0x78d823f56000, uoss=0x78d821f71000, regs=0x78d821f71001) = -1 (Invalid argument)
+[child1:1689] [233] msgrcv(msqid=103, msgp=0x78d823f56000, msgsz=6323, msgtyp=0x80000000ffffffff, msgflg=0x4000) = -1 (Invalid argument)
+[child1:1689] [234] mbind(start=0x78d824097000, len=0, mode=0x0, nmask=0x8, maxnode=0x8000, flags=0x6) = -1 (Bad address)
+[child1:1689] [235] getsid(pid=1) = 1
+[child1:1689] [236] times(tbuf=0x78d823f57000) = 0x66661021
+[child1:1689] [237] removexattr(pathname="/proc/sys/kernel/sched_domain/cpu1", name=0x78d823f56000) = -1 (Permission denied)
+[child1:1689] [238] delete_module(name_user=0x78d823f57000, flags=0x805002212018) = -1 (Operation not permitted)
+[child1:1689] [239] copy_file_range(fd_in=373, off_in=4, fd_out=373, off_out=2730, len=180, flags=0x0) = -1 (Bad address)
+[child1:1689] [240] [32BIT] getgid() = 1000
+[child1:1689] [241] chdir(filename="/proc/1270/net/udp") = -1 (Not a directory)
+[child1:1689] [242] chdir(filename=".//proc/735/task/735/cpuset/") = -1 (No such file or directory)
+[child1:1689] [243] fstatat64(dfd=373, filename="/proc/1270/fdinfo/4", statbuf=0x4, flag=32) = -1 (Invalid argument)
+[child1:1689] [244] writev(fd=373, vec=0xba8ff77ad20, vlen=3) = -1 (Invalid argument)
+[child1:1689] [245] execveat(fd=373, name="/proc/731/task/731/net/ax25_route", argv=0xba8ff77ad20, envp=0xba8ff77edc0, flags=0x0) = -1 (Permission denied)
+[child1:1689] [246] ioprio_get(which=0, who=0x80000000) = -1 (Invalid argument)
+[child1:1689] [247] sched_setattr(pid=1694, uattr=0x8) = -1 (Invalid argument)
+[child1:1689] [248] msgctl(msqid=0xfff6, cmd=0x0, buf=0x78d823f57000) = -1 (Invalid argument)
+[child1:1689] [249] mkdirat(dfd=287, pathname=".//proc/sys/net/ipv6/conf/default/router_solicitation_interval/", mode=6002) = -1 (Not a directory)
+[child1:1689] [250] geteuid() = 1000
+[child1:1689] [251] pwrite64(fd=287, buf=0xba8ff77ad20, count=1633, pos=0xffffffff7effff01) = -1 (Invalid argument)
+[child1:1689] [252] ioprio_set(which=0xfffffffffffdffff, who=0xd00404075048c20, ioprio=0x9e002e16ac) = -1 (Invalid argument)
+[child1:1689] [253] getresgid(rgid=0x78d823f59000, egid=0x78d823f59008, sgid=0x78d823f56000) = 0
+[child1:1689] [254] [32BIT] recvmsg(fd=342, msg=0x0, flags=0x20001a57) = -1 (Bad address)
+[child1:1689] [255] add_key(_type=0xba8fdfa4bf7, _description=0x78d823f57004, _payload=0x78d824096000, plen=1, ringid=0xffffffffffffffff) = -1 (Invalid argument)
+[child1:1689] [256] getitimer(which=0xb2c98647fe489be, value=0x78d823f56000) = -1 (Invalid argument)
+[child1:1689] [257] clock_settime(which_clock=-10, tp=0x78d823f56000) = -1 (Invalid argument)
+[child1:1689] [258] ioctl(fd=287, cmd=0x9b9b, arg=161) = -1 (Inappropriate ioctl for device)
+[child1:1689] [259] lgetxattr(pathname="/proc/sys/kernel/usermodehelper", name=0x1, value=0x78d821f71000, size=0x7a7800) = -1 (Bad address)
+[child1:1689] [260] settimeofday(tv=0x78d823f5b000, tz=0x78d823f5b004) = -1 (Operation not permitted)
+[child1:1689] [261] sched_rr_get_interval(pid=0, interval=0x0) = -1 (Bad address)
+[child1:1689] [262] munlockall() = 0
+[child1:1689] [263] symlinkat(oldname="/proc/sys/net/ipv4/neigh/default/gc_interval", newdfd=287, newname="/proc/735/task/735/net/fib_trie") = -1 (File exists)
+[child1:1689] [264] socketpair(family=1, type=-118, protocol=0xe0e0e0e0e0e0e, usockvec=0xba8ff734eb0) = -1 (Invalid argument)
+[child1:1689] [265] [32BIT] fadvise64(fd=287, offset=0xffffff49, len=0, advice=0x1) = -1 (Invalid argument)
+[child1:1689] [266] mmap(addr=0, len=4096, prot=0xb[PROT_READ|PROT_WRITE|PROT_SEM], flags=0x2, fd=287, off=0) = 0x78d823f40000
+[child1:1689] [267] getitimer(which=0x45328922833019, value=0x8) = -1 (Invalid argument)
+[child1:1689] [268] finit_module(fd=19, uargs=0x4, flags=0x3) = -1 (Operation not permitted)
+[child1:1689] [269] gettid() = 1689
+[child1:1689] [270] clock_adjtime(which_clock=11, utx=0x78d823f56000) = -1 (Operation not supported)
+[child1:1689] [271] pkey_alloc(flags=0, init_val=0x3) = -1 (No space left on device)
+[child1:1689] [272] clock_getres(which_clock=-4, tp=0x4) = -1 (Bad address)
+[child1:1689] [273] getxattr(pathname="/proc/731/ns", name=0x78d823f56000, value=0x78d823f56001, size=4096) = -1 (Operation not supported)
+[child1:1689] [274] getsid(pid=1) = 1
+[child1:1689] [275] move_pages(pid=1, nr_pages=3, pages=0xba8ff77ad60, nodes=0xba8ff734df0, status=0xba8ff734db0, flags=0x2) = -1 (Operation not permitted)
+[child1:1689] [276] finit_module(fd=19, uargs=0x78d823f57000, flags=0x0) = -1 (Operation not permitted)
+[child1:1689] [277] clock_adjtime(which_clock=8, utx=0x0) = -1 (Operation not supported)
+[child1:1689] [278] set_mempolicy(mode=0xd3d3, nmask=0x78d822171000, maxnode=0x2d2857e6048fdcb9) = -1 (Invalid argument)
+[child1:1689] [279] fchdir(fd=19) = -1 (Not a directory)
+[child1:1689] [280] write(fd=19, buf=0xba8ff77ad60, count=1133) = -1 (Invalid argument)
+[child1:1689] [281] getdents(fd=19, dirent=0x4, count=8) = -1 (Not a directory)
+[child1:1689] [282] adjtimex(txc_p=0x78d821f71000) = -1 (Operation not permitted)
+[child1:1689] [283] geteuid() = 1000
+[child1:1689] [284] unlink(pathname="/dev/mapper") = -1 (Permission denied)
+[child1:1689] [285] readlinkat(dfd=19, pathname="/proc/sys/net/ipv6/conf/default/accept_ra", buf=0x4, bufsiz=4096) = -1 (Invalid argument)
+[child1:1689] [286] [32BIT] epoll_wait(epfd=19, events=0x78d823f41000, maxevents=-2, timeout=0x40800008800002) = -1 (Invalid argument)
+[child1:1689] [287] mlockall(flags=0x3) = -1 (Cannot allocate memory)
+[child1:1689] [288] io_cancel(ctx_id=178, iocb=0x0, result=0x78d823f56000) = -1 (Bad address)
+[child1:1689] [289] shutdown(fd=17, how=0x0) = -1 (Socket operation on non-socket)
+[child1:1689] [290] lookup_dcookie(cookie64=0xffff, buf=0x0, len=1) = -1 (Operation not permitted)
+[child1:1689] [291] getpgid(pid=1) = 1
+[child1:1689] [292] io_destroy(ctx=0xb4fe1630b246fa) = -1 (Invalid argument)
+[child1:1689] [293] readlink(path="/proc/sys/net/ipv4/conf/lo/force_igmp_version", buf=0x0, bufsiz=0xffffa) = -1 (Invalid argument)
+[child1:1689] [294] recvfrom(fd=315, ubuf=0x0, size=2602, flags=0x0, addr=0xba8ff77ad60, addr_len=2622) [child1:1689] [294] getrlimit(resource=0xe, rlim=0x78d823f56000) = 0
+[child1:1689] [295] poll(ufds=0xba8ff77bd70, nfds=6, timeout_msecs=0) = 3
+[child1:1689] [296] getpriority(which=0x1, who=1690) = 20
+[child1:1689] [297] [32BIT] fstatat64(dfd=352, filename="/proc/sys/net/ipv6/conf/default/forwarding", statbuf=0x4, flag=0x4000000000000000) = -1 (Bad address)
+[child1:1689] [298] copy_file_range(fd_in=352, off_in=0, fd_out=375, off_out=-4097, len=0, flags=0x0) = -1 (Bad address)
+[child1:1689] [299] futimesat(dfd=352, filename="/proc/1270/task/1270/net/netstat", utimes=0x8) = -1 (Bad address)
+[child1:1689] [300] newstat(filename="/proc/1270/task/1270/fdinfo/17", statbuf=0x1) = -1 (Bad address)
+[child1:1689] [301] setxattr(pathname=".//proc/sys/net/ipv6/conf/default/router_solicitation_interval/", name=0x78d823f56000, value=0x78d821f71000, size=4096, flags=0x0) = -1 (No such file or directory)
+[child1:1689] [302] getsockopt(fd=319, level=0x5f7fd73455da73, optname=0x5114, optval=0x78d823f57000, optlen=1) = -1 (Protocol not available)
+[child1:1689] [303] setxattr(pathname="/proc/731/task/731/schedstat", name=0x0, value=0x0, size=8, flags=0x2) = -1 (Bad address)
+[child1:1689] [304] linkat(olddfd=287, oldname=".//proc/731/task/731/fdinfo/10/", newdfd=19, newname="/proc/735/task/735/net/arp", flags=0x400) = -1 (Not a directory)
+[child1:1689] [305] semget(key=4901, nsems=0xffff800000000000, semflg=0x40000000000) = -1 (No such file or directory)
+[child1:1689] [306] pkey_free(key=0x349cdc0eb37b33) = -1 (Invalid argument)
+[child1:1689] [307] readlink(path="/proc/sys/dev/scsi", buf=0x1, bufsiz=8) = -1 (Invalid argument)
+[child1:1689] [308] dup3(oldfd=287, newfd=19, flags=0x80000) = 19
+[child1:1689] [309] unlink(pathname="/proc/1270/task/1270/schedstat") = -1 (Operation not permitted)
+[child1:1689] [310] sched_setparam(pid=1729, param=0x0) = -1 (Invalid argument)
+[child1:1689] [311] io_setup(nr_events=0x80000000fffffffe, ctxp=0x1) = -1 (Bad address)
+[child1:1689] [312] write(fd=287, buf=0xba8ff734cf0, count=1) = 1
+[child1:1689] [313] setsid() = 1689
+[child1:1689] [314] vmsplice(fd=292, iov=0xba8ff77bd70, nr_segs=72, flags=0x5) [child1:1689] [314] set_robust_list(head=0x78d822171000, len=24) = 0
+[child1:1689] [315] mlock(addr=0x78d823f59000, len=0) = 0
+[child1:1689] [316] finit_module(fd=259, uargs=0x0, flags=0x1) = -1 (Operation not permitted)
+[child1:1689] [317] [32BIT] io_setup(nr_events=0x6660, ctxp=0x8) = -1 (Bad address)
+[child1:1689] [318] quotactl(cmd=0x400000000000008a, special=0x0, id=-9, addr=0x78d824097000) = -1 (No such device)
+[child1:1689] [319] unlinkat(dfd=259, pathname="/proc/sys/net/ipv6/idgen_retries", flag=83) = -1 (Invalid argument)
+[child1:1689] [320] wait4(upid=1735, stat_addr=0x1, options=-5, ru=0x78d822171000) = -1 (Invalid argument)
+[child1:1689] [321] remap_file_pages(start=0x78d8224a0000, size=0xcbac3, prot=0, pgoff=0, flags=0x0) = 0
+[child1:1689] [322] renameat(olddfd=259, oldname=".//proc/1270/task/1270/loginuid/", newdfd=362, newname="/proc/732/task/732/net/ip_mr_cache") = -1 (Not a directory)
+[child1:1689] [323] semget(key=0x3fa8cd0338a6bc, nsems=0x80428a340300000, semflg=0x1a67ad1940b41280) = -1 (Invalid argument)
+[child1:1689] [324] rt_sigaction(sig=21, act=0x78d823f56000, oact=0x0, sigsetsize=128) = -1 (Invalid argument)
+[child1:1689] [325] init_module(umod=0x78d822171000, len=1, uargs=0x78d823f56000) = -1 (Operation not permitted)
+[child1:1689] [326] unlink(pathname="/proc/sys/fs/inode-nr") = -1 (Permission denied)
+[child1:1689] [327] ioperm(from=0x20000000000, num=0x3200c86809, turn_on=0x24afd931) = -1 (Invalid argument)
+[child1:1689] [328] flock(fd=259, cmd=0x4000000000) = -1 (Invalid argument)
+[child1:1689] [329] fremovexattr(fd=259, name=0x8) = -1 (Bad address)
+[child1:1689] [330] fgetxattr(fd=259, name=0x8, value=0x10, size=0x77fffdfe) = -1 (Bad address)
+[child1:1689] [331] getrlimit(resource=0x5, rlim=0x78d823f58000) = 0
+[child1:1689] [332] write(fd=292, buf=0xba8ff734cb0, count=1) = -1 (Resource temporarily unavailable)
+[child1:1689] [333] accept(fd=342, upeer_sockaddr=0xba8ff734c70, upeer_addrlen=18) = -1 (Operation not supported)
+[child1:1689] [334] epoll_create(size=4096) = 0
+[child1:1689] [335] sysfs(option=0x2, arg1=0, arg2=900) = -1 (Bad address)
+[child1:1689] [336] io_submit(ctx_id=0xb1b1b1b1b1b1b1, nr=1, iocbpp=0x78d823f56000) = -1 (Invalid argument)
+[child1:1689] [337] pivot_root(new_root=0x78d823f41000, put_old=0x78d823f41008) = -1 (Operation not permitted)
+[child1:1689] [338] sched_setaffinity(pid=1, len=1, user_mask_ptr=0x4) = -1 (Bad address)
+[child1:1689] [339] [32BIT] symlinkat(oldname="/proc/sys/net/ipv4/tcp_pacing_ca_ratio", newdfd=292, newname="/proc/sys/fs/file-max") = -1 (Bad address)
+[child1:1689] [340] ppoll(ufds=0xba8ff734bf0, nfds=2, tsp=0xba8ff734bb0, sigmask=0x4, sigsetsize=128) = -1 (Invalid argument)
+[child1:1689] [341] clock_nanosleep(which_clock=0x2, flags=0x1, rqtp=0x8, rmtp=0x9) = -1 (Bad address)
+[child1:1689] [342] readahead(fd=292, offset=1, count=8) = -1 (Bad file descriptor)
+[child1:1689] [343] getrandom(buf=0x78d821d71000, count=0xba000, flags=0x1) = -1 (Invalid argument)
+[child1:1689] [344] symlinkat(oldname="/proc/sys/net/ipv4/conf/default/send_redirects", newdfd=292, newname="/proc/sys/net/ipv4/conf/lo/medium_id") = -1 (File exists)
+[child1:1689] [345] capget(header=128, dataptr=0) = -1 (Bad address)
+[child1:1689] [346] flock(fd=292, cmd=-4) = 0
+[child1:1689] [347] openat(dfd=18, filename="/proc/sys/net/ipv4/conf/eth0/arp_accept", flags=0x1102, mode=0) = -1 (Permission denied)
+[child1:1689] [348] setreuid(ruid=0xffff, euid=2048) = -1 (Operation not permitted)
+[child1:1689] [349] ioprio_get(which=0xfffffff6, who=0xd27a) = -1 (Invalid argument)
+[child1:1689] [350] epoll_ctl(epfd=18, op=0x2, fd=27, event=0xba8ff734b60) = -1 (No such file or directory)
+[child1:1689] [351] timerfd_settime(ufd=18, flags=0x80000, utmr=0x1, otmr=0x5) = -1 (Bad address)
+[child1:1689] [352] llistxattr(pathname="/proc/sys/net/ipv6/conf/default/proxy_ndp", list=0x78d823f56000, size=8) = 0
+[child1:1689] [353] lchown(filename="/proc/fs/ext4/vda1", user=0xffffffffa0ffe000, group=0x612b6a135f) = -1 (Operation not permitted)
+[child1:1689] [354] delete_module(name_user=0x78d823f5a000, flags=0xa0a0a0a0a0) = -1 (Operation not permitted)
+[child1:1689] [355] capget(header=-7, dataptr=156) = -1 (Bad address)
+[child1:1689] [356] fanotify_mark(fanotify_fd=18, flags=0xbc, mask=0x1a, dfd=18, pathname="/proc/1270/fdinfo/31") = -1 (Invalid argument)
+[child1:1689] [357] lookup_dcookie(cookie64=1, buf=0x1, len=0x4d95) = -1 (Operation not permitted)
+[child1:1689] [358] rt_sigprocmask(how=-8, set=0x78d824096000, oset=0x78d821f71000, sigsetsize=128) = -1 (Invalid argument)
+[child1:1689] [359] getcwd(buf=0x78d823f56000, size=4096) = 16
+[child1:1689] [360] timer_delete(timer_id=0xc008088200100) = -1 (Invalid argument)
+[child1:1689] [361] fchown(fd=18, user=0x18360f8300, group=0x1e1e1e1e1e1e1e1e) = -1 (Operation not permitted)
+[child1:1689] [362] semget(key=0xe46b5be3b7, nsems=0x8905fcc6324b, semflg=0x3eb51e01697d) = -1 (Invalid argument)
+[child1:1689] [363] swapoff(path="/proc/731/task/731/net/rt6_stats") = -1 (Operation not permitted)
+[child1:1689] [364] setrlimit(resource=0x78d823f57000, rlim=8) = -1 (Bad address)
+[child1:1689] [365] getpriority(which=0x2, who=0) = 20
+[child1:1689] [366] acct(name=0x78d821f71000) = -1 (Operation not permitted)
+[child1:1689] [367] [32BIT] setfsuid(uid=8) = 1000
+[child1:1689] [368] mq_getsetattr(mqdes=18, u_mqstat=0x78d823f57000, u_omqstat=0x78d823f57008) = -1 (Invalid argument)
+[child1:1689] [369] pkey_mprotect(start=0x78d823f58000, len=0, prot=0x6, key=-1) = 0
+[child1:1689] [370] llistxattr(pathname="/proc/1270/net/fib_triestat", list=0x78d823f57000, size=248) = 0
+[child1:1689] [371] clock_settime(which_clock=0xffffffffa0002c89, tp=0x4) = -1 (Bad address)
+[child1:1689] [372] epoll_create1(flags=0x80000) = 387
+[child1:1689] [373] fdatasync(fd=18) = -1 (Invalid argument)
+[child1:1689] [374] setsid() = -1 (Operation not permitted)
+[child1:1689] [375] acct(name=0x78d822371000) = -1 (Operation not permitted)
+[child1:1689] [376] poll(ufds=0xba8ff77c830, nfds=6, timeout_msecs=0) = 0
+[child1:1689] [377] lseek(fd=282, offset=-4, whence=0x2) = -1 (Illegal seek)
+[child1:1689] [378] io_setup(nr_events=-8, ctxp=0x8) = -1 (Bad address)
+[child1:1689] [379] sethostname(name=0x78d822371000, len=4096) = -1 (Operation not permitted)
+[child1:1689] [380] rt_tgsigqueueinfo(tgid=0x2000000000000008, pid=1693, sig=0xfffe, uinfo=0x0) = -1 (Bad address)
+[child1:1689] [381] sched_setattr(pid=1729, uattr=0x78d823f57000) = -1 (Invalid argument)
+[child1:1689] [382] epoll_wait(epfd=282, events=0x78d823f57000, maxevents=205, timeout=0x1100000000000000) = -1 (Invalid argument)
+[child1:1689] [383] newlstat(filename="/proc/sys/net/ipv6/conf/lo/router_solicitation_delay", statbuf=0x4) = -1 (Bad address)
+[child1:1689] [384] swapoff(path="/proc/1270/net/ip6_mr_vif") = -1 (Operation not permitted)
+[child1:1689] [385] fremovexattr(fd=282, name=0x0) = -1 (Bad address)
+[child1:1689] [386] timer_delete(timer_id=128) = -1 (Invalid argument)
+[child1:1689] [387] setgroups(gidsetsize=0x413458d, grouplist=0x78d822171000) = -1 (Operation not permitted)
+[child1:1689] [388] epoll_pwait(epfd=282, events=0x78d822171000, maxevents=0x7fffffffffff, timeout=0x7621e7b03d7ed818) = -1 (Invalid argument)
+[child1:1689] [389] setfsuid(uid=0) = 1000
+[child1:1689] [390] fstatfs(fd=282, buf=0x78d822471000) = 0
+[child1:1689] [391] getgid() = 1000
+[child1:1689] [392] sched_get_priority_min(policy=0x5ce9) = -1 (Invalid argument)
+[child1:1689] [393] io_getevents(ctx_id=0xfffffffd, min_nr=781, nr=8, events=0x0, timeout=0x78d823f56000) = -1 (Invalid argument)
+[child1:1689] [394] lremovexattr(pathname="/proc/sys/net/ipv4/neigh/eth0/mcast_resolicit", name=0x78d823f59000) = -1 (Numerical result out of range)
+[child1:1689] [395] setresuid(ruid=5, euid=94, suid=0xf1f1f1f1f1) = -1 (Operation not permitted)
+[child1:1689] [396] personality(personality=-2) = 0
+[child1:1689] [397] setpriority(which=0, who=0x7c2655d272a4, niceval=66) = -1 (No such process)
+[child1:1689] [398] sethostname(name=0x78d822471000, len=0) = -1 (Operation not permitted)
+[child1:1689] [399] [32BIT] getrandom(buf=0x78d822171000, count=0x18d000, flags=0x0) = -1 (Bad address)
+[child1:1689] [400] sched_setparam(pid=0, param=0x8) = -1 (Bad address)
+[child1:1689] [401] fchown(fd=282, user=0xdc2a292f5f, group=0x686868686868) = -1 (Operation not permitted)
+[child1:1689] [402] getpriority(which=0x2, who=0) = 20
+[child1:1689] [403] fdatasync(fd=282) = -1 (Invalid argument)
+[child1:1689] [404] setsid() = -1 (Operation not permitted)
+[child1:1689] [405] removexattr(pathname="/proc/sys/net/ipv4/conf/all/arp_notify", name=0x0) = -1 (Bad address)
+[child1:1689] [406] timerfd_gettime(ufd=282, otmr=0x8) = -1 (Invalid argument)
+[child1:1689] [407] ioprio_get(which=86, who=1) = -1 (Invalid argument)
+[child1:1689] [408] pkey_free(key=883) = -1 (Invalid argument)
+[child1:1689] [409] mprotect(start=0x78d822471000, len=0x88000, prot=0x0) = 0
+[child1:1689] [410] timer_getoverrun(timer_id=16) = -1 (Invalid argument)
+[child1:1689] [411] getuid() = 1000
+[child1:1689] [412] msgget(key=0xc8c8c8c8c8c8, msgflg=0x10002000001000) = -1 (No such file or directory)
+[child1:1689] [413] symlinkat(oldname="/proc/735/attr/exec", newdfd=355, newname="/proc/732/mounts") = -1 (File exists)
+[child1:1689] [414] clock_gettime(which_clock=0x2000000000, tp=0x8) = -1 (Bad address)
+[child1:1689] [415] timer_delete(timer_id=-8) = -1 (Invalid argument)
+[child1:1689] [416] tee(fdin=292, fdout=290, len=253, flags=0x7) = -1 (Bad file descriptor)
+[child1:1689] [417] removexattr(pathname="/proc/1270/fdinfo/25", name=0x4) = -1 (Bad address)
+[child1:1689] [418] inotify_rm_watch(fd=355, wd=2489) = -1 (Invalid argument)
+[child1:1689] [419] lseek(fd=355, offset=8190, whence=0x0) = 8190
+[child1:1689] [420] msgsnd(msqid=0x989898989898, msgp=0x78d823f5b000, msgsz=0, msgflg=0x5000) = -1 (Invalid argument)
+[child1:1689] [421] fstatat64(dfd=355, filename="/proc/735/task/735/net/tcp", statbuf=0x78d822171000, flag=0xffffe366cdfbd3ba) = -1 (Invalid argument)
+[child1:1689] [422] flock(fd=355, cmd=0x4000006005000000) = -1 (Invalid argument)
+[child1:1689] [423] fgetxattr(fd=355, name=0x4, value=0x78d822371000, size=2082) = -1 (Bad address)
+[child1:1689] [424] capset(header=0xc5c5c5c5, data=2778) = -1 (Bad address)
+[child1:1689] [425] waitid(which=0x84930e69c737a4, upid=0, infop=0x0, options=1, ru=0x78d821f71000) = -1 (Invalid argument)
+[child1:1689] [426] fchmodat(dfd=280, filename="/proc/sys/net/ipv4/route/mtu_expires", mode=2010) = -1 (Operation not permitted)
+[child1:1689] [427] setfsgid(gid=241) = 1000
+[child1:1689] [428] semget(key=0x8000, nsems=123, semflg=0x272727) = -1 (File exists)
+[child1:1689] [429] dup3(oldfd=280, newfd=280, flags=0x0) = -1 (Invalid argument)
+[child1:1689] [430] fanotify_init(flags=0x12, event_f_flags=0) = -1 (Operation not permitted)
+[child1:1689] [431] [32BIT] epoll_ctl(epfd=280, op=0x2, fd=291, event=0xba8ff734980) = -1 (Invalid argument)
+[child1:1689] [432] timer_settime(timer_id=0x82828000, flags=0x0, new_setting=0x78d822171000, old_setting=0x78d823f5b000) = -1 (Invalid argument)
+[child1:1689] [433] statfs(pathname="/proc/irq/26", buf=0x78d823f57000) = 0
+[child1:1689] [434] [32BIT] truncate64(path="/proc/735/net/packet", length=8) = -1 (Bad address)
+[child1:1689] [435] epoll_create1(flags=0x80000) = 388
+[child1:1689] [436] syslog(type=0x0, buf=0x78d823f59000, len=0) = -1 (Operation not permitted)
+[child1:1689] [437] [32BIT] fstatat64(dfd=280, filename="/proc/sys/fs/epoll/max_user_watches", statbuf=0x78d821d71000, flag=0x4000000) = -1 (Invalid argument)
+[child1:1689] [438] pwritev(fd=292, vec=0xba8ff77c870, vlen=118, pos_l=190, pos_h=0x8b8b8b8b8b8b8b8b) = -1 (Illegal seek)
+[child1:1689] [439] [32BIT] geteuid() = 1000
+[child1:1689] [440] set_robust_list(head=0x78d823f57000, len=24) = 0
+[child1:1689] [441] msgget(key=-1, msgflg=0x245488488b060524) = -1 (No such file or directory)
+[child1:1689] [442] waitid(which=0x400000000, upid=1, infop=0x78d822171000, options=253, ru=0x78d822171000) = -1 (Invalid argument)
+[child1:1689] [443] swapoff(path="/proc/732/task/732/sessionid/") = -1 (Operation not permitted)
+[child1:1689] [444] io_setup(nr_events=71, ctxp=0x0) = -1 (Bad address)
+[child1:1689] [445] [32BIT] sendmmsg(fd=307, mmsg=0x78d822471000, vlen=4096, flags=0x0) = -1 (Bad address)
+[child1:1689] [446] eventfd(count=0x6e6e6e) = 389
+[child1:1689] [447] waitid(which=0xa4f57d3bcd91, upid=1695, infop=0x78d823f5b000, options=0xd12c447810a8162, ru=0x78d823f57000) = -1 (Invalid argument)
+[child1:1689] [448] openat(dfd=292, filename="/proc/sys/net/ipv6/conf/lo/accept_ra_min_hop_limit", flags=0x7b1481, mode=666) = -1 (Not a directory)
+[child1:1689] [449] iopl(level=-7, regs=0x8) = -1 (Invalid argument)
+[child1:1689] [450] [32BIT] getgroups(gidsetsize=-23, grouplist=0x4) = -1 (Invalid argument)
+[child1:1689] [451] dup(fildes=292) = 390
+[child1:1689] [452] shutdown(fd=292, how=0x1) = -1 (Socket operation on non-socket)
+[child1:1689] [453] semget(key=0x8000, nsems=60, semflg=0xf3f76d61514c96) = -1 (Permission denied)
+[child1:1689] [454] timer_delete(timer_id=0) = -1 (Invalid argument)
+[child1:1689] [455] lgetxattr(pathname="/proc/sys/net/ipv6/flowlabel_state_ranges", name=0x78d821f71000, value=0x78d821f71004, size=2) = -1 (Operation not supported)
+[child1:1689] [456] getsid(pid=1690) = 1690
+[child1:1689] [457] [32BIT] mlock(addr=0x78d823f41000, len=0) = 0
+[child1:1689] [458] shutdown(fd=292, how=0x2) = -1 (Socket operation on non-socket)
+[child1:1689] [459] statfs(pathname="/proc/731/net/ip_mr_vif", buf=0x78d822171000) = 0
+[child1:1689] [460] utimes(filename="/proc/1270/fdinfo", utimes=0x8) = -1 (Bad address)
+[child1:1689] [461] mq_getsetattr(mqdes=292, u_mqstat=0x0, u_omqstat=0x4) = -1 (Bad file descriptor)
+[child1:1689] [462] fallocate(fd=292, mode=0x1, offset=4, len=77) = -1 (Illegal seek)
+[child1:1689] [463] getrandom(buf=0x78d823f59000, count=0, flags=0x1) = -1 (Invalid argument)
+[child1:1689] [464] [32BIT] renameat(olddfd=292, oldname="/proc/sys/net/ipv4/ip_forward", newdfd=294, newname="/proc/734/task/734/net/unix") = -1 (Bad address)
+[child1:1689] [465] getpgid(pid=0) = 1689
+[child1:1689] [466] creat(pathname="/proc/735/net/dev_mcast", mode=610) = -1 (Permission denied)
+[child1:1689] [467] fdatasync(fd=292) = -1 (Invalid argument)
+[child1:1689] [468] getuid() = 1000
+[child1:1689] [469] futimesat(dfd=234, filename=".//proc/1270/attr/prev/", utimes=0x78d823f56000) = -1 (Invalid argument)
+[child1:1689] [470] pwritev(fd=234, vec=0xba8ff77c8f0, vlen=193, pos_l=0xffff6d6d6d6d6d6d, pos_h=0xffff73b2ba1bcb9d) = -1 (Invalid argument)
+[child1:1689] [471] listxattr(pathname="/proc/sys/net/ipv4/conf/all/arp_filter", list=0x8, size=53) = 0
+[child1:1689] [472] msgget(key=0x5000060, msgflg=0x69351483d3fe) = 0x90012
+[child1:1689] [473] sigaltstack(uss=0x78d823f56000, uoss=0x78d823f56000, regs=0x78d823f56000) = -1 (Invalid argument)
+[child1:1689] [474] fstatat64(dfd=234, filename="/proc/1270/task/1270/fdinfo/23", statbuf=0x4, flag=48) = -1 (Invalid argument)
+[child1:1689] [475] setgid(gid=0x10000000) = -1 (Operation not permitted)
+[child1:1689] [476] [32BIT] name_to_handle_at(fd=234, name=0x1, handle=0x78d823f57000, mnt_id=0x78d823f56000, flag=0xffffffffffffff9c) = -1 (Invalid argument)
+[child1:1689] [477] io_getevents(ctx_id=8192, min_nr=0, nr=4096, events=0x78d823f40000, timeout=0x78d823f40008) = -1 (Invalid argument)
+[child1:1689] [478] sched_setscheduler(pid=1735, policy=0x5, param=0x0) = -1 (Invalid argument)
+[child1:1689] [479] [32BIT] add_key(_type=0xba8fdfa4bf7, _description=0x78d823f57004, _payload=0x78d823f57000, plen=4, ringid=0xfffffffffffffffe) = -1 (Bad address)
+[child1:1689] [480] pwritev(fd=234, vec=0xba8ff77c8f0, vlen=214, pos_l=0x4c08000000000000, pos_h=-9) = -1 (Invalid argument)
+[child1:1689] [481] keyctl(cmd=0x10, arg2=-5, arg3=0x800000000000, arg4=0x20022f2e4a04, arg5=771) = -1 (Invalid argument)
+[child1:1689] [482] read(fd=234, buf=0x78d823f5b000, count=3440) = -1 (Invalid argument)
+[child1:1689] [483] sendto(fd=316, buff=0xba8ff77c970, len=451, flags=0x2e30, addr=0xba8ff77c8f0, addr_len=110) = -1 (Destination address required)
+[child1:1689] [484] ioctl(fd=234, cmd=0x4030582a, arg=0xf8f8) = -1 (Bad address)
+[child1:1689] [485] setgroups(gidsetsize=0x8d5e344a36, grouplist=0x1) = -1 (Operation not permitted)
+[child1:1689] [486] fsetxattr(fd=19, name=0x4, value=0x78d824097000, size=4096, flags=0x2) = -1 (Bad address)
+[child1:1689] [487] accept4(fd=328, upeer_sockaddr=0xba8ff7347a0, upeer_addrlen=24, flags=0x80800) = -1 (Operation not supported)
+[child1:1689] [488] sched_setscheduler(pid=0, policy=0x1, param=0x0) = -1 (Invalid argument)
+[child1:1689] [489] [32BIT] lstat64(filename="/proc/sys/vm/legacy_va_layout", statbuf=0x78d823f57000) = -1 (Bad address)
+[child1:1689] [490] timerfd_create(clockid=0x0, flags=0x80800) = 391
+[child1:1689] [491] setsid() = -1 (Operation not permitted)
+[child1:1689] [492] capget(header=0x200000000000, dataptr=-8) = -1 (Bad address)
+[child1:1689] [493] statfs(pathname="/proc/734/task/734/cmdline/", buf=0x4) = -1 (Not a directory)
+[child1:1689] [494] getegid() = 1000
+[child1:1689] [495] [32BIT] fremovexattr(fd=19, name=0x4) = -1 (Bad address)
+[child1:1689] [496] utimensat(dfd=19, filename=".//proc/sys/net/ipv4/ip_local_port_range/", utimes=0x1, flags=0x0) = -1 (Bad address)
+[child1:1689] [497] llistxattr(pathname=".//proc/731/attr/sockcreate/", list=0x78d822171000, size=61) = -1 (No such file or directory)
+[child1:1689] [498] setfsuid(uid=-6) = 1000
+[child1:1689] [499] [32BIT] mq_timedreceive(mqdes=19, u_msg_ptr=0x1, msg_len=4096, u_msg_prio=0x5, u_abs_timeout=0x78d823f57000) = -1 (Bad address)
+[child1:1689] [500] memfd_create(uname=0x78d822171000, flag=0x3) = 392
+[child1:1689] [501] execveat(fd=19, name="/proc/sys/net/ipv4/tcp_retrans_collapse", argv=0xba8ff77c970, envp=0xba8ff77f9f0, flags=0x1100) = 392
+[child1:1689] [502] lgetxattr(pathname="/proc/execdomains", name=0x1, value=0x78d821f71000, size=4094) = -1 (Bad address)
+[child1:1689] [503] [32BIT] inotify_init() = 393
+[child1:1689] [504] mount(dev_name="/proc/sys/net/ipv4/ip_default_ttl", dir_name="/dev/net/tun/", type=0x78d823f57000, flags=0x0, data=0x78d822171000) = -1 (Not a directory)
+[child1:1689] [505] lseek(fd=19, offset=0x20000, whence=0x3) = 0x20000
+[child1:1689] [506] setsid() = -1 (Operation not permitted)
+[child1:1689] [507] io_submit(ctx_id=0xf5f5f5f5f5f5f5, nr=8, iocbpp=0x78d821d71000) = -1 (Invalid argument)
+[child1:1689] [508] setpgid(pid=1, pgid=0x2a2a2a2a2a2a2a2a) = -1 (No such process)
+[child1:1689] [509] sched_rr_get_interval(pid=1689, interval=0x8) = -1 (Bad address)
+[child1:1689] [510] fchownat(dfd=19, filename="/proc/731/net/dev_mcast", user=228, group=0x2000000000, flag=0x80000000) = -1 (Invalid argument)
+[child1:1689] [511] mknodat(dfd=19, filename=".//proc/sys/net/ipv6/conf/default/max_addresses", mode=0x6767676767676767, dev=0x8000000000000000) = -1 (Not a directory)
+[child1:1689] [512] openat(dfd=376, filename="/proc/1270/ns", flags=0x630601, mode=666) = -1 (Permission denied)
+[child1:1689] [513] [32BIT] sched_setaffinity(pid=0, len=1, user_mask_ptr=0x8) = -1 (Bad address)
+[child1:1689] [514] lsetxattr(pathname="/sys/devices/system/cpu/power/async", name=0x1, value=0x5, size=1022, flags=0x1) = -1 (Bad address)
+[child1:1689] [515] bind(fd=319, umyaddr=0xba8ff734660, addrlen=24) = -1 (Invalid argument)
+[child1:1689] [516] lgetxattr(pathname="/proc/irq/15/smp_affinity", name=0x1, value=0x2, size=4096) = -1 (Bad address)
+[child1:1689] [517] ioprio_set(which=91, who=256, ioprio=0xc100000000004c4c) = -1 (Invalid argument)
+[child1:1689] [518] getpgid(pid=0) = 1689
+[child1:1689] [519] readv(fd=376, vec=0xba8ff77c9f0, vlen=66) = -1 (Resource temporarily unavailable)
+[child1:1689] [520] openat(dfd=376, filename="/proc/sys/net/ipv4/conf/eth0/disable_xfrm", flags=0x40, mode=666) = 394
+[child1:1689] [521] getrusage(who=7, ru=0x1) = -1 (Invalid argument)
+[child1:1689] [522] [32BIT] setgid16(gid=4) = -1 (Operation not permitted)
+[child1:1689] [523] mq_getsetattr(mqdes=376, u_mqstat=0x78d821d71000, u_omqstat=0x78d821d71001) = -1 (Invalid argument)
+[child1:1689] [524] getsockname(fd=343, usockaddr=0xba8ff77c9f0, usockaddr_len=110) = -1 (Bad address)
+[child1:1689] [525] pwritev2(fd=376, vec=0xba8ff77ca70, vlen=151, pos_l=0xababababababab, pos_h=0x5e1e1e1e1e1e1e1e, flags=0x1) = -1 (Illegal seek)
+[child1:1689] [526] setpriority(which=0, who=0xffffffa5a5a5a5a6, niceval=-6) = -1 (No such process)
+[child1:1689] [527] fchdir(fd=376) = -1 (Not a directory)
+[child1:1689] [528] setsockopt(fd=335, level=270, optname=71, optval=0, optlen=1) = -1 (Protocol not available)
+[child1:1689] [529] setrlimit(resource=0x78d822371000, rlim=4096) = -1 (Bad address)
+[child1:1689] [530] utimes(filename="/proc/sys/net/ipv4/neigh/lo/unres_qlen_bytes", utimes=0x1) = -1 (Bad address)
+[child1:1689] [531] add_key(_type=0xba8fdfa4cb4, _description=0x78d823f41004, _payload=0x78d823f4100c, plen=-8, ringid=0xfffffffffffffffa) = -1 (Invalid argument)
+[child1:1689] [532] linkat(olddfd=376, oldname="/proc/735/task/735/net/icmp6", newdfd=376, newname="/proc/sys/net", flags=0x1000) = -1 (No such file or directory)
+[child1:1689] [533] mmap(addr=0, len=0, prot=0x0[PROT_NONE], flags=0x1, fd=374, off=0) = -1 (Invalid argument)
+[child1:1689] [534] [32BIT] umount(name="/proc/734/task/734/net/packet", flags=0xf) = -1 (Operation not permitted)
+[child1:1689] [535] gettid() = 1689
+[child1:1689] [536] fstatat64(dfd=374, filename=".//proc/732/net/wireless", statbuf=0x1, flag=0xcb926a7d787c) = -1 (Invalid argument)
+[child1:1689] [537] geteuid() = 1000
+[child1:1689] [538] [32BIT] stime(tptr=0x78d821d71000) = -1 (Bad address)
+[child1:1689] [539] pipe(fildes=0x78d823f58000) = 0
+[child1:1689] [540] times(tbuf=0x78d823f5b000) = 0x666610ee
+[child1:1689] [541] fsetxattr(fd=374, name=0x78d823f40000, value=0x78d823f40004, size=1, flags=0x0) = -1 (Permission denied)
+[child1:1689] [542] name_to_handle_at(fd=374, name=0x78d822371000, handle=0x78d822371001, mnt_id=0x78d822371002, flag=0xffffffffffffff9c) = -1 (Invalid argument)
+[child1:1689] [543] eventfd2(count=0, flags=0x0) = 397
+[child1:1689] [544] timer_getoverrun(timer_id=-2) = -1 (Invalid argument)
+[child1:1689] [545] setns(fd=374, nstype=0x4c000000) = -1 (Invalid argument)
+[child1:1689] [546] setregid(rgid=0x30500821c00090a, egid=174) = -1 (Operation not permitted)
+[child1:1689] [547] epoll_pwait(epfd=374, events=0x78d822371000, maxevents=61, timeout=0x20d94000) = -1 (Invalid argument)
+[child1:1689] [548] set_robust_list(head=0x78d822471000, len=24) = 0
+[child1:1689] [549] rt_tgsigqueueinfo(tgid=0, pid=0, sig=0xffffffffd3d3dfff, uinfo=0x0) = -1 (Bad address)
+[child1:1689] [550] getpgid(pid=1695) = 1695
+[child1:1689] [551] signalfd4(ufd=282, user_mask=0x78d822471000, sizemask=0x4e80c40c, flags=0x0) = -1 (Invalid argument)
+[child1:1689] [552] fchownat(dfd=282, filename="/proc/sys/fs/file-nr", user=0xf4f4f4f4f4f4, group=1, flag=49) = -1 (Invalid argument)
+[child1:1689] [553] utimes(filename=".//proc/734/task/734/net/rt_cache/", utimes=0x78d823f56000) = -1 (Invalid argument)
+[child1:1689] [554] mincore(start=0x78d823f41000, len=0, vec=0xba8ff77cab0) = 0
+[child1:1689] [555] mlock(addr=0x78d823f40000, len=0) = 0
+[child1:1689] [556] rmdir(pathname="/proc/diskstats") = -1 (Permission denied)
+[child1:1689] [557] shmdt(shmaddr=0x78d823f5a000) = -1 (Invalid argument)
+[child1:1689] [558] getppid() = 1270
+[child1:1689] [559] timerfd_create(clockid=0x1, flags=0x0) = 398
+[child1:1689] [560] wait4(upid=0, stat_addr=0x4, options=0xffffff70, ru=0x8) = -1 (Invalid argument)
+[child1:1689] [561] open_by_handle_at(mountdirfd=282, handle=0x78d822171000, flags=0x711600) = -1 (Operation not permitted)
+[child1:1689] [562] llistxattr(pathname="/dev/dri", list=0x4, size=4) = 0
+[child1:1689] [563] lseek(fd=282, offset=0x80000080009000, whence=0x3) = -1 (Illegal seek)
+[child1:1689] [564] shmdt(shmaddr=0x78d821f71000) = -1 (Invalid argument)
+[child1:1689] [565] unlinkat(dfd=282, pathname="/proc/sys/net/netfilter", flag=-5) = -1 (Invalid argument)
+[child1:1689] [566] utimensat(dfd=282, filename="/proc/735/task/735/uid_map", utimes=0x78d823f56000, flags=0x0) = -1 (Invalid argument)
+[child1:1689] [567] sched_setparam(pid=1, param=0x78d823f5b000) = -1 (Invalid argument)
+[child1:1689] [568] sched_getparam(pid=0, param=0x8) = -1 (Bad address)
+[child1:1689] [569] signalfd(ufd=282, user_mask=0x78d823f56000, sizemask=4096) = -1 (Invalid argument)
+[child1:1689] [570] sched_get_priority_min(policy=0) = 0
+[child1:1689] [571] eventfd(count=0xfffb) = 399
+[child1:1689] [572] setxattr(pathname="/proc/731/task/731/stat/", name=0x1, value=0x5, size=8, flags=0x1) = -1 (Not a directory)
+[child1:1689] [573] read(fd=285, buf=0x78d821d71000, count=2479) = 2479
+[child1:1689] [574] fadvise64(fd=285, offset=-225, len=8, advice=0x4) = 0
+[child1:1689] [575] open(filename="/proc/sys/net/ipv4/conf/lo/disable_policy", flags=0x100, mode=42) = 400
+[child1:1689] [576] [32BIT] sched_setattr(pid=1690, uattr=0x78d823f57000) = -1 (Invalid argument)
+[child1:1689] [577] [32BIT] fadvise64_64(fd=285, offset=0, len=1, advice=0x4) = -1 (Invalid argument)
+[child1:1689] [578] mprotect(start=0x78d823f58000, len=0, prot=0x0) = 0
+[child1:1689] [579] msgget(key=0xff92, msgflg=-4) = 0x98013
+[child1:1689] [580] rename(oldname="/proc/731/net/fib_trie", newname="/proc/731/net/protocols") = -1 (Permission denied)
+[child1:1689] [581] shmdt(shmaddr=0x78d823f40000) = -1 (Invalid argument)
+[child1:1689] [582] sched_yield() = 0
+[child1:1689] [583] timer_create(which_clock=0x2d2d2d2d2d, timer_event_spec=0x78d824096000, create_timer_id=0x78d823f56000) = -1 (Invalid argument)
+[child1:1689] [584] setsockopt(fd=302, level=0, optname=1164, optval=0xba8ff77caf0, optlen=1) = -1 (Protocol not available)
+[child1:1689] [585] epoll_ctl(epfd=285, op=0x1, fd=285, event=0xba8ff734450) = -1 (Operation not permitted)
+[child1:1689] [586] ioctl(fd=285, cmd=16, arg=0x78d821f71000) = -1 (Inappropriate ioctl for device)
+[child1:1689] [587] io_setup(nr_events=-10, ctxp=0x78d823f57000) = -1 (Invalid argument)
+[child1:1689] [588] umask(mask=18) = 0
+[child1:1689] [589] bind(fd=345, umyaddr=0xba8ff734410, addrlen=16) = -1 (Invalid argument)
+[child1:1689] [590] gettid() = 1689
+[child1:1689] [591] pipe2(fildes=0x0, flags=0x4800) = -1 (Bad address)
+[child1:1689] [592] setregid(rgid=0x51a53eda7796, egid=0xffffefff) = -1 (Operation not permitted)
+[child1:1689] [593] mount(dev_name="/proc/731/mounts", dir_name="/proc/732/task/732/net/tcp", type=0x4, flags=0x3, data=0x5) = -1 (Bad address)
+[child1:1689] [594] migrate_pages(pid=1695, maxnode=0x40000, old_nodes=0x1, new_nodes=0x78d823f5a000) = -1 (Invalid argument)
+[child1:1689] [595] open_by_handle_at(mountdirfd=285, handle=0x78d823f41000, flags=0x355e82) = -1 (Operation not permitted)
+[child1:1689] [596] madvise(start=0x78d824096000, len_in=0, advice=0xa) = 0
+[child1:1689] [597] uname(name=0x78d823f5b000) = 0
+[child1:1689] [598] getdents64(fd=285, dirent=0x0, count=1) = -1 (Not a directory)
+[child1:1689] [599] utime(filename="/proc/732/net/connector", times=0x78d821f71000) = -1 (Operation not permitted)
+[child1:1689] [600] personality(personality=0xffffe000) = 0xfffffffe
+[child1:1689] [601] recvmmsg(fd=345, mmsg=0x78d821f71000, vlen=0, flags=0x4000, timeout=0x78d821f71004) = -1 (Invalid argument)
+[child1:1689] [602] pread64(fd=12, buf=0x78d823f40000, count=1302, pos=256) = -1 (Illegal seek)
+[child1:1689] [603] [32BIT] lookup_dcookie(cookie64=0x40000000208, buf=0x78d823f57000, len=0xfff8) = -1 (Operation not permitted)
+[child1:1689] [604] sendto(fd=300, buff=0xba8ff77db00, len=720, flags=0xe000577d, addr=0xba8ff77caf0, addr_len=1754) = -1 (Invalid argument)
+[child1:1689] [605] [32BIT] sethostname(name=0x78d823f56000, len=8) = -1 (Operation not permitted)
+[child1:1689] [606] uname(name=0x78d823f57000) = 0
+[child1:1689] [607] read(fd=12, buf=0x78d823f56000, count=4096) = -1 (Invalid argument)
+[child1:1689] [608] setdomainname(name=0x78d823f57000, len=0xefefe) = -1 (Operation not permitted)
+[child1:1689] [609] getsockname(fd=317, usockaddr=0xba8ff77db00, usockaddr_len=110) = -1 (Bad address)
+[child1:1689] [610] sched_setscheduler(pid=1, policy=0x0, param=0x4) = -1 (Bad address)
+[child1:1689] [611] rt_tgsigqueueinfo(tgid=0xe4e4e4e4e4, pid=0, sig=195, uinfo=0x4) = -1 (Bad address)
+[child1:1689] [612] [32BIT] mknodat(dfd=12, filename="/proc/731/mounts", mode=-211, dev=43) = -1 (Invalid argument)
+[child1:1689] [613] munmap(addr=0x78d823f58000, len=4096) = 0
+[child1:1689] [614] fdatasync(fd=12) = -1 (Invalid argument)
+[child1:1689] [615] move_pages(pid=1694, nr_pages=45, pages=0xba8ff77db80, nodes=0xba8ff77eb90, status=0xba8ff77ec50, flags=0x0) = -1 (No such device)
+[child1:1689] [616] sched_setaffinity(pid=1729, len=8, user_mask_ptr=0x8) = -1 (Bad address)
+[child1:1689] [617] fstatfs(fd=12, buf=0x78d821f71000) = 0
+[child1:1689] [618] [32BIT] init_module(umod=0x78d823f41000, len=1, uargs=0x78d823f41004) = -1 (Operation not permitted)
+[child1:1689] [619] [32BIT] epoll_pwait(epfd=12, events=0x78d821f71000, maxevents=-9, timeout=3384) = -1 (Invalid argument)
+[child1:1689] [620] membarrier(cmd=0x1, flags=0) = 0
+[child1:1689] [621] timerfd_settime(ufd=378, flags=0x80000, utmr=0x78d822171000, otmr=0x78d822171008) = -1 (Invalid argument)
+[child1:1689] [622] prlimit64(pid=1693, resource=0x1818181818181818, new_rlim=0x0, old_rlim=0x78d822171000) = -1 (Invalid argument)
+[child1:1689] [623] pkey_mprotect(start=0x78d823f40000, len=0, prot=0x2000007, key=0xfffb) = 0
+[child1:1689] [624] adjtimex(txc_p=0x78d823f56000) = -1 (Operation not permitted)
+[child1:1689] [625] read(fd=378, buf=0x78d823f56000, count=4096) = -1 (Resource temporarily unavailable)
+[child1:1689] [626] sched_setaffinity(pid=1, len=78, user_mask_ptr=0x78d821d71000) = -1 (Operation not permitted)
+[child1:1689] [627] setsockopt(fd=305, level=0, optname=43, optval=0, optlen=264) = -1 (Bad address)
+[child1:1689] [628] shmdt(shmaddr=0x78d823f59000) = -1 (Invalid argument)
+[child1:1689] [629] timerfd_gettime(ufd=378, otmr=0x78d822171000) = 0
+[child1:1689] [630] getppid() = 1270
+[child1:1689] [631] ioprio_get(which=-162, who=107) = -1 (Invalid argument)
+[child1:1689] [632] timer_gettime(timer_id=12593, setting=0x0) = -1 (Invalid argument)
+[child1:1689] [633] llistxattr(pathname="/proc/sys/net/netfilter/nf_log/12/", list=0x78d824097000, size=0xe3ee) = -1 (Not a directory)
+[child1:1689] [634] [32BIT] ioperm(from=0xffffffdf37f6cdea, num=7, turn_on=-4) = -1 (Invalid argument)
+[child1:1689] [635] getsockopt(fd=347, level=0, optname=0x3d3d3d3d3d3d3d, optval=0x1, optlen=3405) = -1 (Bad address)
+[child1:1689] [636] newfstat(fd=369, statbuf=0x8) = -1 (Bad address)
+[child1:1689] [637] set_robust_list(head=0x78d823f59000, len=24) = 0
+[child1:1689] [638] getresgid(rgid=0x78d821d71000, egid=0x78d822171000, sgid=0x78d821f71000) = 0
+[child1:1689] [639] setrlimit(resource=0x78d822171000, rlim=0x4063) = -1 (Bad address)
+[child1:1689] [640] [32BIT] rt_sigpending(set=0x78d823f59000, sigsetsize=-3) = -1 (Invalid argument)
+[child1:1689] [641] set_robust_list(head=0x78d823f56000, len=24) = 0
+[child1:1689] [642] munlock(addr=0x78d823f41000, len=0) = 0
+[child1:1689] [643] fstatat64(dfd=369, filename="/proc/732/task/732/net/fib_trie", statbuf=0x8, flag=0xfff7) = -1 (Invalid argument)
+[child1:1689] [644] sync() = 0
+[child1:1689] [645] rt_sigaction(sig=8, act=0x1, oact=0x5, sigsetsize=128) = -1 (Invalid argument)
+[child1:1689] [646] delete_module(name_user=0x78d823f41000, flags=0xdadadadada) = -1 (Operation not permitted)
+[child1:1689] [647] lsetxattr(pathname="/proc/sys/net/ipv6/conf/lo/hop_limit", name=0x0, value=0x1, size=8, flags=0x1) = -1 (Bad address)
+[child1:1689] [648] msgsnd(msqid=0xfffffffc, msgp=0x8, msgsz=8, msgflg=0x4000) = -1 (Bad address)
+[child1:1689] [649] gettid() = 1689
+[child1:1689] [650] pipe2(fildes=0x78d821d71000, flags=0x80000) = 0
+[child1:1689] [651] dup3(oldfd=360, newfd=284, flags=0x0) = 284
+[child1:1689] [652] mmap(addr=0, len=0x100000, prot=0x1[PROT_READ], flags=0x1, fd=360, off=4096) = 0x78d821c71000
+[child1:1689] [653] fadvise64(fd=360, offset=0x7fffffffffffe000, len=4096, advice=0x1) = 0
+[child1:1689] [654] sendto(fd=343, buff=0xba8ff77ebd0, len=851, flags=0x150c1, addr=0xba8ff77dbc0, addr_len=3809) = -1 (Invalid argument)
+[child1:1689] [655] setresgid(rgid=0x4100e916002d9480, egid=0xffff, sgid=3822) = -1 (Operation not permitted)
+[child1:1689] [656] flock(fd=360, cmd=0xa8032000000be) = 0
+[child1:1689] [657] creat(pathname="/proc/734/task/734/mounts", mode=710) = -1 (Permission denied)
+[child1:1689] [658] clock_nanosleep(which_clock=0x2, flags=0x0, rqtp=0x78d821f71000, rmtp=0x78d823f57000) [child1:1689] [658] newfstat(fd=367, statbuf=0x1) = -1 (Bad address)
+[child1:1689] [659] clock_nanosleep(which_clock=0x2, flags=0x0, rqtp=0x78d821f71000, rmtp=0x78d823f57000) [child1:1689] [659] lremovexattr(pathname="/proc/sys/net/ipv6/conf/eth0/optimistic_dad", name=0x1) = -1 (Bad address)
+[child1:1689] [660] ustat(dev=-1, ubuf=0x0) = -1 (Invalid argument)
+[child1:1689] [661] timer_settime(timer_id=123, flags=0x1, new_setting=0x78d822171000, old_setting=0x78d821d71000) = -1 (Invalid argument)
+[child1:1689] [662] semget(key=0, nsems=108, semflg=0x6eb0250000b79a14) = 0x20004
+[child1:1689] [663] mq_unlink(u_name=0x78d821f71000) = -1 (No such file or directory)
+[child1:1689] [664] access(filename="/proc/731/autogroup", mode=701) = -1 (Invalid argument)
+[child1:1689] [665] [32BIT] fcntl(fd=281, cmd=0x406, arg=375) = 403
+[child1:1689] [666] setpriority(which=0xfded70592c29, who=125, niceval=0x3636363636363636) = -1 (Invalid argument)
+[child1:1689] [667] unshare(unshare_flags=0x20000) = -1 (Operation not permitted)
+[child1:1689] [668] getdents(fd=375, dirent=0x1, count=2048) = -1 (Not a directory)
+[child1:1689] [669] [32BIT] setuid16(uid=151) = -1 (Operation not permitted)
+[child1:1689] [670] [32BIT] execveat(fd=375, name="/proc/sys/net/ipv4/neigh/default/mcast_resolicit", argv=0xba8ff77ec10, envp=0xba8ff77ecf0, flags=0x1100) = -1 (Bad address)
+[child1:1689] [671] sigaltstack(uss=0x78d823f56000, uoss=0x78d823f56001, regs=0x78d823f56009) = -1 (Invalid argument)
+[child1:1689] [672] msgsnd(msqid=0xfffffff6, msgp=0x1, msgsz=8, msgflg=0x0) = -1 (Bad address)
+[child1:1689] [673] semop(semid=0xfffe, tsops=0x78d822171000, nsops=0x2d9f695dc804f4) = -1 (Argument list too long)
+[child1:1689] [674] pwritev2(fd=375, vec=0xba8ff77ebd0, vlen=203, pos_l=0x80000000ffff0000, pos_h=0xffffff7ffffe6fbf, flags=0x2) = -1 (Invalid argument)
+[child1:1689] [675] mremap(addr=0x78d823f5a000, old_len=0, new_len=4096, flags=0x0, new_addr=0) = -1 (Cannot allocate memory)
+[child1:1689] [676] dup(fildes=375) = 404
+[child1:1689] [677] recvmsg(fd=339, msg=0x78d823f56000, flags=0x8004c5f5) = -1 (Invalid argument)
+[child1:1689] [678] inotify_add_watch(fd=375, pathname="/proc/irq/9/smp_affinity", mask=0x0) = -1 (Invalid argument)
+[child1:1689] [679] sched_get_priority_max(policy=0xfffffff6) = -1 (Invalid argument)
+[child1:1689] [680] sched_get_priority_max(policy=0x400000000000) = 0
+[child1:1689] [681] fcntl(fd=375, cmd=0x9, arg=0x535d1000) = 0
+[child1:1689] [682] [32BIT] syslog(type=0x0, buf=0x78d821c71000, len=0x4b000) = -1 (Operation not permitted)
+[child1:1689] [683] wait4(upid=1, stat_addr=0x8, options=0xfce6bc776905b1e, ru=0x9) = -1 (Invalid argument)
+[child1:1689] [684] msgget(key=-4, msgflg=0x400000000000) = -1 (No such file or directory)
+[child1:1689] [685] getsockopt(fd=301, level=129, optname=16, optval=0x8, optlen=8) = -1 (Operation not supported)
+[child1:1689] [686] recvmsg(fd=308, msg=0x8, flags=0x5) = -1 (Bad address)
+[child1:1689] [687] pkey_free(key=0xffffff3b) = -1 (Invalid argument)
+[child1:1689] [688] mprotect(start=0x78d822371000, len=0xb000, prot=0x300000d) = -1 (Invalid argument)
+[child1:1689] [689] getdents64(fd=282, dirent=0x78d823f5b000, count=4096) = -1 (Not a directory)
+[child1:1689] [690] fsetxattr(fd=282, name=0x78d823f5b000, value=0x78d823f5b000, size=0, flags=0x0) = -1 (Permission denied)
+[child1:1689] [691] rt_sigpending(set=0x78d821d71000, sigsetsize=-9) = -1 (Invalid argument)
+[child1:1689] [692] sethostname(name=0x78d823f57000, len=4095) = -1 (Operation not permitted)
+[child1:1689] [693] [32BIT] reboot(magic1=249, magic2=0xfff6, cmd=0x757575757575, arg=0x78d823f57000) = -1 (Operation not permitted)
+[child1:1689] [694] fallocate(fd=282, mode=0x38, offset=0x181b6e87, len=4) = -1 (Invalid argument)
+[child1:1689] [695] mknod(filename="/proc/sys/net/ipv6/neigh/lo/base_reachable_time_ms", mode=0, dev=0) = -1 (File exists)
+[child1:1689] [696] open(filename="/proc/731/task/731/cmdline", flags=0x117600, mode=666) = -1 (Not a directory)
+[child1:1689] [697] semget(key=0, nsems=0x410af104, semflg=0xffff) = -1 (Invalid argument)
+[child1:1689] [698] splice(fd_in=282, off_in=0x78d822171000, fd_out=295, off_out=0x78d822371000, len=8, flags=0x1) = -1 (Bad file descriptor)
+[child1:1689] [699] umount(name="/proc/732/task/732/attr/prev", flags=0x5) = -1 (Operation not permitted)
+[child1:1689] [700] mknod(filename="/proc/735/attr/exec", mode=720, dev=-9) = -1 (File exists)
+[child1:1689] [701] getgroups(gidsetsize=0x80000, grouplist=0x4) = -1 (Bad address)
+[child1:1689] [702] rt_sigprocmask(how=0xffffffffffffa5a6, set=0x78d823f57000, oset=0x78d823f57008, sigsetsize=128) = -1 (Invalid argument)
+[child1:1689] [703] msync(start=0x78d821d71000, len=0x72000, flags=0x4) = 0
+[child1:1689] [704] pwritev2(fd=282, vec=0xba8ff77ebd0, vlen=68, pos_l=0xffff880000000000, pos_h=0xffff225fc5710141, flags=0x1) = -1 (Invalid argument)
+[child1:1689] [705] getcpu(cpup=0x78d823f56000, nodep=0x78d823f40000, unused=0x78d823f40008) = 0
+[child1:1689] [706] getsockname(fd=348, usockaddr=0xba8ff77ebd0, usockaddr_len=110) = -1 (Bad address)
+[child1:1689] [707] personality(personality=0x6815c825088210) = 0xffffe000
+[child1:1689] [708] epoll_pwait(epfd=282, events=0x0, maxevents=0, timeout=588) = -1 (Invalid argument)
+[child1:1689] [709] readlinkat(dfd=374, pathname="/proc/1270/net/packet", buf=0x4, bufsiz=73) = -1 (Invalid argument)
+[child1:1689] [710] madvise(start=0x78d822371000, len_in=0x86000, advice=0xe) = 0
+[child1:1689] [711] readlinkat(dfd=374, pathname=".//proc/irq/15/spurious", buf=0x78d823f57000, bufsiz=4096) = -1 (Not a directory)
+[child1:1689] [712] preadv(fd=374, vec=0xba8ff77ec50, vlen=36, pos_l=0x606d, pos_h=0x2400800) = -1 (Illegal seek)
+[child1:1689] [713] [32BIT] migrate_pages(pid=1, maxnode=0x202020202020, old_nodes=0x78d823f5b000, new_nodes=0x78d823f5b008) = -1 (Invalid argument)
+[child1:1689] [714] sync() = 0
+[child1:1689] [715] setgroups(gidsetsize=0, grouplist=0x8) = -1 (Operation not permitted)
+[child1:1689] [716] clock_settime(which_clock=0xc000, tp=0x4) = -1 (Invalid argument)
+[child1:1689] [717] mlock2(start=0x78d821c71000, len=0x9000) = -1 (Cannot allocate memory)
+[child1:1689] [718] msgsnd(msqid=2048, msgp=0x8, msgsz=5, msgflg=0x3000) = -1 (Bad address)
+[child1:1689] [719] readv(fd=374, vec=0xba8ff77ec50, vlen=121) = -1 (Resource temporarily unavailable)
+[child1:1689] [720] statfs(pathname="/proc/sys/net/ipv6/conf/all/forwarding", buf=0x78d823f57000) = 0
+[child1:1689] [721] getgid() = 1000
+[child1:1689] [722] getxattr(pathname="/proc/732/task/732/net/dev_mcast", name=0x1, value=0x78d823f5b000, size=1) = -1 (Bad address)
+[child1:1689] [723] faccessat(dfd=374, filename="/proc/731/attr/fscreate", mode=0) = 0
+[child1:1689] [724] unlinkat(dfd=374, pathname="/proc/fs/ext4/vda1/es_shrinker_info", flag=0xfffa) = -1 (Invalid argument)
+[child1:1689] [725] shmctl(shmid=1, cmd=0x2, buf=0x0) = -1 (Invalid argument)
+[child1:1689] [726] msgctl(msqid=4096, cmd=0x2, buf=0x78d823f58000) = -1 (Invalid argument)
+[child1:1689] [727] ioperm(from=0, num=-8, turn_on=0xffffffffa6a31e37) = -1 (Invalid argument)
+[child1:1689] [728] ioperm(from=0xc4c4c4c4c4, num=179, turn_on=0x4ce2e2e2e2e2e2e2) = -1 (Invalid argument)
+[child1:1689] [729] sethostname(name=0x78d821d71000, len=8) = -1 (Operation not permitted)
+[child1:1689] [730] sched_get_priority_min(policy=0x5e6ee782) = -1 (Invalid argument)
+[child1:1689] [731] fsetxattr(fd=374, name=0x4, value=0x78d823f57000, size=0x3b3b3b3b, flags=0x3) = -1 (Bad address)
+[child1:1689] [732] fsync(fd=374) = -1 (Invalid argument)
+[child1:1689] [733] getrlimit(resource=0xe, rlim=0x78d821d71000) = 0
+[child1:1689] [734] dup3(oldfd=155, newfd=155, flags=0x0) = -1 (Invalid argument)
+[child1:1689] [735] readlinkat(dfd=155, pathname="/proc/sys/net/ipv6/conf/lo/max_desync_factor", buf=0x4, bufsiz=1) = -1 (Invalid argument)
+[child1:1689] [736] fsetxattr(fd=155, name=0x1, value=0x1, size=2577, flags=0x2) = -1 (Bad address)
+[child1:1689] [737] get_robust_list(pid=1759, head_ptr=0x1, len_ptr=0x78d823f58000) = -1 (Operation not permitted)
+[child1:1689] [738] writev(fd=155, vec=0xba8ff79dfe0, vlen=242) = -1 (Bad file descriptor)
+[child1:1689] [739] unlink(pathname="/proc/sys/kernel/watchdog") = -1 (Permission denied)
+[child1:1689] [740] pread64(fd=155, buf=0x8, count=1288, pos=112) = 0
+[child1:1689] [741] eventfd(count=102) = 405
+[child1:1689] [742] sync_file_range(fd=155, offset=-6, nbytes=0, flags=0xff000) = -1 (Invalid argument)
+[child1:1689] [743] sendmsg(fd=343, msg=0xba8ff77ed10, flags=0x828) = -1 (Message too long)
+[child1:1689] [744] [32BIT] mq_notify(mqdes=155, u_notification=0x4) = -1 (Bad address)
+[child1:1689] [745] getxattr(pathname="/proc/1270/task/1270/fdinfo/25", name=0x78d823f59000, value=0x78d823f59000, size=8) = -1 (Operation not supported)
+[child1:1689] [746] sched_yield() = 0
+[child1:1689] [747] dup(fildes=155) = 406
+[child1:1689] [748] getcwd(buf=0x78d821d71000, size=18) = 16
+[child1:1689] [749] getcwd(buf=0x78d823f57000, size=0xffff) = 16
+[child1:1689] [750] lseek(fd=289, offset=0x4008180200, whence=0x3) = -1 (Illegal seek)
+[child1:1689] [751] getdents(fd=289, dirent=0x78d823f56000, count=238) = -1 (Not a directory)
+[child1:1689] [752] getrusage(who=1, ru=0x8) = -1 (Bad address)
+[child1:1689] [753] openat(dfd=289, filename="/proc/sys/net/ipv4/neigh/default/unres_qlen", flags=0x1, mode=0) = -1 (Permission denied)
+[child1:1689] [754] [32BIT] setsid() = -1 (Operation not permitted)
+[child1:1689] [755] chroot(filename="/proc/731/stat") = -1 (Not a directory)
+[child1:1689] [756] readv(fd=289, vec=0xba8ff77ec90, vlen=123) = 0xfe97
+[child1:1689] [757] munlockall() = 0
+[child1:1689] [758] [32BIT] newstat(filename="/proc/cgroups", statbuf=0x4) = -1 (Bad address)
+[child1:1689] [759] clock_gettime(which_clock=0x40000000, tp=0x78d822171000) = -1 (Invalid argument)
+[child1:1689] [760] listen(fd=289, backlog=-1) = -1 (Socket operation on non-socket)
+[child1:1689] [761] sendfile(out_fd=289, in_fd=352, offset=0x78d821d71000, count=0xdffde) = -1 (Bad file descriptor)
+[child1:1689] [762] swapoff(path="/proc/735/task/735/net/connector") = -1 (Operation not permitted)
+[child1:1689] [763] mprotect(start=0x78d823f5b000, len=0xde000, prot=0x100000b) = -1 (Invalid argument)
+[child1:1689] [764] read(fd=289, buf=0x78d823f56000, count=4096) = 4096
+[child1:1689] [765] fstatfs(fd=22, buf=0x1) = -1 (Bad address)
+[child1:1689] [766] rt_sigpending(set=0x78d823f58000, sigsetsize=0xe012900a810) = -1 (Invalid argument)
+[child1:1689] [767] semctl(semid=0x500000800000000, semnum=52, cmd=0xc7c7, arg=9) = -1 (Invalid argument)
+[child1:1689] [768] getrusage(who=-1, ru=0x0) = -1 (Bad address)
+[child1:1689] [769] syslog(type=0x0, buf=0x78d823f58000, len=0) = -1 (Operation not permitted)
+[child1:1689] [770] chroot(filename="/proc/irq/5/node") = -1 (Not a directory)
+[child1:1689] [771] lsetxattr(pathname="/proc/sys/net/ipv4/conf/lo/shared_media", name=0x1, value=0x1, size=248, flags=0x2) = -1 (Bad address)
+[child1:1689] [772] [32BIT] sched_getscheduler(pid=0) = 0
+[child1:1689] [773] times(tbuf=0x78d822371000) = 0x666611ce
+[child1:1689] [774] futimesat(dfd=288, filename="/proc/sys/net/ipv4/neigh/lo", utimes=0x78d823f56000) = -1 (Operation not permitted)
+[child1:1689] [775] lchown(filename="/proc/1270/attr/current", user=0xffffefff, group=0x810a5b) = -1 (Operation not permitted)
+[child1:1689] [776] [32BIT] io_cancel(ctx_id=77, iocb=0x78d823f56000, result=0x78d823f56000) = -1 (Bad address)
+[child1:1689] [777] prlimit64(pid=1729, resource=0x3f1261d9fa, new_rlim=0x1, old_rlim=0x2) = -1 (Bad address)
+[child1:1689] [778] utime(filename="/proc/732/task/732/stat", times=0x8) = -1 (Bad address)
+[child1:1689] [779] getitimer(which=0x370b7c4c7b3e, value=0x78d823f57000) = -1 (Invalid argument)
+[child1:1689] [780] mlock2(start=0x78d824096000, len=0) = 0
+[child1:1689] [781] getegid() = 1000
+[child1:1689] [782] sysinfo(info=0x78d821d71000) = 0
+[child1:1689] [783] pkey_free(key=0) = -1 (Invalid argument)
+[child1:1689] [784] creat(pathname="/proc/sys/net/ipv6/conf/eth0/ndisc_notify", mode=174) = -1 (Permission denied)
+[child1:1689] [785] setgroups(gidsetsize=114, grouplist=0x78d824096000) = -1 (Operation not permitted)
+[child1:1689] [786] madvise(start=0x78d823f40000, len_in=0, advice=0x4) = 0
+[child1:1689] [787] seccomp(op=0x1, flags=0x1, uargs=0x8) = -1 (Invalid argument)
+[child1:1689] [788] setresgid(rgid=-5, egid=0xbbe8b2, sgid=0xfff9) = -1 (Operation not permitted)
+[child1:1689] [789] getcwd(buf=0x78d822471000, size=8) = -1 (Numerical result out of range)
+[child1:1689] [790] semget(key=164, nsems=0x800000000000, semflg=0xa00000000000057) = -1 (No such file or directory)
+[child1:1689] [791] request_key(_type=0x78d823f41000, _description=0x78d823f56000, _callout_info=0x78d823f56004, destringid=0xfffffffffffffffb) = -1 (Required key not available)
+[child1:1689] [792] recvfrom(fd=351, ubuf=0x4, size=4096, flags=0xe0000ef9, addr=0xba8ff79dfe0, addr_len=1534) = -1 (Invalid argument)
+[child1:1689] [793] eventfd2(count=4, flags=0x80001) = 407
+[child1:1689] [794] getpgid(pid=1689) = 1689
+[child1:1689] [795] writev(fd=288, vec=0xba8ff77ecd0, vlen=81) = 0x8568a
+[child1:1689] [796] fanotify_init(flags=0x3, event_f_flags=0) = -1 (Operation not permitted)
+[child1:1689] [797] epoll_ctl(epfd=288, op=0x3, fd=18, event=0xba8ff734090) = -1 (Invalid argument)
+[child1:1689] [798] unshare(unshare_flags=0x10000) = 0
+[child1:1689] [799] rt_sigtimedwait(uthese=-9, uinfo=0x1, uts=0x78d823f5b000, sigsetsize=0x78d823f5b000) = -1 (Invalid argument)
+[child1:1689] [800] capget(header=0x5000, dataptr=0xffffff6f03fbe88e) = -1 (Bad address)
+[child1:1689] [801] fallocate(fd=353, mode=0x1a, offset=0x7cbbf0, len=0xfffffffff8255800) = -1 (Invalid argument)
+[child1:1689] [802] sched_get_priority_min(policy=22) = -1 (Invalid argument)
+[child1:1689] [803] inotify_init1(flags=0x80000) = 408
+[child1:1689] [804] semget(key=0xad5552c8e4, nsems=-2, semflg=-234) = -1 (Invalid argument)
+[child1:1689] [805] poll(ufds=0xba8ff6ec670, nfds=4, timeout_msecs=0) = 4
+[child1:1689] [806] getrandom(buf=0x78d822171000, count=0xb4000, flags=0x1) = -1 (Invalid argument)
+[child1:1689] [807] capset(header=0xffffff59, data=-9) = -1 (Bad address)
+[child1:1689] [808] [32BIT] fchmod(fd=353, mode=40) = 0
+[child1:1689] [809] uname(name=0x78d823f56000) = 0
+[child1:1689] [810] fallocate(fd=353, mode=0x4, offset=4096, len=8) = -1 (Operation not supported)
+[child1:1689] [811] execve(name="/proc/sys/net/ipv6/conf/eth0/regen_max_retry", argv=0xba8ff77ed50, envp=0xba8ff77ede0) = -1 (Permission denied)
+[child1:1689] [812] fsync(fd=294) = -1 (Invalid argument)
+[child1:1689] [813] setxattr(pathname="/proc/sys/net/ipv6/conf/lo/accept_ra_defrtr", name=0x78d823f40000, value=0x78d821d71000, size=0x589800, flags=0x1) = -1 (Numerical result out of range)
+[child1:1689] [814] delete_module(name_user=0x78d822471000, flags=-9) = -1 (Operation not permitted)
+[child1:1689] [815] ppoll(ufds=0xba8ff734050, nfds=0, tsp=0xba8ff734010, sigmask=0x78d822371000, sigsetsize=128) = -1 (Invalid argument)
+[child1:1689] [816] msgrcv(msqid=0xa4a4a4a4a4a4a4a4, msgp=0x78d823f56000, msgsz=6029, msgtyp=-7, msgflg=0x2000) = -1 (Invalid argument)
+[child1:1689] [817] setns(fd=294, nstype=0x44000000) = -1 (Invalid argument)
+[child1:1689] [818] recvfrom(fd=348, ubuf=0x4, size=1, flags=0x0, addr=0xba8ff77ed10, addr_len=110) [child1:1689] [818] getcpu(cpup=0x78d821f71000, nodep=0x78d823f56000, unused=0x78d823f56000) = 0
+[child1:1689] [819] flock(fd=13, cmd=0x5796b7bd11066d89) = -1 (Invalid argument)
+[child1:1689] [820] add_key(_type=0xba8fdfa4bf7, _description=0x78d823f57004, _payload=0x78d822471000, plen=4, ringid=0xfffffffffffffffc) = -1 (Invalid argument)
+[child1:1689] [821] [32BIT] acct(name=0x78d822471000) = -1 (Operation not permitted)
+[child1:1689] [822] fgetxattr(fd=13, name=0x78d823f5b000, value=0x78d823f5b008, size=8) = -1 (Numerical result out of range)
+[child1:1689] [823] getrusage(who=-4, ru=0x78d823f5b000) = -1 (Invalid argument)
+[child1:1689] [824] setpgid(pid=0, pgid=0x6df413ca25d2b540) = -1 (Operation not permitted)
+[child1:1689] [825] gettimeofday(tv=0x78d821d71000, tz=0x78d821d71001) = 0
+[child1:1689] [826] seccomp(op=0x0, flags=0x0, uargs=0x0) = 0
+[child1:1689] [827] readv(fd=13, vec=0xba8ff77ed90, vlen=213) = -1 (Invalid argument)
+[child1:1689] [828] getitimer(which=0xfffd, value=0x4) = -1 (Invalid argument)
+[child1:1689] [829] link(oldname="/proc/731/task/731/net/stat", newname="/proc/1270/fdinfo/28") = -1 (File exists)
+[child1:1689] [830] dup(fildes=13) = 409
+[child1:1689] [831] epoll_ctl(epfd=13, op=0x1, fd=356, event=0xba8ff733f90) = -1 (Operation not permitted)
+[child1:1689] [832] fstatat64(dfd=13, filename="/proc/sys/net/ipv6/neigh/default/proxy_delay", statbuf=0x4, flag=0) = -1 (Bad address)
+[child1:1689] [833] pwritev(fd=13, vec=0xba8ff77ed90, vlen=47, pos_l=10, pos_h=0x32000000000000d4) = -1 (Illegal seek)
+[child1:1689] [834] io_setup(nr_events=-9, ctxp=0x0) = -1 (Bad address)
+[child1:1689] [835] chown(filename="/proc/sys/kernel/pty", user=0x2000000000000, group=0xae1a532250c3) = -1 (Operation not permitted)
+[child1:1689] [836] semget(key=0x300000000000ffff, nsems=-7, semflg=-10) = -1 (Invalid argument)
+[child1:1689] [837] personality(personality=35) = 0x25088210
+[child1:1689] [838] inotify_init() = 410
+[child1:1689] [839] request_key(_type=0x78d822471000, _description=0x78d822471008, _callout_info=0x78d822471008, destringid=0xfffffffffffffffd) = -1 (Required key not available)
+[child1:1689] [840] mkdirat(dfd=13, pathname="/proc/1270/task/1270/fdinfo/23", mode=7) = -1 (File exists)
+[child1:1689] [841] capset(header=-9, data=0x400000000) = -1 (Bad address)
+[child1:1689] [842] access(filename="/proc/732/task/732/attr/sockcreate", mode=10) = -1 (Invalid argument)
+[child1:1689] [843] setgid(gid=63) = -1 (Operation not permitted)
+[child1:1689] [844] set_mempolicy(mode=0xffffffffffff8181, nmask=0x78d822371000, maxnode=1) = -1 (Invalid argument)
+[child1:1689] [845] socket(family=31, type=3, protocol=5) = -1 (Address family not supported by protocol)
+[child1:1689] [846] acct(name=0x78d823f57000) = -1 (Operation not permitted)
+[child1:1689] [847] name_to_handle_at(fd=364, name=0x0, handle=0x8, mnt_id=0x78d821f71000, flag=0x100) = -1 (Invalid argument)
+[child1:1689] [848] preadv(fd=364, vec=0xba8ff77edd0, vlen=61, pos_l=0x11a1609, pos_h=0x8a1a1a1a1a1a1a1) = 0
+[child1:1689] [849] flistxattr(fd=364, list=0x78d821c71000, size=0) = 0
+[child1:1689] [850] faccessat(dfd=364, filename="/dev/vfio", mode=4) = 0
+[child1:1689] [851] timerfd_gettime(ufd=364, otmr=0x1) = -1 (Invalid argument)
+[child1:1689] [852] sendmsg(fd=334, msg=0xba8ff77edd0, flags=0x6) = -1 (Invalid argument)
+[child1:1689] [853] reboot(magic1=0xffdba16b9a79d1cb, magic2=0x112d0cca3ccc0, cmd=27, arg=0x4) = -1 (Operation not permitted)
+[child1:1689] [854] sched_rr_get_interval(pid=1779, interval=0x4) = -1 (Bad address)
+[child1:1689] [855] fchdir(fd=364) = -1 (Not a directory)
+[child1:1689] [856] lchown(filename="/proc/irq/24/spurious", user=0xfffffffc00000000, group=-1766) = -1 (Operation not permitted)
+[child1:1689] [857] shmctl(shmid=-4097, cmd=0x0, buf=0x78d823f57000) = -1 (Invalid argument)
+[child1:1689] [858] sched_getscheduler(pid=1779) = 0
+[child1:1689] [859] mq_unlink(u_name=0x78d822371000) = -1 (No such file or directory)
+[child1:1689] [860] migrate_pages(pid=1, maxnode=0xb4b4b4b4b4b4, old_nodes=0x8, new_nodes=0x78d823f5a000) = -1 (Invalid argument)
+[child1:1689] [861] quotactl(cmd=-3, special=0x78d823f57000, id=0xdcf62493adb0, addr=0x78d823f57001) = -1 (No such file or directory)
+[child1:1689] [862] lgetxattr(pathname="/proc/731/task/731/net/ax25_route", name=0x78d822471000, value=0x78d822471008, size=0) = -1 (Operation not supported)
+[child1:1689] [863] name_to_handle_at(fd=357, name=0x0, handle=0x78d823f57000, mnt_id=0x78d821d71000, flag=0xffffffffffffff9c) = -1 (Invalid argument)
+[child1:1689] [864] name_to_handle_at(fd=357, name=0x4, handle=0x78d821d71000, mnt_id=0x78d821d71004, flag=0x1300) = -1 (Invalid argument)
+[child1:1689] [865] [32BIT] inotify_init1(flags=0x0) = 411
+[child1:1689] [866] [32BIT] epoll_pwait(epfd=357, events=0x1, maxevents=1024, timeout=0) = -1 (Invalid argument)
+[child1:1689] [867] [32BIT] lstat64(filename="/proc/1270/task/1270/net/netlink", statbuf=0x78d822371000) = -1 (Bad address)
+[child1:1689] [868] name_to_handle_at(fd=357, name=0x1, handle=0x2, mnt_id=0x3, flag=0x100) = -1 (Invalid argument)
+[child1:1689] [869] [32BIT] unlinkat(dfd=357, pathname="/proc/fs/ext4/vda1/mb_groups", flag=4098) = -1 (Invalid argument)
+[child1:1689] [870] open(filename="/proc/sys/net/ipv4/conf/all/disable_policy", flags=0x4000, mode=0) = -1 (Invalid argument)
+[child1:1689] [871] set_robust_list(head=0x78d823f56000, len=24) = 0
+[child1:1689] [872] membarrier(cmd=0x0, flags=0) = 1
+[child1:1689] [873] rmdir(pathname="/proc/sys/vm/dirty_background_ratio/") = -1 (Permission denied)
+[child1:1689] [874] mknod(filename="/proc/732/task/732/net/softnet_stat", mode=406, dev=0) = -1 (File exists)
+[child1:1689] [875] sysfs(option=0x3, arg1=69, arg2=255) = 22
+[child1:1689] [876] sched_getscheduler(pid=0) = 0
+[child1:1689] [877] reboot(magic1=0xf0f0f0f0f0f0f0, magic2=0x10000, cmd=-10, arg=0x78d821d71000) = -1 (Operation not permitted)
+[child1:1689] [878] init_module(umod=0x78d822471000, len=0x2c93c, uargs=0x78d823f57000) = -1 (Operation not permitted)
+[child1:1689] [879] mbind(start=0x78d822171000, len=0x1a4000, mode=0x4002, nmask=0x78d821d71000, maxnode=0x8000, flags=0x4) = -1 (Invalid argument)
+[child1:1689] [880] semtimedop(semid=0x40000000000, tsops=0x4, nsops=0x1e1e1e1e1e1e1e1e, timeout=0x4) = -1 (Argument list too long)
+[child1:1689] [881] pipe(fildes=0x78d822171000) = 0
+[child1:1689] [882] clock_gettime(which_clock=-3, tp=0x78d823f5a000) = 0
+[child1:1689] [883] getcwd(buf=0x78d822171000, size=4) = -1 (Numerical result out of range)
+[child1:1689] [884] sched_setattr(pid=1759, uattr=0x1) = -1 (Invalid argument)
+[child1:1689] [885] [32BIT] unlinkat(dfd=357, pathname="/proc/sys/vm/stat_interval", flag=0) = -1 (Bad address)
+[child1:1689] [886] remap_file_pages(start=0x78d82252d000, size=0xfffffffffffb6997, prot=0, pgoff=0x79659900, flags=0x10000) = -1 (Invalid argument)
+[child1:1689] [887] signalfd4(ufd=357, user_mask=0x78d821f71000, sizemask=0x9c0024205c8, flags=0x0) = -1 (Invalid argument)
+[child1:1689] [888] mkdir(pathname="/proc/sys/kernel/sched_domain/cpu0/domain0/max_interval", mode=447) = -1 (File exists)
+[child1:1689] [889] fanotify_mark(fanotify_fd=357, flags=0x2, mask=0x8000019, dfd=277, pathname="/proc/sys/net/ipv6/conf/default/router_solicitations") = -1 (Invalid argument)
+[child1:1689] [890] signalfd4(ufd=283, user_mask=0x78d821c71000, sizemask=0xfff6, flags=0x80800) = -1 (Invalid argument)
+[child1:1689] [891] recvmsg(fd=324, msg=0x78d823f5a000, flags=0x10810) = -1 (Message too long)
+[child1:1689] [892] openat(dfd=283, filename="/proc/731/fd", flags=0x610801, mode=666) = -1 (Permission denied)
+[child1:1689] [893] getsockopt(fd=339, level=0x6cf0dd41245, optname=223, optval=0x0, optlen=0xfffc) = -1 (Operation not supported)
+[child1:1689] [894] mkdir(pathname="/proc/sys/fs/mqueue/msgsize_max", mode=257) = -1 (File exists)
+[child1:1689] [895] dup3(oldfd=283, newfd=283, flags=0x80000) = -1 (Invalid argument)
+[child1:1689] [896] chdir(filename="/proc/731/task/731/net/ip6_flowlabel") = -1 (Not a directory)
+[child1:1689] [897] [32BIT] ssetmask(newmask=-9) = 0
+[child1:1689] [898] mlockall(flags=0x5) = -1 (Cannot allocate memory)
+[child1:1689] [899] preadv2(fd=283, vec=0xba8ff77ee10, vlen=204, pos_l=218, pos_h=0x3b3b3b3b3b3b3b, flags=0x1) = -1 (Illegal seek)
+[child1:1689] [900] splice(fd_in=283, off_in=0x0, fd_out=283, off_out=0x78d824096000, len=0xfff7, flags=0x7) = -1 (Bad file descriptor)
+[child1:1689] [901] keyctl(cmd=0xa, arg2=0x900010110e0, arg3=191, arg4=0x797979797979, arg5=0) = -1 (Bad address)
+[child1:1689] [902] times(tbuf=0x78d823f57000) = 0x66661235
+[child1:1689] [903] mlock2(start=0x78d823f41000, len=0) = 0
+[child1:1689] [904] setreuid(ruid=-159, euid=0xffffffc1cc8a5069) = -1 (Operation not permitted)
+[child1:1689] [905] sigaltstack(uss=0x78d821f71000, uoss=0x78d822171000, regs=0x78d823f5b000) = -1 (Invalid argument)
+[child1:1689] [906] personality(personality=-5) = 35
+[child1:1689] [907] add_key(_type=0xba8fdfa4cb4, _description=0x78d821d71000, _payload=0x78d821d71001, plen=211, ringid=0xfffffffffffffffe) = 0x1f55b686
+[child1:1689] [908] rt_sigpending(set=0x78d823f56000, sigsetsize=0x53535353535353) = -1 (Invalid argument)
+[child1:1689] [909] sched_yield() = 0
+[child1:1689] [910] rt_tgsigqueueinfo(tgid=23, pid=1689, sig=0x42428272c70c55, uinfo=0x78d823f57000) = -1 (No such process)
+[child1:1689] [911] symlink(oldname="/proc/sys/vm/laptop_mode/", newname="/proc/731/mountstats") = -1 (File exists)
+[child1:1689] [912] [32BIT] chroot(filename="/proc/1270/task/1270/net/igmp6") = -1 (Bad address)
+[child1:1689] [913] delete_module(name_user=0x78d821f71000, flags=0x2000000000000000) = -1 (Operation not permitted)
+[child1:1689] [914] io_setup(nr_events=0x3cb4295c68cd418c, ctxp=0x78d821c71000) = -1 (Bad address)
+[child1:1689] [915] timer_settime(timer_id=39, flags=0x1, new_setting=0x4, old_setting=0x78d823f5b000) = -1 (Bad address)
+[child1:1689] [916] sendto(fd=346, buff=0xba8ff733d90, len=1, flags=0x5, addr=0xba8ff7a50d0, addr_len=408) = -1 (Invalid argument)
+[child1:1689] [917] [32BIT] getpgid(pid=0) = 1689
+[child1:1689] [918] pread64(fd=283, buf=0x0, count=3106, pos=93) = -1 (Illegal seek)
+[child1:1689] [919] dup2(oldfd=366, newfd=366) = 366
+[child1:1689] [920] prctl(option=22, arg2=2, arg3=0xba8ff733d50, arg4=0, arg5=0) = -1 (Permission denied)
+[child1:1689] [921] socketpair(family=1, type=0, protocol=0x100600000000004, usockvec=0xba8ff733d10) = -1 (Protocol not supported)
+[child1:1689] [922] umask(mask=0x5ee92222b83b) = 18
+[child1:1689] [923] mbind(start=0x78d824096000, len=0, mode=0x1, nmask=0x78d821d71000, maxnode=0x8000, flags=0x4) = -1 (Invalid argument)
+[child1:1689] [924] settimeofday(tv=0x78d823f56000, tz=0x78d823f56008) = -1 (Invalid argument)
+[child1:1689] [925] getsockopt(fd=345, level=51, optname=126, optval=0x78d823f56000, optlen=4096) = -1 (Protocol not available)
+[child1:1689] [926] [32BIT] setregid16(rgid=0x858585858585, egid=-1) = -1 (Operation not permitted)
+[child1:1689] [927] clock_getres(which_clock=0x100000000, tp=0x8) = -1 (Bad address)
+[child1:1689] [928] setpriority(which=32, who=0xa9cb4a073354, niceval=0x200000000) = -1 (Invalid argument)
+[child1:1689] [929] [32BIT] fchmod(fd=366, mode=20) = 0
+[child1:1689] [930] [32BIT] mbind(start=0x78d821f71000, len=0x4c000, mode=0x2, nmask=0x0, maxnode=0x8000, flags=0x0) = -1 (Invalid argument)
+[child1:1689] [931] msync(start=0x78d821f71000, len=0x1be000, flags=0x1) = 0
+[child1:1689] [932] mremap(addr=0x78d823f40000, old_len=0, new_len=4096, flags=0x2, new_addr=0x1540000000) = -1 (Invalid argument)
+[child1:1689] [933] sched_get_priority_min(policy=-108) = -1 (Invalid argument)
+[child1:1689] [934] read(fd=366, buf=0x78d823f56000, count=4096) = 0
+[child1:1689] [935] finit_module(fd=366, uargs=0x78d823f56000, flags=0x0) = -1 (Operation not permitted)
+[child1:1689] [936] ustat(dev=0x8000000080000000, ubuf=0x0) = -1 (Invalid argument)
+[child1:1689] [937] inotify_init() = 414
+[child1:1689] [938] sched_setaffinity(pid=0, len=4, user_mask_ptr=0x1) = -1 (Bad address)
+[child1:1689] [939] fanotify_mark(fanotify_fd=366, flags=0xe, mask=0x0, dfd=80, pathname="/proc/sys/kernel/sched_domain/cpu0/domain0") = -1 (Invalid argument)
+[child1:1689] [940] shutdown(fd=366, how=0x0) = -1 (Socket operation on non-socket)
+[child1:1689] [941] timer_gettime(timer_id=-8192, setting=0x4) = -1 (Invalid argument)
+[child1:1689] [942] getcwd(buf=0x78d823f57000, size=4) = -1 (Numerical result out of range)
+[child1:1689] [943] times(tbuf=0x78d823f56000) = 0x66661235
+[child1:1689] [944] io_getevents(ctx_id=-1, min_nr=8, nr=8, events=0x78d821f71000, timeout=0x78d823f5b000) = -1 (Invalid argument)
+[child1:1689] [945] newlstat(filename="/proc/731/task/731/net/igmp", statbuf=0x8) = -1 (Bad address)
+[child1:1689] [946] readlink(path="/proc/sys/kernel/modules_disabled", buf=0x1, bufsiz=16382) = -1 (Invalid argument)
+[child1:1689] [947] add_key(_type=0xba8fdfa4bff, _description=0x78d822471008, _payload=0x78d821f71000, plen=4096, ringid=0xfffffffffffffffb) = -1 (No such device)
+[child1:1689] [948] mq_notify(mqdes=285, u_notification=0x78d821d71000) = -1 (Bad file descriptor)
+[child1:1689] [949] time(tloc=0x78d821f71000) = 0x59133e04
+[child1:1689] [950] mknodat(dfd=285, filename="/proc/1270/task/1270/attr/fscreate", mode=0xffffffff810000ff, dev=0x1f43a0f8) = -1 (File exists)
+[child1:1689] [951] getcwd(buf=0x78d823f5b000, size=8) = -1 (Numerical result out of range)
+[child1:1689] [952] dup3(oldfd=285, newfd=285, flags=0x80000) = -1 (Invalid argument)
+[child1:1689] [953] rename(oldname="/proc/sys/net/ipv4/route/error_cost/", newname="/proc/sys/fs/epoll/max_user_watches") = -1 (Not a directory)
+[child1:1689] [954] [32BIT] mq_timedsend(mqdes=285, u_msg_ptr=0x78d824097000, msg_len=4096, msg_prio=0x6a6a, u_abs_timeout=0x78d824097000) = -1 (Bad address)
+[child1:1689] [955] [32BIT] membarrier(cmd=0x0, flags=0) = 1
+[child1:1689] [956] chown(filename="/proc/735/net/ipv6_route", user=50, group=0x171717171717) = -1 (Operation not permitted)
+[child1:1689] [957] preadv(fd=285, vec=0xba8ff77eee0, vlen=88, pos_l=0xfffc, pos_h=0x1c1408e1349203) = 1733
+[child1:1689] [958] [32BIT] mlock2(start=0x78d822171000, len=0x1a3000) = -1 (Cannot allocate memory)
+[child1:1689] [959] fdatasync(fd=360) = 0
+[child1:1689] [960] getrandom(buf=0x78d823f5b000, count=0xb0000, flags=0x3) = -1 (Invalid argument)
+[child1:1689] [961] open(filename="/proc/asound/oss/sndstat", flags=0xa4201, mode=0) = -1 (Permission denied)
+[child1:1689] [962] inotify_init() = 415
+[child1:1689] [963] semctl(semid=0xfffb, semnum=-1, cmd=0x400000, arg=0) = -1 (Invalid argument)
+[child1:1689] [964] perf_event_open(attr_uptr=0xba8ff77ef20, pid=360, cpu=-1, group_fd=-1, flags=0xfe) = -1 (Invalid argument)
+[child1:1689] [965] eventfd(count=1) = 416
+[child1:1689] [966] prctl(option=22, arg2=2, arg3=0xba8ff733cd0, arg4=0, arg5=0) = -1 (Permission denied)
+[child1:1689] [967] setrlimit(resource=0x78d821c71000, rlim=124) = -1 (Bad address)
+[child1:1689] [968] membarrier(cmd=0x0, flags=0) = 1
+[child1:1689] [969] acct(name=0x78d822171000) = -1 (Operation not permitted)
+[child1:1689] [970] mlockall(flags=0x2) = 0
+[child1:1689] [971] faccessat(dfd=360, filename="/proc/sys/net/ipv4/neigh/default/gc_thresh3", mode=100) = -1 (Invalid argument)
+[child1:1689] [972] io_setup(nr_events=0x45221cbb0e, ctxp=0x0) = -1 (Bad address)
+[child1:1689] [973] sched_setaffinity(pid=1, len=0x5191, user_mask_ptr=0x0) = -1 (Bad address)
+[child1:1689] [974] setreuid(ruid=0x802100, euid=0x2f5f30dcec) = -1 (Operation not permitted)
+[child1:1689] [975] munmap(addr=0x78d8223dd000, len=4096) = 0
+[child1:1689] [976] setsockopt(fd=346, level=41, optname=50, optval=0xba8ff7a60e0, optlen=20) = 0
+[child1:1689] [977] getgroups(gidsetsize=-164, grouplist=0x8) = -1 (Invalid argument)
+[child1:1689] [978] getpgid(pid=0) = 1689
+[child1:1689] [979] sched_rr_get_interval(pid=1759, interval=0x0) = -1 (Bad address)
+[child1:1689] [980] select(n=0, inp=0xba8ff77f0e0, outp=0xba8ff77f170, exp=0xba8ff77f200, tvp=0xba8ff733c90) = 0
+[child1:1689] [981] sync() = 0
+[child1:1689] [982] ioctl(fd=13, cmd=0xc06855c8, arg=128) = -1 (Inappropriate ioctl for device)
+[child1:1689] [983] write(fd=13, buf=0xba8ff733c50, count=1) = -1 (Invalid argument)
+[child1:1689] [984] remap_file_pages(start=0x78d82231b000, size=4096, prot=0, pgoff=0, flags=0x0) = 0
+[child1:1689] [985] reboot(magic1=228, magic2=54, cmd=0, arg=0x8) = -1 (Operation not permitted)
+[child1:1689] [986] sched_getscheduler(pid=1) = 0
+[child1:1689] [987] sched_getscheduler(pid=1) = 0
+[child1:1689] [988] epoll_wait(epfd=13, events=0x1, maxevents=0, timeout=0xc4c4c4c4c4c4c4c5) = -1 (Invalid argument)
+[child1:1689] [989] personality(personality=0xc4c4c4c4c4c4c4) = 0xfffffffb
+[child1:1689] [990] [32BIT] clock_settime(which_clock=-6, tp=0x78d822171000) = -1 (Bad address)
+[child1:1689] [991] setresgid(rgid=4096, egid=193, sgid=-5) = -1 (Operation not permitted)
+[child1:1689] [992] [32BIT] getgroups16(gidsetsize=0x200000000, grouplist=0x8) = 8
+[child1:1689] [993] io_cancel(ctx_id=0x1000000, iocb=0x78d822171000, result=0x78d823f56000) = -1 (Invalid argument)
+[child1:1689] [994] sched_getscheduler(pid=1695) = 0
+[child1:1689] [995] pwritev(fd=13, vec=0xba8ff7a60e0, vlen=229, pos_l=0x4000000000000, pos_h=122) = -1 (Illegal seek)
+[child1:1689] [996] setgroups(gidsetsize=-2, grouplist=0x78d823f5b000) = -1 (Operation not permitted)
+[child1:1689] [997] [32BIT] inotify_init() = 417
+[child1:1689] [998] epoll_pwait(epfd=13, events=0x78d823f40000, maxevents=0, timeout=0x2000000) = -1 (Invalid argument)
+[child1:1689] [999] settimeofday(tv=0x78d824096000, tz=0x78d824096000) = -1 (Invalid argument)
+[child1:1689] [1000] semctl(semid=54, semnum=0x4e8be7924a889c9f, cmd=0xfffc, arg=227) = -1 (Invalid argument)
+[child1:1689] [1001] capget(header=0xdbdbdbdbdbdbdbdb, dataptr=0) = -1 (Bad address)
+[child1:1689] [1002] mq_timedreceive(mqdes=13, u_msg_ptr=0x4, msg_len=0x14f547d, u_msg_prio=0x78d823f57000, u_abs_timeout=0x78d823f57000) = -1 (Bad file descriptor)
+[child1:1689] [1003] getsockopt(fd=323, level=0xb008101f022d05, optname=-5, optval=0x4, optlen=127) = -1 (Protocol not available)
+[child1:1689] [1004] timer_create(which_clock=0x800000004080000, timer_event_spec=0x78d821c71000, create_timer_id=0x78d821c71004) = -1 (Invalid argument)
+[child1:1689] [1005] socket(family=37, type=5, protocol=0) = -1 (Address family not supported by protocol)
+[child1:1689] [1006] setsid() = -1 (Operation not permitted)
+[child1:1689] [1007] name_to_handle_at(fd=13, name=0x78d823f57000, handle=0x78d823f57000, mnt_id=0x78d823f57000, flag=0x1000) = -1 (Not a directory)
+[child1:1689] [1008] timer_settime(timer_id=102, flags=0x1, new_setting=0x78d823f57000, old_setting=0x78d823f58000) = -1 (Invalid argument)
+[child1:1689] [1009] signalfd4(ufd=280, user_mask=0x0, sizemask=52, flags=0x0) = -1 (Invalid argument)
+[child1:1689] [1010] chmod(filename="/proc/asound/cards", mode=1000) = -1 (Operation not permitted)
+[child1:1689] [1011] timer_gettime(timer_id=0xaeaeaeaeae, setting=0x4) = -1 (Invalid argument)
+[child1:1689] [1012] ustat(dev=0x7d743eb299, ubuf=0x0) = -1 (Invalid argument)
+[child1:1689] [1013] sendmsg(fd=324, msg=0xba8ff77f1a0, flags=0x3) = -1 (Operation not supported)
+[child1:1689] [1014] get_mempolicy(policy=0x78d821d71000, nmask=0x78d822171000, maxnode=240, addr=0x78d821d71000, flags=0x0) = -1 (Invalid argument)
+[child1:1689] [1015] faccessat(dfd=280, filename="/proc/735/task/735/personality", mode=0) = 0
+[child1:1689] [1016] mincore(start=0x78d823f5a000, len=0, vec=0xba8ff7a60e0) = 0
+[child1:1689] [1017] sched_getscheduler(pid=1) = 0
+[child1:1689] [1018] execveat(fd=280, name="/proc/731/net/ax25_route", argv=0xba8ff77f120, envp=0xba8ff77f210, flags=0x0) = -1 (Permission denied)
+[child1:1689] [1019] mlock2(start=0x78d823f5a000, len=0) = 0
+[child1:1689] [1020] [32BIT] clock_adjtime(which_clock=13, utx=0x78d824097000) = -1 (Bad address)
+[child1:1689] [1021] syncfs(fd=280) = 0
+[child1:1689] [1022] keyctl(cmd=0xa, arg2=0x4e00126cc78040, arg3=4096, arg4=0xb4b4b4b4b4b4, arg5=0x2f9b31bc442c) = -1 (Bad address)
+[child1:1689] [1023] listxattr(pathname="/proc/735/environ", list=0x4, size=1) = 0
+[child1:1689] [1024] swapon(path="/proc/1270/task/1270/io", swap_flags=0x10000) = -1 (Operation not permitted)
+[child1:1689] [1025] fchdir(fd=280) = -1 (Not a directory)
+[child1:1689] [1026] fdatasync(fd=280) = -1 (Invalid argument)
+[child1:1689] [1027] mbind(start=0x78d821d71000, len=0x6c000, mode=0x2, nmask=0x1, maxnode=0x8000, flags=0x1) = -1 (Bad address)
+[child1:1689] [1028] rt_tgsigqueueinfo(tgid=138, pid=1, sig=0xffffffffa0001000, uinfo=0x4) = -1 (Bad address)
+[child1:1689] [1029] poll(ufds=0xba8ff77f120, nfds=8, timeout_msecs=0) = 5
+[child1:1689] [1030] [32BIT] fremovexattr(fd=28, name=0x8) = -1 (Bad address)
+[child1:1689] [1031] sched_get_priority_max(policy=-5) = -1 (Invalid argument)
+[child1:1689] [1032] setns(fd=28, nstype=0x0) = -1 (Invalid argument)
+[child1:1689] [1033] sigaltstack(uss=0x78d822171000, uoss=0x78d822171001, regs=0x78d822171005) = -1 (Invalid argument)
+[child1:1689] [1034] get_mempolicy(policy=0x78d821f71000, nmask=0x78d823f57000, maxnode=510, addr=0x78d823f57000, flags=0x2) = 0
+[child1:1689] [1035] recvfrom(fd=313, ubuf=0x0, size=0x5000, flags=0x20057e01, addr=0xba8ff733b10, addr_len=16) = -1 (Resource temporarily unavailable)
+[child1:1689] [1036] fstatfs(fd=21, buf=0x78d823f5b000) = 0
+[child1:1689] [1037] mknodat(dfd=21, filename="/proc/734/net/dev_mcast", mode=0xc43b754ba7d087, dev=-5) = -1 (Invalid argument)
+[child1:1689] [1038] umask(mask=203) = 59
+[child1:1689] [1039] inotify_add_watch(fd=21, pathname="/proc/735", mask=0x0) = -1 (Invalid argument)
+[child1:1689] [1040] bind(fd=348, umyaddr=0xba8ff733a50, addrlen=16) = -1 (Invalid argument)
+[child1:1689] [1041] msgsnd(msqid=-1, msgp=0x0, msgsz=1, msgflg=0x2000) = -1 (Bad address)
+[child1:1689] [1042] io_destroy(ctx=0x9621) = -1 (Invalid argument)
+[child1:1689] [1043] pwritev(fd=21, vec=0xba8ff77f120, vlen=93, pos_l=215, pos_h=8) = -1 (Illegal seek)
+[child1:1689] [1044] inotify_init1(flags=0x80000) = 418
+[child1:1689] [1045] readlinkat(dfd=21, pathname="/proc/irq/6", buf=0x0, bufsiz=0) = -1 (Invalid argument)
+[child1:1689] [1046] chown(filename="/proc/sys/net/ipv6/conf/eth0/autoconf", user=0x202020202020202, group=163) = -1 (Operation not permitted)
+[child1:1689] [1047] getpriority(which=0x2, who=1759) = -1 (No such process)
+[child1:1689] [1048] io_getevents(ctx_id=104, min_nr=0, nr=102, events=0x78d823f57000, timeout=0x78d824096000) = -1 (Invalid argument)
+[child1:1689] [1049] io_cancel(ctx_id=0x9c9c9c9c9c9c9c, iocb=0x4, result=0x5) = -1 (Bad address)
+[child1:1689] [1050] fremovexattr(fd=21, name=0x78d821f71000) = -1 (Numerical result out of range)
+[child1:1689] [1051] get_mempolicy(policy=0x78d823f59000, nmask=0x78d822171000, maxnode=511, addr=0x78d821f71000, flags=0x6) = -1 (Invalid argument)
+[child1:1689] [1052] epoll_ctl(epfd=21, op=0x3, fd=371, event=0xba8ff7339d0) = -1 (Invalid argument)
+[child1:1689] [1053] getgroups(gidsetsize=0xffffffff8100ffff, grouplist=0x1) = -1 (Invalid argument)
+[child1:1689] [1054] [32BIT] getxattr(pathname="/proc/sys/net/ipv4/conf/lo/medium_id", name=0x8, value=0x8, size=1) = -1 (Bad address)
+[child1:1689] [1055] sched_getaffinity(pid=0, len=0, user_mask_ptr=0x78d823f58000) = -1 (Invalid argument)
+[child1:1689] [1056] [32BIT] sync() = 0
+[child1:1689] [1057] pivot_root(new_root=0x78d823f40000, put_old=0x78d823f56000) = -1 (Operation not permitted)
+[child1:1689] [1058] ftruncate(fd=23, length=3646) = -1 (Invalid argument)
+[child1:1689] [1059] timer_gettime(timer_id=256, setting=0x4) = -1 (Invalid argument)
+[child1:1689] [1060] getitimer(which=-9, value=0x78d823f58000) = -1 (Invalid argument)
+[child1:1689] [1061] fsetxattr(fd=23, name=0x78d822471000, value=0x78d822471001, size=4096, flags=0x1) = -1 (Permission denied)
+[child1:1689] [1062] accept(fd=331, upeer_sockaddr=0xba8ff77f160, upeer_addrlen=110) = -1 (Operation not supported)
+[child1:1689] [1063] [32BIT] execve(name="/proc/sys/net/ipv6/conf/eth0/use_oif_addrs_only", argv=0xba8ff77f220, envp=0xba8ff77f2f0) = -1 (Bad address)
+[child1:1689] [1064] finit_module(fd=23, uargs=0x4, flags=0x1) = -1 (Operation not permitted)
+[child1:1689] [1065] chdir(filename="/proc/irq/14/affinity_hint") = -1 (Not a directory)
+[child1:1689] [1066] connect(fd=336, uservaddr=0xba8ff77f1e0, addrlen=110) = -1 (Invalid argument)
+[child1:1689] [1067] sendmmsg(fd=344, mmsg=0x1, vlen=2046, flags=0x4) = -1 (Bad address)
+[child1:1689] [1068] inotify_rm_watch(fd=23, wd=253) = -1 (Invalid argument)
+[child1:1689] [1069] getpgid(pid=1693) = 1693
+[child1:1689] [1070] rt_sigpending(set=0x78d822171000, sigsetsize=0x58700000) = -1 (Invalid argument)
+[child1:1689] [1071] inotify_init1(flags=0x0) = 419
+[child1:1689] [1072] setresgid(rgid=212, egid=4, sgid=120) = -1 (Operation not permitted)
+[child1:1689] [1073] readlinkat(dfd=23, pathname="/proc/sys/net/ipv4/icmp_ignore_bogus_error_responses", buf=0x1, bufsiz=4096) = -1 (Invalid argument)
+[child1:1689] [1074] swapoff(path="/proc/sys/kernel/sched_domain/cpu1/domain0/idle_idx") = -1 (Operation not permitted)
+[child1:1689] [1075] [32BIT] shutdown(fd=23, how=0x3) = -1 (Socket operation on non-socket)
+[child1:1689] [1076] fsync(fd=23) = -1 (Invalid argument)
+[child1:1689] [1077] pivot_root(new_root=0x78d823f56000, put_old=0x78d823f56000) = -1 (Operation not permitted)
+[child1:1689] [1078] [32BIT] init_module(umod=0x78d823f56000, len=-4, uargs=0x78d821d71000) = -1 (Operation not permitted)
+[child1:1689] [1079] fchdir(fd=23) = -1 (Not a directory)
+[child1:1689] [1080] futimesat(dfd=23, filename="/proc/732/task/732/net/protocols", utimes=0x4) = -1 (Bad address)
+[child1:1689] [1081] umount(name="/proc/sys/kernel/sched_domain/cpu1/domain0/imbalance_pct", flags=0x0) = -1 (Operation not permitted)
+[child1:1689] [1082] rt_sigpending(set=0x78d823f57000, sigsetsize=1) = 0
+[child1:1689] [1083] settimeofday(tv=0x78d822171000, tz=0x78d822171001) = -1 (Operation not permitted)
+[child1:1689] [1084] execve(name="/proc/irq/28/affinity_hint", argv=0xba8ff733990, envp=0xba8ff77f2a0) = -1 (Permission denied)
+[child1:1689] [1085] io_destroy(ctx=0x5000) = -1 (Invalid argument)
+[child1:1689] [1086] ioperm(from=0x6ed3a90d47f4b8a4, num=203, turn_on=0x1d0f5c475e8cc7) = -1 (Invalid argument)
+[child1:1689] [1087] sched_setattr(pid=0, uattr=0x0) = -1 (Invalid argument)
+[child1:1689] [1088] clock_adjtime(which_clock=13, utx=0x8) = -1 (Invalid argument)
+[child1:1689] [1089] sysinfo(info=0x78d823f57000) = 0
+[child1:1689] [1090] openat(dfd=292, filename="/proc/731/net/arp", flags=0x5f5e82, mode=666) = -1 (Not a directory)
+[child1:1689] [1091] mq_notify(mqdes=292, u_notification=0x4) = -1 (Bad address)
+[child1:1689] [1092] getpeername(fd=306, usockaddr=0xba8ff6ec600, usockaddr_len=38) = -1 (Transport endpoint is not connected)
+[child1:1689] [1093] quotactl(cmd=0x800000000, special=0x78d823f56000, id=4, addr=0x78d823f56004) = -1 (No such file or directory)
+[child1:1689] [1094] munlockall() = 0
+[child1:1689] [1095] epoll_create(size=249) = 420
+[child1:1689] [1096] sched_get_priority_min(policy=1) = 1
+[child1:1689] [1097] signalfd4(ufd=292, user_mask=0x1, sizemask=-189, flags=0x80000) = -1 (Invalid argument)
+[child1:1689] [1098] utimes(filename="/proc/sys/net/ipv4/ip_nonlocal_bind", utimes=0x78d821d71000) = -1 (Operation not permitted)
+[child1:1689] [1099] getrusage(who=47, ru=0x78d821f71000) = -1 (Invalid argument)
+[child1:1689] [1100] sched_getattr(pid=1729, param=0x78d822171000, size=48) = -1 (Invalid argument)
+[child1:1689] [1101] fallocate(fd=19, mode=0x4, offset=255, len=4) = -1 (Operation not supported)
+[child1:1689] [1102] utime(filename=".//proc/sys/net/ipv4/tcp_available_congestion_control/", times=0x78d823f41000) = -1 (No such file or directory)
+[child1:1689] [1103] setxattr(pathname="/proc/sys/kernel/printk_devkmsg", name=0x4, value=0x78d821c71000, size=1, flags=0x3) = -1 (Bad address)
+[child1:1689] [1104] symlinkat(oldname="/proc/sys/net/ipv4/conf/eth0/src_valid_mark", newdfd=19, newname="/proc/732/task/732/net/ax25") = -1 (File exists)
+[child1:1689] [1105] mlock2(start=0x78d822471000, len=0x1d000) = -1 (Cannot allocate memory)
+[child1:1689] [1106] readlink(path="/proc/sys/net/ipv4/conf/eth0/log_martians", buf=0x78d822371000, bufsiz=3875) = -1 (Invalid argument)
+[child1:1689] [1107] add_key(_type=0xba8fdfa4cb4, _description=0x78d823f57001, _payload=0x78d821d71000, plen=0xe000, ringid=0xfffffffffffffffe) = -1 (Invalid argument)
+[child1:1689] [1108] msgget(key=-6, msgflg=-4) = 0xd801b
+[child1:1689] [1109] times(tbuf=0x78d821c71000) = -1 (Bad address)
+[child1:1689] [1110] setns(fd=19, nstype=0x48000000) = -1 (Invalid argument)
+[child1:1689] [1111] timer_delete(timer_id=227) = -1 (Invalid argument)
+[child1:1689] [1112] getuid() = 1000
+[child1:1689] [1113] signalfd4(ufd=19, user_mask=0x78d823f5b000, sizemask=145, flags=0x0) = -1 (Invalid argument)
+[child1:1689] [1114] semtimedop(semid=0x2000000000000, tsops=0x8, nsops=-4097, timeout=0x10) = -1 (Invalid argument)
+[child1:1689] [1115] pread64(fd=19, buf=0x8, count=1924, pos=0x420000000000fff7) = 0
+[child1:1689] [1116] execve(name="/proc/sys/net/ipv4/ipfrag_high_thresh", argv=0xba8ff733910, envp=0xba8ff77f2e0) = -1 (Permission denied)
+[child1:1689] [1117] mq_timedsend(mqdes=19, u_msg_ptr=0x78d823f41000, msg_len=1, msg_prio=25, u_abs_timeout=0x78d823f41001) = -1 (Invalid argument)
+[child1:1689] [1118] futex(uaddr=0x78d822471000, op=0x2, val=0x28282828282828, utime=0x78d821d71000, uaddr2=0x78d821f71000, val3=0x7000) = -1 (Function not implemented)
+[child1:1689] [1119] [32BIT] eventfd2(count=4, flags=0x80000) = 421
+[child1:1689] [1120] setresgid(rgid=2, egid=0x7fffffff00000008, sgid=0x64b915d02918ca2c) = -1 (Operation not permitted)
+[child1:1689] [1121] [32BIT] link(oldname="/proc/sys/net/ipv6/conf/lo/temp_prefered_lft", newname="/proc/sys/kernel/timer_migration") = -1 (Bad address)
+[child1:1689] [1122] [32BIT] sched_setscheduler(pid=0, policy=0x3, param=0x0) = -1 (Invalid argument)
+[child1:1689] [1123] mq_open(u_name=0x78d821f71000, oflag=0x800000000000, mode=1002, u_attr=0x78d821f71001) = -1 (No such file or directory)
+[child1:1689] [1124] [32BIT] sgetmask() = 0xfffffffffffbfef7
+[child1:1689] [1125] fsync(fd=19) = 0
+[child1:1689] [1126] acct(name=0x78d822471000) = -1 (Operation not permitted)
+[child1:1689] [1127] unlinkat(dfd=62, pathname="/proc/sys/net/ipv4/conf/all/src_valid_mark", flag=-3) = -1 (Invalid argument)
+[child1:1689] [1128] [32BIT] writev(fd=62, vec=0xba8ff77f320, vlen=116) = -1 (Bad file descriptor)
+[child1:1689] [1129] set_mempolicy(mode=0xc000, nmask=0x1, maxnode=187) = -1 (Invalid argument)
+[child1:1689] [1130] fsetxattr(fd=62, name=0x78d821d71000, value=0x78d824097000, size=178, flags=0x2) = -1 (Permission denied)
+[child1:1689] [1131] reboot(magic1=0xd5d5d5d5d5d5, magic2=0x5000000000000010, cmd=-8, arg=0x1) = -1 (Operation not permitted)
+[child1:1689] [1132] setdomainname(name=0x78d823f57000, len=3200) = -1 (Operation not permitted)
+[child1:1689] [1133] getrandom(buf=0x78d823f59000, count=0, flags=0x1) = -1 (Invalid argument)
+[child1:1689] [1134] chdir(filename="/proc/sys/kernel/panic_on_unrecovered_nmi") = -1 (Not a directory)
+[child1:1689] [1135] mq_unlink(u_name=0x78d821f71000) = -1 (No such file or directory)
+[child1:1689] [1136] [32BIT] request_key(_type=0x78d823f57000, _description=0x78d823f57000, _callout_info=0x78d823f57004, destringid=0xfffffffffffffffa) = -1 (Bad address)
+[child1:1689] [1137] timer_settime(timer_id=209, flags=0x1, new_setting=0x78d823f40000, old_setting=0x78d823f40004) = -1 (Invalid argument)
+[child1:1689] [1138] lseek(fd=62, offset=-10, whence=0x3) = -1 (Invalid argument)
+[child1:1689] [1139] [32BIT] adjtimex(txc_p=0x78d821d71000) = -1 (Bad address)
+[child1:1689] [1140] lookup_dcookie(cookie64=0xfffd, buf=0x0, len=212) = -1 (Operation not permitted)
+[child1:1689] [1141] msgsnd(msqid=0x800020000802, msgp=0x0, msgsz=0x202001, msgflg=0x0) = -1 (Bad address)
+[child1:1689] [1142] shmget(key=0xffff878787878788, size=4092, shmflg=256) = -1 (No such file or directory)
+[child1:1689] [1143] membarrier(cmd=0x0, flags=0) = 1
+[child1:1689] [1144] chdir(filename="/proc/732/task/732/net/igmp") = -1 (Not a directory)
+[child1:1689] [1145] setsid() = -1 (Operation not permitted)
+[child1:1689] [1146] pipe(fildes=0x78d822471000) = 0
+[child1:1689] [1147] epoll_ctl(epfd=62, op=0x1, fd=289, event=0xba8ff7338d0) = -1 (Invalid argument)
+[child1:1689] [1148] sched_setaffinity(pid=0, len=8, user_mask_ptr=0x78d821f71000) = -1 (Invalid argument)
+[child1:1689] [1149] shutdown(fd=62, how=0x0) = -1 (Socket operation on non-socket)
+[child1:1689] [1150] mmap(addr=0, len=0, prot=0xa[PROT_WRITE|PROT_SEM], flags=0x27132, fd=-1, off=0) = -1 (Invalid argument)
+[child1:1689] [1151] umask(mask=0x1a3f3e5ee4) = 203
+[child1:1689] [1152] statfs(pathname="/proc/irq/12", buf=0x0) = -1 (Bad address)
+[child1:1689] [1153] getrandom(buf=0x78d823f40000, count=0, flags=0x0) = -1 (Invalid argument)
+[child1:1689] [1154] [32BIT] setsockopt(fd=307, level=0x5ac65668, optname=184, optval=0, optlen=4) = -1 (Protocol not available)
+[child1:1689] [1155] swapoff(path="/proc/731/task/731/net/mcfilter6") = -1 (Operation not permitted)
+[child1:1689] [1156] lgetxattr(pathname="/proc/1270/personality", name=0x78d821c71000, value=0x78d822471000, size=214) = -1 (Bad address)
+[child1:1689] [1157] fstatfs(fd=62, buf=0x8) = -1 (Bad address)
+[child1:1689] [1158] setfsuid(uid=105) = 1000
+[child1:1689] [1159] newlstat(filename="/proc/sys/net/ipv4/conf/all/medium_id", statbuf=0x78d821c71000) = -1 (Bad address)
+[child1:1689] [1160] timer_delete(timer_id=0xfffffff7) = -1 (Invalid argument)
+[child1:1689] [1161] munlock(addr=0x78d821c71000, len=0xc5000) = 0
+[child1:1689] [1162] waitid(which=0x23809, upid=1759, infop=0x78d823f5a000, options=0xffffffff9f9f9f9f, ru=0x78d823f5a000) = -1 (Invalid argument)
+[child1:1689] [1163] [32BIT] setuid16(uid=0x2a2a2a) = -1 (Operation not permitted)
+[child1:1689] [1164] lgetxattr(pathname=".//proc/sys/net/ipv4/neigh/default/anycast_delay", name=0x78d823f56000, value=0x78d823f56004, size=0) = -1 (No such file or directory)
+[child1:1689] [1165] madvise(start=0x78d824097000, len_in=0, advice=0x10) = 0
+[child1:1689] [1166] iopl(level=115, regs=0x8) = -1 (Invalid argument)
+[child1:1689] [1167] acct(name=0x78d823f57000) = -1 (Operation not permitted)
+[child1:1689] [1168] timerfd_create(clockid=0x0, flags=0x80000) = 424
+[child1:1689] [1169] gettid() = 1689
+[child1:1689] [1170] delete_module(name_user=0x78d823f57000, flags=229) = -1 (Operation not permitted)
+[child1:1689] [1171] accept(fd=334, upeer_sockaddr=0xba8ff733810, upeer_addrlen=18) = -1 (Operation not supported)
+[child1:1689] [1172] syncfs(fd=18) = 0
+[child1:1689] [1173] clock_settime(which_clock=-1, tp=0x78d822471000) = -1 (Invalid argument)
+[child1:1689] [1174] [32BIT] chdir(filename="/proc/sys/net/ipv6/conf/eth0/force_mld_version") = -1 (Bad address)
+[child1:1689] [1175] shmat(shmid=-4, shmaddr=0x4, shmflg=-8) = -1 (Invalid argument)
+[child1:1689] [1176] mq_getsetattr(mqdes=18, u_mqstat=0x1, u_omqstat=0x5) = -1 (Bad address)
+[child1:1689] [1177] perf_event_open(attr_uptr=0xba8ff77f320, pid=-1, cpu=0, group_fd=-1, flags=0x1) = -1 (Permission denied)
+[child1:1689] [1178] acct(name=0x78d823f56000) = -1 (Operation not permitted)
+[child1:1689] [1179] unshare(unshare_flags=0x10200) = 0
+[child1:1689] [1180] mbind(start=0x78d823f5b000, len=0x5d000, mode=0x3, nmask=0x0, maxnode=0x8000, flags=0x3) = -1 (Invalid argument)
+[child1:1689] [1181] inotify_init() = 425
+[child1:1689] [1182] fcntl(fd=18, cmd=0x407, arg=0xdc0fc000) = -1 (Bad file descriptor)
+[child1:1689] [1183] timerfd_create(clockid=0x0, flags=0x80000) = 426
+[child1:1689] [1184] socketpair(family=1, type=0xefd6fd1908033f, protocol=-2, usockvec=0xba8ff7337d0) = -1 (Invalid argument)
+[child1:1689] [1185] lookup_dcookie(cookie64=0x60606060606, buf=0x78d823f57000, len=223) = -1 (Operation not permitted)
+[child1:1689] [1186] getitimer(which=0, value=0x4) = -1 (Bad address)
+[child1:1689] [1187] io_submit(ctx_id=119, nr=2, iocbpp=0x78d824096000) = -1 (Invalid argument)
+[child1:1689] [1188] mkdir(pathname="/proc/731/attr/prev", mode=200) = -1 (File exists)
+[child1:1689] [1189] fchdir(fd=18) = -1 (Not a directory)
+[child1:1689] [1190] accept(fd=348, upeer_sockaddr=0xba8ff6ec6e0, upeer_addrlen=36) = -1 (Operation not supported)
+[child1:1689] [1191] removexattr(pathname="/proc/irq/15/smp_affinity_list", name=0x8) = -1 (Bad address)
+[child1:1689] [1192] remap_file_pages(start=0x78d823f41000, size=4096, prot=0, pgoff=0, flags=0x0) = 0
+[child1:1689] [1193] pivot_root(new_root=0x78d821f71000, put_old=0x78d821f71001) = -1 (Operation not permitted)
+[child1:1689] [1194] getpeername(fd=310, usockaddr=0xba8ff733750, usockaddr_len=12) = -1 (Transport endpoint is not connected)
+[child1:1689] [1195] ftruncate(fd=18, length=130) = -1 (Invalid argument)
+[child1:1689] [1196] link(oldname="/proc/734/net/igmp", newname="/proc/sys/net/ipv4/conf/eth0/arp_ignore") = -1 (File exists)
+[child1:1689] [1197] newstat(filename="/dev/disk/by-partuuid", statbuf=0x78d823f59000) = 0
+[child1:1689] [1198] mremap(addr=0x78d824097000, old_len=0, new_len=4096, flags=0x0, new_addr=0) = -1 (Cannot allocate memory)
+[child1:1689] [1199] flock(fd=292, cmd=0x7ffffbff) = 0
+[child1:1689] [1200] getsockopt(fd=335, level=3550, optname=0x800000000, optval=0x0, optlen=0xff45) = -1 (Protocol not available)
+[child1:1689] [1201] mq_notify(mqdes=292, u_notification=0x8) = -1 (Bad address)
+[child1:1689] [1202] llistxattr(pathname="/proc/sys/fs/dir-notify-enable", list=0x78d823f5b000, size=33) = 0
+[child1:1689] [1203] getrandom(buf=0x78d821f71000, count=0x6a000, flags=0x0) = -1 (Invalid argument)
+[child1:1689] [1204] sethostname(name=0x78d823f56000, len=4096) = -1 (Operation not permitted)
+[child1:1689] [1205] utime(filename="/proc/734/net/sockstat6", times=0x78d822371000) = -1 (Operation not permitted)
+[child1:1689] [1206] settimeofday(tv=0x78d824097000, tz=0x78d824097004) = -1 (Operation not permitted)
+[child1:1689] [1207] sched_getaffinity(pid=0, len=8, user_mask_ptr=0x4) = -1 (Bad address)
+[child1:1689] [1208] readahead(fd=292, offset=-4, count=0x7d7d) = -1 (Bad file descriptor)
+[child1:1689] [1209] [32BIT] finit_module(fd=292, uargs=0x4, flags=0x1) = -1 (Operation not permitted)
+[child1:1689] [1210] [32BIT] timerfd_gettime(ufd=292, otmr=0x78d823f57000) = -1 (Invalid argument)
+[child1:1689] [1211] iopl(level=-3, regs=0x8) = -1 (Invalid argument)
+[child1:1689] [1212] lseek(fd=292, offset=0xa8a8a8a8a8a8, whence=0x0) = -1 (Illegal seek)
+[child1:1689] [1213] sched_setscheduler(pid=1694, policy=0x6, param=0x4) = -1 (Bad address)
+[child1:1689] [1214] fchmodat(dfd=292, filename="/proc/sys/net/ipv6/conf/all/proxy_ndp", mode=401) = -1 (Operation not permitted)
+[child1:1689] [1215] select(n=0, inp=0xba8ff77f360, outp=0xba8ff77f3f0, exp=0xba8ff77f480, tvp=0xba8ff733650) = 0
+[child1:1689] [1216] getresgid(rgid=0x78d823f57000, egid=0x78d823f57001, sgid=0x78d822371000) = 0
+[child1:1689] [1217] getgid() = 1000
+[child1:1689] [1218] open(filename="/proc/731/task/731/net/igmp6", flags=0x1, mode=1000) = -1 (Permission denied)
+[child1:1689] [1219] rt_sigpending(set=0x78d823f57000, sigsetsize=0x141414141414) = -1 (Invalid argument)
+[child1:1689] [1220] removexattr(pathname="/proc/sys/kernel/shmmax", name=0x78d821d71000) = -1 (Permission denied)
+[child1:1689] [1221] membarrier(cmd=0x0, flags=0) = 1
+[child1:1689] [1222] getsid(pid=1) = 1
+[child1:1689] [1223] [32BIT] eventfd2(count=8, flags=0x1) = 427
+[child1:1689] [1224] lookup_dcookie(cookie64=255, buf=0x4, len=208) = -1 (Operation not permitted)
+[child1:1689] [1225] ioctl(fd=292, cmd=0x4020940d, arg=0x78d821f71000) = -1 (Invalid cross-device link)
+[child1:1689] [1226] newlstat(filename="/proc/734/task/734/cmdline", statbuf=0x0) = -1 (Bad address)
+[child1:1689] [1227] getrlimit(resource=0xc, rlim=0x4) = -1 (Bad address)
+[child1:1689] [1228] umount(name="/proc/1270/attr/sockcreate", flags=0x0) = -1 (Operation not permitted)
+[child1:1689] [1229] setgid(gid=181) = -1 (Operation not permitted)
+[child1:1689] [1230] setregid(rgid=0x208000000000000, egid=178) = -1 (Operation not permitted)
+[child1:1689] [1231] ftruncate(fd=352, length=4096) = -1 (Invalid argument)
+[child1:1689] [1232] mbind(start=0x78d823f59000, len=0, mode=0x0, nmask=0x1, maxnode=0x8000, flags=0x2) = -1 (Bad address)
+[child1:1689] [1233] pwritev(fd=352, vec=0xba8ff7a60e0, vlen=196, pos_l=0x20000000000000, pos_h=-9) = -1 (Bad file descriptor)
+[child1:1689] [1234] poll(ufds=0xba8ff7335d0, nfds=1, timeout_msecs=0) = 1
+[child1:1689] [1235] setfsgid(gid=38) = 1000
+[child1:1689] [1236] clock_gettime(which_clock=-1, tp=0x78d823f40000) = -1 (Invalid argument)
+[child1:1689] [1237] [32BIT] flock(fd=352, cmd=0xffff880000010000) = -1 (Invalid argument)
+[child1:1689] [1238] utimes(filename="/proc/734/net/fib_trie", utimes=0x1) = -1 (Bad address)
+[child1:1689] [1239] [32BIT] getgid16() = 1000
+[child1:1689] [1240] fchdir(fd=352) = -1 (Not a directory)
+[child1:1689] [1241] unlinkat(dfd=352, pathname="/proc/sys/kernel/printk_devkmsg", flag=0xca1d68a044) = -1 (Invalid argument)
+[child1:1689] [1242] set_mempolicy(mode=0x74747474747474, nmask=0x4, maxnode=0xe6e6e6e6e6e6e6e6) = -1 (Invalid argument)
+[child1:1689] [1243] waitid(which=0xebebebebebeb, upid=1, infop=0x4, options=0x80d65f82055100f3, ru=0x8) = -1 (Invalid argument)
+[child1:1689] [1244] epoll_ctl(epfd=352, op=0x1, fd=352, event=0xba8ff733550) = -1 (Operation not permitted)
+[child1:1689] [1245] sched_setattr(pid=1, uattr=0x0) = -1 (Invalid argument)
+[child1:1689] [1246] [32BIT] sched_rr_get_interval(pid=0, interval=0x4) = -1 (Bad address)
+[child1:1689] [1247] semget(key=85, nsems=0x100000001e71dfe5, semflg=99) = -1 (Invalid argument)
+[child1:1689] [1248] accept(fd=302, upeer_sockaddr=0xba8ff77f3a0, upeer_addrlen=110) = -1 (Invalid argument)
+[child1:1689] [1249] getcpu(cpup=0x78d821f71000, nodep=0x78d823f56000, unused=0x78d823f58000) = 0
+[child1:1689] [1250] setfsuid(uid=-8) = 1000
+[child1:1689] [1251] [32BIT] symlinkat(oldname=".//proc/735/task/735/net/mcfilter6/", newdfd=283, newname="/proc/sys/net/ipv4/icmp_echo_ignore_broadcasts") = -1 (Bad address)
+[child1:1689] [1252] epoll_create(size=4096) = 428
+[child1:1689] [1253] getpid() = 1689
+[child1:1689] [1254] get_mempolicy(policy=0x78d821d71000, nmask=0x78d821d71000, maxnode=508, addr=0x78d821d71001, flags=0x0) = -1 (Invalid argument)
+[child1:1689] [1255] [32BIT] mincore(start=0x78d822471000, len=0xfb000, vec=0x78d821b70010) = -1 (Cannot allocate memory)
+[child1:1689] [1256] flock(fd=283, cmd=0x4000000) = -1 (Invalid argument)
+[child1:1689] [1257] setfsgid(gid=242) = 1000
+[child1:1689] [1258] sigaltstack(uss=0x78d823f56000, uoss=0x78d823f56000, regs=0x78d823f56001) = -1 (Invalid argument)
+[child1:1689] [1259] [32BIT] perf_event_open(attr_uptr=0xba8ff77f460, pid=283, cpu=0, group_fd=283, flags=0x6) = -1 (Permission denied)
+[child1:1689] [1260] shmget(key=0x1f3f3732af, size=0xffffffff81000001, shmflg=-9) = -1 (Invalid argument)
+[child1:1689] [1261] syncfs(fd=283) = 0
+[child1:1689] [1262] removexattr(pathname="/proc/734/net/dev", name=0x4) = -1 (Bad address)
+[child1:1689] [1263] ioprio_get(which=0x6e9a07a78f67, who=0x3a3a3a3a3a3a3a3a) = -1 (Invalid argument)
+[child1:1689] [1264] ioprio_get(which=189, who=-5) = -1 (Invalid argument)
+[child1:1689] [1265] sendto(fd=301, buff=0xba8ff7a70f0, len=2806, flags=0x3, addr=0xba8ff7a60e0, addr_len=3054) = -1 (Invalid argument)
+[child1:1689] [1266] migrate_pages(pid=0, maxnode=0x19f7254c04405290, old_nodes=0x8, new_nodes=0x8) = -1 (Invalid argument)
+[child1:1689] [1267] timer_getoverrun(timer_id=0xc08265e27cfda17e) = -1 (Invalid argument)
+[child1:1689] [1268] syslog(type=0x0, buf=0x78d823f58000, len=0) = -1 (Operation not permitted)
+[child1:1689] [1269] msync(start=0x78d822471000, len=0x55000, flags=0x3) = 0
+[child1:1689] [1270] signalfd(ufd=283, user_mask=0x8, sizemask=0x68100002) = -1 (Invalid argument)
+[child1:1689] [1271] mq_timedreceive(mqdes=32, u_msg_ptr=0x0, msg_len=4088, u_msg_prio=0x78d823f57000, u_abs_timeout=0x78d823f57000) = -1 (Bad file descriptor)
+[child1:1689] [1272] shmat(shmid=0x14004320, shmaddr=0x78d821f71000, shmflg=0x3a51cf48ba) = -1 (Invalid argument)
+[child1:1689] [1273] setns(fd=32, nstype=0x8000000) = -1 (Invalid argument)
+[child1:1689] [1274] getppid() = 1270
+[child1:1689] [1275] pwrite64(fd=32, buf=0xba8ff77f460, count=165, pos=0x7373) = -1 (Bad file descriptor)
+[child1:1689] [1276] copy_file_range(fd_in=32, off_in=8, fd_out=22, off_out=1, len=0, flags=0x0) = -1 (Bad address)
+[child1:1689] [1277] wait4(upid=0, stat_addr=0x0, options=0xbf7f068776, ru=0x78d821d71000) = -1 (Invalid argument)
+[child1:1689] [1278] io_getevents(ctx_id=934, min_nr=4, nr=4096, events=0x4, timeout=0x78d821d71000) = -1 (Invalid argument)
+[child1:1689] [1279] mq_notify(mqdes=32, u_notification=0x8) = -1 (Bad address)
+[child1:1689] [1280] fallocate(fd=32, mode=0x37, offset=1, len=0) = -1 (Invalid argument)
+[child1:1689] [1281] [32BIT] poll(ufds=0xba8ff77f460, nfds=7, timeout_msecs=0) = -1 (Bad address)
+[child1:1689] [1282] vmsplice(fd=289, iov=0xba8ff7a70f0, nr_segs=969, flags=0x4) = -1 (Bad address)
+[child1:1689] [1283] timerfd_gettime(ufd=354, otmr=0x4) = -1 (Invalid argument)
+[child1:1689] [1284] readlink(path="/proc/732/net/raw6", buf=0x4, bufsiz=4) = -1 (Invalid argument)
+[child1:1689] [1285] inotify_rm_watch(fd=354, wd=0xffbfffffffffffff) = -1 (Invalid argument)
+[child1:1689] [1286] ppoll(ufds=0xba8ff77f460, nfds=6, tsp=0xba8ff733490, sigmask=0x78d823f57000, sigsetsize=128) = -1 (Invalid argument)
+[child1:1689] [1287] sched_getattr(pid=1, param=0x78d823f5a000, size=3521) = -1 (Invalid argument)
+[child1:1689] [1288] seccomp(op=0x0, flags=0x0, uargs=0x0) = 0
+[child1:1689] [1289] sched_yield() = 0
+[child1:1689] [1290] rt_sigpending(set=0x78d821d71000, sigsetsize=0x178a075646242351) = -1 (Invalid argument)
+[child1:1689] [1291] sysinfo(info=0x78d823f57000) = 0
+[child1:1689] [1292] set_robust_list(head=0x78d823f59000, len=24) = 0
+[child1:1689] [1293] sched_getparam(pid=1694, param=0x4) = -1 (Bad address)
+[child1:1689] [1294] lseek(fd=291, offset=0x5000, whence=0x1) = -1 (Illegal seek)
+[child1:1689] [1295] umount(name="/proc/731/task/731/fdinfo/14", flags=0x0) = -1 (Operation not permitted)
+[child1:1689] [1296] io_destroy(ctx=0xe3e040d92f07) = -1 (Invalid argument)
+[child1:1689] [1297] timer_delete(timer_id=0xd7074000) = -1 (Invalid argument)
+[child1:1689] [1298] inotify_rm_watch(fd=291, wd=0xc2c2c2c2c2) = -1 (Invalid argument)
+[child1:1689] [1299] sched_getscheduler(pid=1693) = 0
+[child1:1689] [1300] sync() = 0
+[child1:1689] [1301] timer_settime(timer_id=0xffffff38df2c898d, flags=0x1, new_setting=0x78d823f57000, old_setting=0x78d822471000) = -1 (Invalid argument)
+[child1:1689] [1302] readv(fd=283, vec=0xba8ff7a70f0, vlen=143) 
