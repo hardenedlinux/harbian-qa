@@ -1,19 +1,27 @@
-# Make syzkaller kernel-state-sencitive
+# Make syzkaller a state-based guided fuzzer
 
 ## Code
+
 1. syz-executor patch: run a ebpf monitor before execute_one, read shared memory to get kernel socket state
 2. shm_monitor: load a ebpf text, monitor the socket state, write the state to the shared memory
 
+
 ## Goal
-Make the syzkaller as a kernel-state-sencitive fuzzer or state-guide fuzzer. The fuzzer should collect the progs which hit the same code coverage but with different kernel data state. Currently syzkaller only collect coverage information.
-I wonder if it's effective that make syzkaller more kernel-state-sencitive.
+
+Make the syzkaller as a kernel-state-awareness fuzzer or state-based guided fuzzer. The fuzzer should collect the progs which hit the same code coverage but with different kernel data state. Currently syzkaller only collect coverage information.
+
+I wonder if it's effective that make syzkaller more kernel-state-awareness.
 These code only implement: run a syz-execprog with socket monitor( ebpf).
+
 
 ## Customize
 ### ebpf, kernel data type
+
 ebpf text in ebpf/ebpf.go can be modify as your will. You can get any data you want by writing ebpf by yourself.  In my case, the socket state i want to get is a uint32. Actually, at first, i try to make it looks like a syzkaller coverage signal as fuzzer's feedback, but i failed.
 The state is maintained by state/state.go.
+
 ### kernel socket state
+
 parse/parse.go is only for making the socket state readable. Modify it refer to you ebpf text as your will.
 
 ## Example
