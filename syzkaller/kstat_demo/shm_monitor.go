@@ -1,3 +1,8 @@
+/* This is the old monitor, it can track socket state by sock_addr, but it's
+ * very slow. Because raw data collection and handling is complex. And  
+ * synchronize needs time too. I implement the other monitor pipe_monitor.go
+ */
+
 package main
 
 import (

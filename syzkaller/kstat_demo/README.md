@@ -2,22 +2,20 @@
 
 ## Code
 
-1. syz-executor patch: run a ebpf monitor before execute_one, read shared memory to get kernel socket state
-2. shm_monitor: load a ebpf text, monitor the socket state, write the state to the shared memory
-
+1. syz-executor patch: run a ebpf monitor before execute_one, read pipe/shared memory to get kernel socket state
+2. pipe_monitor/shm_monitor: load a ebpf text, monitor the socket state, feedback to syzkaller by using pipe/shared memory. pipe_monitor is more simple and efficient. But it can't track the socket.
 
 ## Goal
 
 Make the syzkaller as a kernel-state-awareness fuzzer or state-based guided fuzzer. The fuzzer should collect the progs which hit the same code coverage but with different kernel data state. Currently syzkaller only collect coverage information.
 
 I wonder if it's effective that make syzkaller more kernel-state-awareness.
-These code only implement: run a syz-execprog with socket monitor( ebpf).
+I finish collecting the some socket state and feedback to syzkaller currently. Use the coverage signal interface.
 
 
 ## Customize
 ### ebpf, kernel data type
-
-ebpf text in ebpf/ebpf.go can be modify as your will. You can get any data you want by writing ebpf by yourself.  In my case, the socket state i want to get is a uint32. Actually, at first, i try to make it looks like a syzkaller coverage signal as fuzzer's feedback, but i failed.
+ebpf text in ebpf/ebpftext.go can be modify as your will. You can get any data you want by writing ebpf by yourself.  In my case, the socket state i want is a uint64, fill with kprobe point(a specify num) and sk->__sk_flags ...  
 The state is maintained by state/state.go.
 
 ### kernel socket state
@@ -25,6 +23,8 @@ The state is maintained by state/state.go.
 parse/parse.go is only for making the socket state readable. Modify it refer to you ebpf text as your will.
 
 ## Example
+pipe_monitor can run well with patched syzkaller( patch_executor_pipe.patch). Without any different compared to original syzkaller's using. But you need write your ebpf to collect state.
+This is a example run patched execproc( patch_for_syz_executor.patch) with shm_monitor.
 ```  
 # bin/linux_amd64/syz-execprog -executor=./bin/linux_amd64/syz-executor -cover=1 -threaded=0 -procs=1 --debug 06def8c2645148cb881aff26e222a886db9e1d72 
 2019/01/09 04:34:14 parsed 1 programs

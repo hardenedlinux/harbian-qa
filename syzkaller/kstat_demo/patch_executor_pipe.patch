@@ -1,0 +1,317 @@
+diff --git a/executor/common.h b/executor/common.h
+index 49a2cbd6..c8a32548 100644
+--- a/executor/common.h
++++ b/executor/common.h
+@@ -476,7 +476,7 @@ again:
+ #endif
+ 
+ #if SYZ_EXECUTOR || SYZ_REPEAT
+-static void execute_one(void);
++static void execute_one(int monpipe);
+ #if SYZ_EXECUTOR_USES_FORK_SERVER
+ #include <signal.h>
+ #include <sys/types.h>
+@@ -492,7 +492,7 @@ static void execute_one(void);
+ static void reply_handshake();
+ #endif
+ 
+-static void loop(void)
++static void loop(int monpipe)
+ {
+ #if SYZ_HAVE_SETUP_LOOP
+ 	setup_loop();
+@@ -553,7 +553,7 @@ static void loop(void)
+ #if SYZ_EXECUTOR && SYZ_EXECUTOR_USES_SHMEM
+ 			close(kOutPipeFd);
+ #endif
+-			execute_one();
++			execute_one(monpipe);
+ #if SYZ_HAVE_RESET_TEST
+ 			reset_test();
+ #endif
+diff --git a/executor/common_linux.h b/executor/common_linux.h
+index 00c78c6a..318ae5bc 100644
+--- a/executor/common_linux.h
++++ b/executor/common_linux.h
+@@ -1487,7 +1487,7 @@ static void setup_common()
+ #include <sys/time.h>
+ #include <sys/wait.h>
+ 
+-static void loop();
++static void loop(int monpipe);
+ 
+ static void sandbox_common()
+ {
+@@ -1561,6 +1561,8 @@ static int do_sandbox_none(void)
+ 	// and they are usually run under non-root.
+ 	// Also since debug is stripped by pkg/csource, we need to do {}
+ 	// even though we generally don't do {} around single statements.
++
++        /* Filter by using cmdline isn't so accurate, but it's simple */
+ 	if (unshare(CLONE_NEWPID)) {
+ 		debug("unshare(CLONE_NEWPID): %d\n", errno);
+ 	}
+@@ -1579,7 +1581,29 @@ static int do_sandbox_none(void)
+ #if SYZ_EXECUTOR || SYZ_ENABLE_NETDEV
+ 	initialize_netdevices();
+ #endif
+-	loop();
++	/* rawSignal is a single int, use pipe is ok */
++	int monpipefd[2];
++	int ret = pipe(monpipefd);
++	if (ret < 0)
++	  fail("Pipe create failed\n");
++
++	int monpid = fork();
++	if (monpid == 0) {
++	  prctl(PR_SET_PDEATHSIG, SIGINT);
++	  dup2(monpipefd[1], STDOUT_FILENO);
++	  /* For reading monitor log print */
++	  close(monpipefd[0]);
++	  close(monpipefd[1]);
++	  debug("single ebpf start ...\n");
++	  execl("/root/pipe_monitor", "/root/pipe_monitor", NULL);
++	  return 0;
++	}
++	/* ebpf loading is very slow, one time a vm restart */
++	sleep(6);
++
++	close(monpipefd[1]);
++	/*Only sandbox_none, feed zero to others sandbox_* */
++	loop(monpipefd[0]);
+ 	doexit(1);
+ }
+ #endif
+@@ -1624,7 +1648,7 @@ static int do_sandbox_setuid(void)
+ 	// See task_dump_owner function in kernel.
+ 	prctl(PR_SET_DUMPABLE, 1, 0, 0, 0);
+ 
+-	loop();
++	loop(0);
+ 	doexit(1);
+ }
+ #endif
+@@ -1747,7 +1771,7 @@ static int namespace_sandbox_proc(void* arg)
+ 	if (syscall(SYS_capset, &cap_hdr, &cap_data))
+ 		fail("capset failed");
+ 
+-	loop();
++	loop(0);
+ 	doexit(1);
+ }
+ 
+@@ -1902,7 +1926,7 @@ static int do_sandbox_android_untrusted_app(void)
+ 	initialize_netdevices();
+ #endif
+ 
+-	loop();
++	loop(0);
+ 	doexit(1);
+ }
+ #endif
+diff --git a/executor/executor.cc b/executor/executor.cc
+index 68c98155..73d85203 100644
+--- a/executor/executor.cc
++++ b/executor/executor.cc
+@@ -203,6 +203,7 @@ struct thread_t {
+ 	uint32 reserrno;
+ 	bool fault_injected;
+ 	cover_t cov;
++        int monpipe;
+ };
+ 
+ static thread_t threads[kMaxThreads];
+@@ -284,7 +285,7 @@ struct kcov_comparison_t {
+ 	bool operator<(const struct kcov_comparison_t& other) const;
+ };
+ 
+-static thread_t* schedule_call(int call_index, int call_num, bool colliding, uint64 copyout_index, uint64 num_args, uint64* args, uint64* pos);
++static thread_t* schedule_call(int call_index, int call_num, bool colliding, uint64 copyout_index, uint64 num_args, uint64* args, uint64* pos, int monpipe);
+ static void handle_completion(thread_t* th);
+ static void copyout_call_results(thread_t* th);
+ static void write_call_output(thread_t* th, bool finished);
+@@ -541,8 +542,24 @@ void reply_execute(int status)
+ }
+ 
+ // execute_one executes program stored in input_data.
+-void execute_one()
++void execute_one(int monpipe)
+ {
++  /* Set the monpipe to NOBLOCK fd */
++  if(fcntl(monpipe, F_SETFL, O_NONBLOCK) < 0)
++    fail("Failed to set O_NONBLOCK");
++  int n = 0;
++  char buf[0x11];
++  int ret = 17;
++  /* There may be some remnant data should be cleared */
++  while(ret > 0 || n < 100) {
++    ret = read(monpipe, buf, sizeof(buf));
++    if(ret > 0) {
++      n = 0;
++    }
++    n++;
++  }
++  debug("Pipe is clear now!\n");
++
+ 	// Duplicate global collide variable on stack.
+ 	// Fuzzer once come up with ioctl(fd, FIONREAD, 0x920000),
+ 	// where 0x920000 was exactly collide address, so every iteration reset collide to 0.
+@@ -662,8 +679,12 @@ retry:
+ 			args[i] = read_arg(&input_pos);
+ 		for (uint64 i = num_args; i < 6; i++)
+ 			args[i] = 0;
++		/* Attach the monpipe to thread_t
++		 * so pipe can be used
++		 * in write_coverage_signal
++		 */
+ 		thread_t* th = schedule_call(call_index++, call_num, colliding, copyout_index,
+-					     num_args, args, input_pos);
++					     num_args, args, input_pos, monpipe);
+ 
+ 		if (colliding && (call_index % 2) == 0) {
+ 			// Don't wait for every other call.
+@@ -721,23 +742,26 @@ retry:
+ 	}
+ 
+ 	if (flag_collide && !flag_inject_fault && !colliding && !collide) {
+-		debug("enabling collider\n");
++	        debug("enabling collider\n");
+ 		collide = colliding = true;
+ 		goto retry;
+ 	}
+ }
+ 
+-thread_t* schedule_call(int call_index, int call_num, bool colliding, uint64 copyout_index, uint64 num_args, uint64* args, uint64* pos)
++thread_t* schedule_call(int call_index, int call_num, bool colliding, uint64 copyout_index, uint64 num_args, uint64* args, uint64* pos, int monpipe)
+ {
+ 	// Find a spare thread to execute the call.
+ 	int i;
+ 	for (i = 0; i < kMaxThreads; i++) {
+ 		thread_t* th = &threads[i];
+-		if (!th->created)
++		if (!th->created) {
+ 			thread_create(th, i);
++			th->monpipe = monpipe;
++		}
+ 		if (event_isset(&th->done)) {
+ 			if (th->executing)
+ 				handle_completion(th);
++			th->monpipe = monpipe;
+ 			break;
+ 		}
+ 	}
+@@ -782,14 +806,48 @@ void write_coverage_signal(thread_t* th, uint32* signal_count_pos, uint32* cover
+ 		prev = hash(pc);
+ 		if (dedup(sig))
+ 			continue;
+-		write_output(sig);
+-		nsig++;
++		/* Enable coverage signal is OK */
++		//write_output(sig);
++		//nsig++;
++	}
++	debug("Reading ...\n");
++	/* 64bit hex and a '\n' */
++	char buf[0x11];
++	int ret = 0x11, n= 0;
++	/* Be sure the signal of a syscall is really read */
++	while(ret > 0 || n < 1000) {
++	  memset(buf, 0, sizeof(buf));
++	  ret = read(th->monpipe, buf, sizeof(buf));
++	  uint64_t sig = 0;
++	  if(ret > 0) {
++	    sig = strtol(buf, NULL, 16);
++	    if (dedup(sig))
++	      continue;
++	    write_output(sig);
++	    debug("A state signal %016lx\n", sig);
++	    n = 0;
++	    nsig++;
++	  }
++	  sig = 0;
++	  n++;
+ 	}
++	/* VM check will failed because no signal
++	 * so i need to feed it with fake signal
++	 * May have a better way?
++	 */
++	write_output(0xffffffff);
++	nsig++;
++	write_output(0xffffffff);
++	nsig++;
++
+ 	// Write out number of signals.
+ 	*signal_count_pos = nsig;
+ 
+-	if (!flag_collect_cover)
++	if (!flag_collect_cover) {
++	        debug("First run, no coverage\n");
+ 		return;
++	}
++	debug("Run for collect coverage\n");
+ 	// Write out real coverage (basic block PCs).
+ 	uint32 cover_size = th->cov.size;
+ 	if (flag_dedup_cover) {
+@@ -800,7 +858,7 @@ void write_coverage_signal(thread_t* th, uint32* signal_count_pos, uint32* cover
+ 	// Truncate PCs to uint32 assuming that they fit into 32-bits.
+ 	// True for x86_64 and arm64 without KASLR.
+ 	for (uint32 i = 0; i < cover_size; i++)
+-		write_output(cover_data[i]);
++	        write_output(cover_data[i]);
+ 	*cover_count_pos = cover_size;
+ }
+ #endif
+diff --git a/tools/create-openbsd-gce-ci.sh b/tools/create-openbsd-gce-ci.sh
+index f5903f16..e3ebfecd 100755
+--- a/tools/create-openbsd-gce-ci.sh
++++ b/tools/create-openbsd-gce-ci.sh
+@@ -29,11 +29,9 @@ fi
+ rm -fr etc && mkdir -p etc
+ cat >install.site <<EOF
+ #!/bin/sh
+-syspatch
+ PKGS="bash gcc git gmake go llvm nano wget"
+ PKG_PATH=https://${MIRROR}/pub/OpenBSD/${DOWNLOAD_VERSION}/packages/${ARCH}/ pkg_add -I \$PKGS
+-PKG_PATH=http://firmware.openbsd.org/firmware/snapshots/ pkg_add vmm-firmware
+-PKG_PATH= pkg_info -I \$PKGS vmm-firmware && echo pkg_add OK
++PKG_PATH= pkg_info -I \$PKGS && echo pkg_add OK
+ 
+ echo 'set tty com0' > boot.conf
+ echo 'PasswordAuthentication no' >> /etc/ssh/sshd_config
+@@ -55,9 +53,6 @@ cat >etc/rc.local <<EOF
+   echo "starting syz-ci"
+   fsck -y /dev/sd1a
+   mount /syzkaller
+-  mkdir -p /syzkaller/ramdisk
+-  mount -t mfs -o-s=10G /dev/sd0b /syzkaller/ramdisk
+-  chown syzkaller:syzkaller /syzkaller/ramdisk
+   su -l syzkaller <<EOF2
+     cd /syzkaller
+     set -eux
+@@ -74,17 +69,6 @@ cat >etc/rc.conf.local <<EOF
+ slaacd_flags=NO
+ smtpd_flags=NO
+ sndiod_flags=NO
+-vmd_flags=
+-EOF
+-
+-cat >etc/vm.conf <<EOF
+-vm "syzkaller" {
+-  disable
+-  disk "/dev/null"
+-  local interface
+-  owner syzkaller
+-  allow instance { boot, disk, memory }
+-}
+ EOF
+ 
+ cat >etc/sysctl.conf <<EOF
+@@ -207,7 +191,6 @@ Done.
+ To create GCE image run the following commands:
+ 
+ gsutil cp -a public-read "$i" gs://syzkaller/
+-gcloud compute images create ci-openbsd-root --source-uri gs://syzkaller/"$i" \\
+-    --licenses "https://www.googleapis.com/compute/v1/projects/vm-options/global/licenses/enable-vmx"
++gcloud compute images create ci-openbsd-root --source-uri gs://syzkaller/"$i"
+ 
+ EOF
