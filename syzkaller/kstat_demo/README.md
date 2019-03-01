@@ -5,7 +5,8 @@
 1. syz-executor patch: run a ebpf monitor before execute_one, read pipe/shared memory to get kernel socket state
 2. pipe_monitor/shm_monitor: load a ebpf text, monitor the socket state, feedback to syzkaller by using pipe/shared memory. pipe_monitor is more simple and efficient. But it can't track the socket.
 
-* The patch base on upstream commit 0b29b7f95253d645
+* Patches named as:
+FEATURE\_NAME1-FEATURE\_NAME2-FEATURE\_NAMEn-commit_COMMITNUM.patch
 
 ## Goal
 
