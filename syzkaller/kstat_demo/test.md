@@ -19,7 +19,8 @@ This is some coverage of functions which monitored by my ebpf:
 | tcp_getsockopt | 61/59 | 57/59 | 56/57 | 61/60 | 58/58 | 60/58 |  
 | inet_accept | 2/2 | 2/2 | 2/2 | 2/2 | 2/2 | 2/2 |  
 | tcp_ioctl | 9/9 | 9/9 | 9/9 | 9/9 | 9/9 | 9/9 |  
-  
+
+* [Data](data.zip) get from syzkaller web.  
 
 ## Concludsion
 1. Greater coverage then original syzkaller especially in function tcp_sendmsg.
