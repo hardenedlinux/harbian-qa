@@ -8,7 +8,7 @@ I implement runtime state feedback by using ebpf. ebpf collect a 64-bit state se
 
 ## Testcase
 I run six times both original and customize syzkaller. Two hours per time. The enable syscalls is extract from socket_inet6.txt and socket_inet_tcp.txt using this [tool](https://github.com/hardenedlinux/harbian-qa/blob/master/syz_patch/extract_syscall_names_from_prog.py). There is also some syscalls for ipv4_tcp have to be removed by hand.
-This is some coverage of functions which monitored by my ebpf:  
+This is some coverage( customize vs. original in the table) of functions which monitored by my ebpf:  
 
 |kern_func | 1 | 2 | 3 | 4 | 5 | 6 |  
 | -------- | - | - | - | - | - | - |  
