@@ -1,32 +1,50 @@
 # Make syzkaller a state-based guided fuzzer
 
-## Code
+## Code and features
+1. [0001-Add-ebpf-feedback.patch](0001-Add-ebpf-feedback.patch): run a ebpf monitor before execute_one, read pipe memory to get kernel socket state  
+2. [pipe_monitor.go](pipe_monitor.go): load a ebpf text, monitor the socket state, feedback to syzkaller by using pipe memory. But it can't trace the historical state of a specific socket.  
+3. [0002-Attach-weight-to-prog.patch](0002-Attach-weight-to-prog.patch): These patch attach weight to syzkaller prog. The weight is from state signal or coverage information.  
 
-1. syz-executor patch: run a ebpf monitor before execute_one, read pipe/shared memory to get kernel socket state
-2. pipe_monitor/shm_monitor: load a ebpf text, monitor the socket state, feedback to syzkaller by using pipe/shared memory. pipe_monitor is more simple and efficient. But it can't track the socket.
-
-* Patches named as:
-FEATURE\_NAME1-FEATURE\_NAME2-FEATURE\_NAMEn-commit_COMMITNUM.patch
+* These patch base on upstream syzkaller: 12365b99  
+More detail refer to the code comments. 
 
 ## Goal
-
-Make the syzkaller as a kernel-state-awareness fuzzer or state-based guided fuzzer. The fuzzer should collect the progs which hit the same code coverage but with different kernel data state. Currently syzkaller only collect coverage information.
+Make the syzkaller as a kernel-state-awareness fuzzer or state-based guided fuzzer. The fuzzer should collect the progs which hit the same code coverage but with different kernel data state. Currently syzkaller only collect coverage information.  
 
 I wonder if it's effective that make syzkaller more kernel-state-awareness.
-I finish collecting the some socket state and feedback to syzkaller currently. Use the coverage signal interface.
+I finish collecting the some socket state and feedback to syzkaller currently. Use the coverage signal interface.  
 
+## Usage  
 
-## Customize
-### ebpf, kernel data type
-ebpf text in ebpf/ebpftext.go can be modify as your will. You can get any data you want by writing ebpf by yourself.  In my case, the socket state i want is a uint64, fill with kprobe point(a specify num) and sk->__sk_flags ...  
-The state is maintained by state/state.go.
+### Patch  
+You need patch original syzkaller. Note 0002-Attach-weight-to-prog.patch only attach the weight to prog. Without using weight.  
 
-### kernel socket state
+### Gobpf  
+Run:  
+```  
+go build pipe_monitor.go
+```  
+Scp it to VM:/root/pipe_monitor.  
 
-parse/parse.go is only for making the socket state readable. Modify it refer to you ebpf text as your will.
+### Run state-base syzkaller
+Just run syz-manager as original syzkaller.
+
+## What can you customize  
+
+### ebpf, kernel data type  
+ebpf text in ebpf/ebpftext.go is the only one can be modified as your will. You can get any data you want by writing ebpf by yourself.  In my case, I fill a uint64_t with socket state. Actually I try to separate them to two 32-bit. The high-32-bit is general historical socket state( type, flags, state ...). The low-32-bit is branch-related function argument and function id. The patched executor will calculate:  
+```  
+sig = hash((state&0xffffffff)^((state>>32)&0xffffffff))
+```  
+which looks like a coverage signal
+
+### kernel socket state  
+parse/parse.go is only for making the socket state readable. Modify it refer to you ebpf text as your will. Only for execprog.
 
 ## Example
-pipe_monitor can run well with patched syzkaller( patch_executor_pipe.patch). Without any different compared to original syzkaller's using. But you need write your ebpf to collect state.
+pipe_monitor can run well with patched syzkaller. Without any different compare to original syzkaller's using. But you need write your ebpf to collect state.  
+[Here](test.md) is a example show the effect of ebpf state feedback compare to original syzkaller.
+
 This is a example run patched execproc( patch_for_syz_executor.patch) with shm_monitor.
 ```  
 # bin/linux_amd64/syz-execprog -executor=./bin/linux_amd64/syz-executor -cover=1 -threaded=0 -procs=1 --debug 06def8c2645148cb881aff26e222a886db9e1d72 
