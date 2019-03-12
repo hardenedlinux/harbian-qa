@@ -1,3 +1,18 @@
+From 38626b7e7f1e32379541dad7211f08ff29d63d33 Mon Sep 17 00:00:00 2001
+From: Bins94 <kaipeng94@gmail.com>
+Date: Tue, 12 Mar 2019 00:01:27 -0400
+Subject: [PATCH 2/2] Attach weight to prog
+
+---
+ pkg/rpctype/rpctype.go |  9 +++++----
+ prog/clone.go          |  1 +
+ prog/prio.go           |  4 ++++
+ prog/prog.go           |  1 +
+ syz-fuzzer/fuzzer.go   |  1 +
+ syz-fuzzer/proc.go     | 27 +++++++++++++++++++++++----
+ syz-manager/html.go    |  1 +
+ 7 files changed, 36 insertions(+), 8 deletions(-)
+
 diff --git a/pkg/rpctype/rpctype.go b/pkg/rpctype/rpctype.go
 index 66b61601..569ad712 100644
 --- a/pkg/rpctype/rpctype.go
@@ -31,7 +46,7 @@ index 5ad82c35..1711da2e 100644
  	newargs := make(map[*ResultArg]*ResultArg)
  	for ci, c := range p.Calls {
 diff --git a/prog/prio.go b/prog/prio.go
-index eaec3a70..70d81fe9 100644
+index eaec3a70..27e8ed5c 100644
 --- a/prog/prio.go
 +++ b/prog/prio.go
 @@ -7,6 +7,7 @@ import (
@@ -42,16 +57,17 @@ index eaec3a70..70d81fe9 100644
  )
  
  // Calulation of call-to-call priorities.
-@@ -142,11 +143,13 @@ func (target *Target) calcDynamicPrio(corpus []*Prog) [][]float32 {
+@@ -142,11 +143,14 @@ func (target *Target) calcDynamicPrio(corpus []*Prog) [][]float32 {
  		prios[i] = make([]float32, len(target.Syscalls))
  	}
  	for _, p := range corpus {
-+		log.Logf(0, "A new prog with weight: %v", p.Weight)
++		log.Logf(0, "Prog with weight: %v", p.Weight)
  		for _, c0 := range p.Calls {
  			for _, c1 := range p.Calls {
  				id0 := c0.Meta.ID
  				id1 := c1.Meta.ID
  				prios[id0][id1] += 1.0
++				/* Only for choosing syscalls */
 +				//prios[id0][id1] += (p.Weight*1.0)
  			}
  		}
@@ -69,10 +85,10 @@ index 83e5991d..fb9ba353 100644
  
  type Call struct {
 diff --git a/syz-fuzzer/fuzzer.go b/syz-fuzzer/fuzzer.go
-index d41dfe66..facf1f08 100644
+index 52fa30de..50b5b067 100644
 --- a/syz-fuzzer/fuzzer.go
 +++ b/syz-fuzzer/fuzzer.go
-@@ -336,6 +336,7 @@ func (fuzzer *Fuzzer) addInputFromAnotherFuzzer(inp rpctype.RPCInput) {
+@@ -339,6 +339,7 @@ func (fuzzer *Fuzzer) addInputFromAnotherFuzzer(inp rpctype.RPCInput) {
  	}
  	sig := hash.Hash(inp.Prog)
  	sign := inp.Signal.Deserialize()
@@ -81,10 +97,28 @@ index d41dfe66..facf1f08 100644
  }
  
 diff --git a/syz-fuzzer/proc.go b/syz-fuzzer/proc.go
-index ca12a97c..75db2277 100644
+index ca12a97c..d37d2bd8 100644
 --- a/syz-fuzzer/proc.go
 +++ b/syz-fuzzer/proc.go
-@@ -126,6 +126,7 @@ func (proc *Proc) triageInput(item *WorkTriage) {
+@@ -95,6 +95,17 @@ func (proc *Proc) loop() {
+ 			proc.execute(proc.execOpts, p, ProgNormal, StatGenerate)
+ 		} else {
+ 			// Mutate an existing prog.
++			/* Don't use 'Probability Cumulative Distribution'
++                         * eliminate the effects of other new prog
++                         */
++			/*for {
++				p = corpus[proc.rnd.Intn(len(corpus))].Clone()
++				r := float32(proc.rnd.Intn(MAX_WEIGHT))
++				log.Logf(0, "Try a new prog from corpus, r:%v, weight:%v", r, p.Weight)
++				if(r < p.Weight) {
++					break
++				}
++			}*/
+ 			p := corpus[proc.rnd.Intn(len(corpus))].Clone()
+ 			p.Mutate(proc.rnd, programLength, ct, corpus)
+ 			log.Logf(1, "#%v: mutated", proc.pid)
+@@ -126,6 +137,7 @@ func (proc *Proc) triageInput(item *WorkTriage) {
  	)
  	// Compute input coverage and non-flaky signal for minimization.
  	notexecuted := 0
@@ -92,26 +126,26 @@ index ca12a97c..75db2277 100644
  	for i := 0; i < signalRuns; i++ {
  		info := proc.executeRaw(proc.execOptsCover, item.p, StatTriage)
  		if !reexecutionSuccess(info, &item.info, item.call) {
-@@ -134,6 +135,8 @@ func (proc *Proc) triageInput(item *WorkTriage) {
+@@ -134,6 +146,9 @@ func (proc *Proc) triageInput(item *WorkTriage) {
  			if notexecuted > signalRuns/2+1 {
  				return // if happens too often, give up
  			}
++			/* State signal with useful information */
 +			//tmpWeight = getWeightFromState(info)
 +			//tmpWeight += getWeightFromCover(info)
  			continue
  		}
  		thisSignal, thisCover := getSignalAndCover(item.p, info, item.call)
-@@ -154,6 +157,9 @@ func (proc *Proc) triageInput(item *WorkTriage) {
+@@ -154,6 +169,8 @@ func (proc *Proc) triageInput(item *WorkTriage) {
  						// The call was not executed or failed.
  						continue
  					}
 +					//tmpWeight = getWeightFromState(info)
 +					//tmpWeight += getWeightFromCover(info)
-+
  					thisSignal, _ := getSignalAndCover(p1, info, call1)
  					if newSignal.Intersection(thisSignal).Len() == newSignal.Len() {
  						return true
-@@ -165,13 +171,15 @@ func (proc *Proc) triageInput(item *WorkTriage) {
+@@ -165,13 +182,15 @@ func (proc *Proc) triageInput(item *WorkTriage) {
  
  	data := item.p.Serialize()
  	sig := hash.Hash(data)
@@ -143,3 +177,6 @@ index b90a5aa6..3f38f311 100644
  		if err != nil {
  			http.Error(w, fmt.Sprintf("failed to deserialize program: %v", err), http.StatusInternalServerError)
  			return
+-- 
+2.20.1
+
