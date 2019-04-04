@@ -1,0 +1,95 @@
+From b91ccf8f6cf80c4ec3d25f1c9d5214890668e8c0 Mon Sep 17 00:00:00 2001
+From: Bins94 <kaipeng94@gmail.com>
+Date: Tue, 26 Mar 2019 23:01:39 -0400
+Subject: [PATCH 2/2] Coverage filter for kernel function
+
+---
+ executor/cov_filter.h | 38 ++++++++++++++++++++++++++++++++++++++
+ executor/executor.cc  | 12 ++++++++++++
+ 2 files changed, 50 insertions(+)
+ create mode 100644 executor/cov_filter.h
+
+diff --git a/executor/cov_filter.h b/executor/cov_filter.h
+new file mode 100644
+index 00000000..34ab920b
+--- /dev/null
++++ b/executor/cov_filter.h
+@@ -0,0 +1,38 @@
++typedef unsigned int uint32;
++
++struct code_region{
++        uint32 start;
++        uint32 end;
++};
++
++/* Address of kernel function for filtering coverage signal */
++static struct code_region  white_list[] = {
++        //tcp_v6_init_sock
++        {.start = 0x8288e2f8, .end = 0x8288e2f8},
++	//tcp_v6_connect
++        {.start = 0x8288faa2, .end = 0x82891751},
++	//tcp_sendmsg_locked
++        {.start = 0x8260df92, .end = 0x8261122f},
++	//tcp_recvmsg
++	{.start = 0x82604ffe, .end = 0x82606a9d},
++	//tcp_close
++        {.start = 0x82611c13, .end = 0x826128f2},
++	//tcp_shutdown
++        {.start = 0x82602c7b, .end = 0x82602d39},
++	//do_tcp_setsockopt
++        {.start = 0x82602e8e, .end = 0x82604f06},
++	//do_tcp_getsockopt
++	{.start = 0x82604ffe, .end = 0x82606a9d},
++	//inet_accept
++        {.start = 0x826d9242, .end = 0x826d9734},
++	//inet_listen
++	{.start = 0x826d5a87, .end = 0x826d5c7f},
++	//tcp_ioctl
++        {.start = 0x82600a9a, .end = 0x82600fb8},
++	//__inet6_bind
++	{.start = 0x82604ffe, .end = 0x82606a9d},
++	//inet6_getname
++	{.start = 0x827b7c20, .end = 0x827b8129},
++	//inet6_ioctl
++	{.start = 0x827b7c20, .end = 0x827b8129}
++};
+diff --git a/executor/executor.cc b/executor/executor.cc
+index d1dc2df6..49728f15 100644
+--- a/executor/executor.cc
++++ b/executor/executor.cc
+@@ -15,6 +15,7 @@
+ #include <time.h>
+ #include <unistd.h>
+ 
++#include "cov_filter.h"
+ #include "defs.h"
+ 
+ /* Separate state signal and coverage signal by high-4-bit
+@@ -808,6 +809,15 @@ thread_t* schedule_call(int call_index, int call_num, bool colliding, uint64 cop
+ }
+ 
+ #if SYZ_EXECUTOR_USES_SHMEM
++bool cover_filter(uint32 pc) {
++        for(uint32 i=0; i<(sizeof(white_list)/sizeof(uint64)); i++) {
++	        if((pc >= white_list[i].start) && (pc <= white_list[i].end))
++	                return true;
++	}
++	return false;
++}
++
++
+ template <typename cover_data_t>
+ void write_coverage_signal(cover_t* cov, uint32* signal_count_pos, uint32* cover_count_pos, int monpipe)
+ {
+@@ -855,6 +865,8 @@ void write_coverage_signal(cover_t* cov, uint32* signal_count_pos, uint32* cover
+ 		}
+ 		cover_data_t sig = pc ^ prev;
+ 		prev = hash(pc);
++		if (!cover_filter(pc))
++		        continue;
+ 		if (dedup(sig))
+ 			continue;
+ 		write_output64(sig&COVERAGE_SIG_MASK);
+-- 
+2.20.1
+

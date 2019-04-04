@@ -1,0 +1,26 @@
+{
+    "target": "linux/amd64",
+    "http": "",
+    "workdir": "",
+    "kernel_obj": "",
+    "image": "syzkalls.img",
+    "sshkey": "/root/.ssh/id_rsa",
+    "syzkaller": "/root/syzkalls/",
+    "sandbox": "none",
+    "name": "debian-4.17-ipv4_tcp",
+    "hub_client":"debian-4.17-ipv4_tcp",
+    "hub_addr":"",
+    "hub_key":"",
+    "suppressions": ["some known bug"],
+    "enable_syscalls": ["ioctl$sock_inet6_tcp_SIOCATMARK", "ioctl$sock_inet_tcp_SIOCOUTQ", "ioctl$sock_inet6_tcp_SIOCOUTQ", "ioctl$sock_inet_tcp_SIOCOUTQNSD", "ioctl$sock_inet6_tcp_SIOCOUTQNSD", "setsockopt$inet6_tcp_TLS_RX", "setsockopt$inet6_tcp_TLS_TX", "setsockopt$inet6_tcp_TCP_FASTOPEN_KEY", "getsockopt$inet6_tcp_TCP_REPAIR_WINDOW", "setsockopt$inet6_tcp_TCP_REPAIR_WINDOW", "setsockopt$inet6_tcp_TCP_REPAIR_OPTIONS", "setsockopt$inet6_tcp_TCP_QUEUE_SEQ", "setsockopt$inet6_tcp_TCP_REPAIR_QUEUE", "setsockopt$inet6_tcp_TCP_REPAIR", "setsockopt$inet6_tcp_TCP_MD5SIG", "setsockopt$inet6_tcp_TCP_ULP", "setsockopt$inet6_tcp_TCP_CONGESTION", "getsockopt$inet6_tcp_TCP_ZEROCOPY_RECEIVE", "getsockopt$inet6_tcp_buf", "setsockopt$inet6_tcp_buf", "getsockopt$inet6_tcp_int", "setsockopt$inet6_tcp_int", "socket$inet6_tcp", "socket$inet6", "accept$inet6", "accept4$inet6", "bind$inet6", "connect$inet6", "sendto$inet6", "recvfrom$inet6", "getsockname$inet6", "getpeername$inet6", "getsockopt$inet6_int", "setsockopt$inet6_int", "getsockopt$inet6_buf", "setsockopt$inet6_buf", "setsockopt$inet6_IPV6_ADDRFORM", "getsockopt$inet6_opts", "setsockopt$inet6_opts", "getsockopt$inet6_mreq", "setsockopt$inet6_mreq", "setsockopt$inet6_IPV6_FLOWLABEL_MGR", "getsockopt$inet6_IPV6_FLOWLABEL_MGR", "getsockopt$inet6_IPV6_IPSEC_POLICY", "setsockopt$inet6_IPV6_IPSEC_POLICY", "getsockopt$inet6_IPV6_XFRM_POLICY", "setsockopt$inet6_IPV6_XFRM_POLICY", "setsockopt$inet6_MCAST_JOIN_GROUP", "setsockopt$inet6_MCAST_LEAVE_GROUP", "setsockopt$inet6_group_source_req", "setsockopt$inet6_MCAST_MSFILTER", "setsockopt$inet6_IPV6_PKTINFO", "setsockopt$inet6_MRT6_ADD_MIF", "setsockopt$inet6_MRT6_ADD_MFC", "setsockopt$inet6_MRT6_DEL_MFC", "setsockopt$inet6_MRT6_ADD_MFC_PROXY", "setsockopt$inet6_MRT6_DEL_MFC_PROXY", "getsockopt$inet6_mtu", "setsockopt$inet6_mtu", "ioctl$sock_inet6_SIOCADDRT", "ioctl$sock_inet6_SIOCDELRT", "ioctl$sock_inet6_SIOCSIFADDR", "ioctl$sock_inet6_SIOCDIFADDR", "ioctl$sock_inet6_SIOCSIFDSTADDR", "listen", "shutdown", "close"],
+    "procs": 1,
+    "type": "qemu",
+    "vm": {
+	"count": 1,
+	"cpu": 6,
+	"mem": 18384,
+	"kernel": "boot/bzImage",
+	"initrd": "initrd.img",
+	"cmdline": "kmemleak=on reboot=warm net.ifnames=tap0 console=ttyS0 vsyscall=native rodata=n oops=panic panic_on_warn=1 panic=0 ftrace_dump_on_oops=orig_cpu earlyprintk=serial slub_debug=UZ root=/dev/sda1",
+	"qemu_args": "-enable-kvm"
+	
