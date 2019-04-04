@@ -17,13 +17,16 @@ I finish collecting the some socket state and feedback to syzkaller currently. U
 ## Usage  
 
 ### Patch  
-You need patch original syzkaller. Note 0002-Attach-weight-to-prog.patch only attach the weight to prog. Without using weight.  
-
+You need patch original syzkaller. Note 0002-Attach-weight-to-prog.patch only attach the weight to prog. Without using weight.
+```  
+git checkout 12365b99
+git apply *.patch
+```
 ### Gobpf  
 Run:  
 ```  
 go build pipe_monitor.go
-```  
+```
 Scp it to VM:/root/pipe_monitor.  
 
 ### Run state-base syzkaller
@@ -34,7 +37,7 @@ Just run syz-manager as original syzkaller.
 ### ebpf, kernel data type  
 ebpf text in ebpf/ebpftext.go is the only one can be modified as your will. You can get any data you want by writing ebpf by yourself.  In my case, I fill a uint64_t with socket state. Actually I try to separate them to two 32-bit. The high-32-bit is general historical socket state( type, flags, state ...). The low-32-bit is branch-related function argument and function id. The patched executor will calculate:  
 ```  
-sig = hash((state&0xffffffff)^((state>>32)&0xffffffff))
+sig = hash(((state>>32)&0xffffffff))^(state&0xffffffff)
 ```  
 which looks like a coverage signal
 
@@ -43,7 +46,7 @@ parse/parse.go is only for making the socket state readable. Modify it refer to 
 
 ## Example
 pipe_monitor can run well with patched syzkaller. Without any different compare to original syzkaller's using. But you need write your ebpf to collect state.  
-[Here](test.md) is a example show the effect of ebpf state feedback compare to original syzkaller.
+[Here](sample/test.md) is a example show the effect of ebpf state feedback compare to original syzkaller.
 
 This is a example run patched execproc( patch_for_syz_executor.patch) with shm_monitor.
 ```  
