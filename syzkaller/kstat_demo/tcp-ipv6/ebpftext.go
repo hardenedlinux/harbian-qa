@@ -298,5 +298,7 @@ int kprobe__inet6_getname(struct pt_regs *ctx, struct sock *sk, int cmd, int pee
     return 0;
 }
 `
-/* Kernel probe point, kprobe__do_mmap for syzkaller's machine check */
+/* Kernel probe/retprobe point */
 var ProbePoint []string = []string{"tcp_v6_init_sock","tcp_v6_connect","tcp_sendmsg","tcp_recvmsg","tcp_close","tcp_shutdown","tcp_setsockopt","tcp_getsockopt","inet_accept","inet_listen", "tcp_ioctl", "inet6_bind", "inet6_getname","inet6_ioctl"}
+
+var RetProbePoint []string = []string{}
