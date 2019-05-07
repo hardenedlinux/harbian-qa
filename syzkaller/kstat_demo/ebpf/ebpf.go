@@ -22,7 +22,10 @@ func EbpfInit() string {
 
 func Attachs(m *bcc.Module) {
 	for _, funcname := range ProbePoint {
-		attach(funcname, m)
+		attachProbe(funcname, m)
+	}
+	for _, funcname := range RetProbePoint {
+		attachRetProbe(funcname, m)
 	}
 }
 
@@ -31,7 +34,7 @@ func ReadLine(tp *tracepipe.TracePipe, pid uint64) string {
 }
 
 /* Add kprobe__ at the beginning, your hookfunc should be kprobe__KERN_FUNCNAME */
-func attach(kprobepoint string, m *bcc.Module) {
+func attachProbe(kprobepoint string, m *bcc.Module) {
 	funcName := "kprobe__" + kprobepoint
 	tmpKprobe, err := m.LoadKprobe(funcName)
 	if err != nil {
@@ -42,6 +45,21 @@ func attach(kprobepoint string, m *bcc.Module) {
 	err = m.AttachKprobe(kprobepoint, tmpKprobe)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Failed to attach %s: %s\n", kprobepoint, err);
+		os.Exit(1)
+	}
+}
+
+func attachRetProbe(kretprobepoint string, m *bcc.Module) {
+	funcName := "kretprobe__" + kretprobepoint
+	tmpKretprobe, err := m.LoadKprobe(funcName)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Failed to load %s: %s\n", kretprobepoint, err);
+		os.Exit(1)
+	}
+
+	err = m.AttachKretprobe(kretprobepoint, tmpKretprobe)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Failed to attach %s: %s\n", kretprobepoint, err);
 		os.Exit(1)
 	}
 }
