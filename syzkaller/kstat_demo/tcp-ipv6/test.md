@@ -16,7 +16,7 @@ go build pipe_monitor
 Command for patching syzkaller:
 ```  
 cd /path/to/your/syzkaller/source
-git checkout 12365b99
+git checkout c1718ecf
 git apply /path/to/harbian-qa/syzkaller/kstat_demo/tcp-ipv6.patch
 ```
 After patching syzkaller, to filter coverage, address in executor/cov_filter.h should fit to you kernel. Use fun2addr as:
