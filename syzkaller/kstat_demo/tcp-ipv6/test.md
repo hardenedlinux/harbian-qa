@@ -1,9 +1,10 @@
 # A sample of tcp-ipv6 fuzz
 
 ## Feature of customize syzkaller
-1. Socket state( historical state, high-32-bit) and kernel function arguments( low-32-bit, about code branch) feedback  
-2. Coverage filter  
-I implement runtime state feedback by using ebpf. ebpf collect a 64-bit state send to executor, executor separate to two 32-bit state. Then calculate low-32-bit ^ hash(high-32-bit). The result of it will look like original syzkaller coverage signal. Send these signals to fuzzer. Coverage filter implement in executor. You can get kernel function address region use the [fun2addr](https://github.com/hardenedlinux/harbian-qa/blob/master/syz_patch/fun2addr.go).
+1. Socket state( historical state) feedback.
+2. Coverage filter
+
+I implement runtime state( sk->sk_state, tp->repair ...) feedback by using ebpf. ebpf collect a 64-bit state send to executor, executor separate to two 32-bit state. Then calculate low-32-bit ^ hash(high-32-bit). The result of it will look like original syzkaller coverage signal. Send these signals to fuzzer. Coverage filter implement in executor. You can get kernel function address region use the [fun2addr](https://github.com/hardenedlinux/harbian-qa/blob/master/syz_patch/fun2addr.go).
 
 ## Usage  
 Command for build ebpf monitor:
@@ -36,11 +37,25 @@ This is some coverage( customize vs. original in the table) of functions which m
 | tcp_setsockopt | 83/80 | 80/81 | 84/79 | 84/82 | 82/81 | 84/83 |  
 | tcp_getsockopt | 61/59 | 57/59 | 56/57 | 61/60 | 58/58 | 60/58 |  
 | inet_accept | 2/2 | 2/2 | 2/2 | 2/2 | 2/2 | 2/2 |  
-| tcp_ioctl | 9/9 | 9/9 | 9/9 | 9/9 | 9/9 | 9/9 |  
+| tcp_ioctl | 9/9 | 9/9 | 9/9 | 9/9 | 9/9 | 9/9 |
 
-* [Data](data.zip) get from syzkaller web.  
+Other example, I run six times both original and customize syzkaller. Two hours per time. These lines can be easily covered:  
+#### tp->repair/tp->repair_queue
+https://elixir.bootlin.com/linux/v4.17/source/net/ipv4/tcp.c#L1233 (5:0)
+https://elixir.bootlin.com/linux/v4.17/source/net/ipv4/tcp.c#L2687 (6:0)
+https://elixir.bootlin.com/linux/v4.17/source/net/ipv4/tcp.c#L2689 (5:0)
+https://elixir.bootlin.com/linux/v4.17/source/net/ipv4/tcp.c#L3106 (5:2)
+
+#### sk->sk_state
+https://elixir.bootlin.com/linux/v4.17/source/net/ipv4/tcp.c#L1259 (6:0)
+https://elixir.bootlin.com/linux/v4.17/source/net/ipv4/tcp.c#L2137 (6:2)
 
 ## Concludsion
-1. Greater coverage then original syzkaller especially in function tcp_sendmsg.
+1. Greater coverage then original syzkaller especially in function tcp_sendmsg. It is because historical state and nested condition. We can see in the second example.
+
 2. The tcp_setsockopt coverage of customize syzkaller is only a little more then original syzkaller's because of powerful syscalls script. Most of uncovered code is similar in original syzkaller. Is it because of powerful syscalls script and mutation is not enough?
-3. SIOCINQ branch in tcp_ioctl can't be reached by both original and customize syzkaller. That means function arguments feedback is not so effective in this case. I think the reason is the value of SIOCINQ　is too complex. Here is a [paper](https://lifeasageek.github.io/class/cs52700-fall16/pages/prog-assignment-1.html) about branch exploration. But it is too complex to implement it by ebpf.
+
+## RawData
+* [Data](data.zip) get from syzkaller web. It's not macth to the table.
+* The test will keep the same enable syscalls, run time, vm evironment.
+* Collect different data as feedback( ebpftext) get different result.
