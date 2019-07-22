@@ -1,0 +1,747 @@
+From 8cc56c6fb55acec8d687a545346026ec12776cc2 Mon Sep 17 00:00:00 2001
+From: Bins94 <kaipeng94@gmail.com>
+Date: Wed, 17 Jul 2019 03:19:17 -0400
+Subject: [PATCH 2/5] Add ebpf feedback and display in webui
+
+---
+ executor/common.h        |   6 +-
+ executor/common_linux.h  |  39 ++++++++++---
+ executor/executor.cc     | 118 +++++++++++++++++++++++++++++++++------
+ pkg/csource/generated.go |  45 +++++++++++----
+ pkg/ipc/ipc.go           |  22 ++++++--
+ pkg/runtest/run.go       |   4 +-
+ pkg/signal/signal.go     |   6 +-
+ prog/analysis.go         |  10 ++--
+ syz-fuzzer/proc.go       |   2 +-
+ syz-manager/html.go      |  21 ++++---
+ 10 files changed, 215 insertions(+), 58 deletions(-)
+
+diff --git a/executor/common.h b/executor/common.h
+index 05c75978..33309581 100644
+--- a/executor/common.h
++++ b/executor/common.h
+@@ -498,7 +498,7 @@ again:
+ #endif
+ 
+ #if SYZ_EXECUTOR || SYZ_REPEAT
+-static void execute_one(void);
++static void execute_one(int monpipe);
+ #if SYZ_EXECUTOR_USES_FORK_SERVER
+ #include <signal.h>
+ #include <sys/types.h>
+@@ -514,7 +514,7 @@ static void execute_one(void);
+ static void reply_handshake();
+ #endif
+ 
+-static void loop(void)
++static void loop(int monpipe)
+ {
+ #if SYZ_HAVE_SETUP_LOOP
+ 	setup_loop();
+@@ -575,7 +575,7 @@ static void loop(void)
+ #if SYZ_EXECUTOR && SYZ_EXECUTOR_USES_SHMEM
+ 			close(kOutPipeFd);
+ #endif
+-			execute_one();
++			execute_one(monpipe);
+ #if SYZ_HAVE_CLOSE_FDS && !SYZ_THREADED
+ 			close_fds();
+ #endif
+diff --git a/executor/common_linux.h b/executor/common_linux.h
+index ff312664..5f94031c 100644
+--- a/executor/common_linux.h
++++ b/executor/common_linux.h
+@@ -1889,7 +1889,7 @@ static void setup_common()
+ #include <sys/time.h>
+ #include <sys/wait.h>
+ 
+-static void loop();
++static void loop(int monpipe);
+ 
+ static void sandbox_common()
+ {
+@@ -1906,7 +1906,7 @@ static void sandbox_common()
+ 	close(netns);
+ #endif
+ 
+-	struct rlimit rlim;
++	/*struct rlimit rlim;
+ #if SYZ_EXECUTOR
+ 	rlim.rlim_cur = rlim.rlim_max = (200 << 20) +
+ 					(kMaxThreads * kCoverSize + kExtraCoverSize) * sizeof(void*);
+@@ -1923,7 +1923,7 @@ static void sandbox_common()
+ 	rlim.rlim_cur = rlim.rlim_max = 0;
+ 	setrlimit(RLIMIT_CORE, &rlim);
+ 	rlim.rlim_cur = rlim.rlim_max = 256; // see kMaxFd
+-	setrlimit(RLIMIT_NOFILE, &rlim);
++	setrlimit(RLIMIT_NOFILE, &rlim);*/
+ 
+ 	// CLONE_NEWNS/NEWCGROUP cause EINVAL on some systems,
+ 	// so we do them separately of clone in do_sandbox_namespace.
+@@ -2009,7 +2009,32 @@ static int do_sandbox_none(void)
+ #if SYZ_EXECUTOR || SYZ_ENABLE_NETDEV
+ 	initialize_netdevices();
+ #endif
+-	loop();
++	/* if the rawSignal is a single uint64,
++         * but not state convert edge, use pipe is ok
++         */
++	int monpipefd[2];
++	int ret = pipe(monpipefd);
++	if (ret < 0)
++		fail("Pipe create failed\n");
++
++	int monpid = fork();
++	if (monpid == 0) {
++		prctl(PR_SET_PDEATHSIG, SIGINT);
++		dup2(monpipefd[1], STDOUT_FILENO);
++		/* For reading monitor log print */
++		close(monpipefd[0]);
++		close(monpipefd[1]);
++		debug("single ebpf start ...\n");
++		execl("/root/pipe_monitor", "/root/pipe_monitor", "--debug", NULL);
++		return 0;
++	}
++	/* ebpf loading is very slow, one time a vm restart */
++	sleep(6);
++
++	close(monpipefd[1]);
++	/*Only sandbox_none, feed zero to others sandbox_* */
++	loop(monpipefd[0]);
++
+ 	doexit(1);
+ }
+ #endif
+@@ -2057,7 +2082,7 @@ static int do_sandbox_setuid(void)
+ 	// See task_dump_owner function in kernel.
+ 	prctl(PR_SET_DUMPABLE, 1, 0, 0, 0);
+ 
+-	loop();
++	loop(0);
+ 	doexit(1);
+ }
+ #endif
+@@ -2168,7 +2193,7 @@ static int namespace_sandbox_proc(void* arg)
+ 	if (syscall(SYS_capset, &cap_hdr, &cap_data))
+ 		fail("capset failed");
+ 
+-	loop();
++	loop(0);
+ 	doexit(1);
+ }
+ 
+@@ -2325,7 +2350,7 @@ static int do_sandbox_android_untrusted_app(void)
+ 	initialize_netdevices();
+ #endif
+ 
+-	loop();
++	loop(0);
+ 	doexit(1);
+ }
+ #endif
+diff --git a/executor/executor.cc b/executor/executor.cc
+index e104fc89..3e04a06f 100644
+--- a/executor/executor.cc
++++ b/executor/executor.cc
+@@ -35,6 +35,8 @@
+ #endif
+ 
+ #define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
++#define STATE_SIG_MASK 0xf000000000000000
++#define COVERAGE_SIG_MASK 0xe0000000ffffffff
+ 
+ // uint64 is impossible to printf without using the clumsy and verbose "%" PRId64.
+ // So we define and use uint64. Note: pkg/csource does s/uint64/uint64/.
+@@ -95,9 +97,12 @@ const int kOutFd = 4;
+ static uint32* output_data;
+ static uint32* output_pos;
+ static uint32* write_output(uint32 v);
++/* Extend signal to 64-bit, these functions' name end with *64  */
++static uint32* write_output64(uint64 v);
+ static void write_completed(uint32 completed);
+ static uint32 hash(uint32 a);
+ static bool dedup(uint32 sig);
++static bool dedup2(uint32 sig);
+ #endif
+ 
+ enum sandbox_type {
+@@ -203,6 +208,7 @@ struct thread_t {
+ 	bool fault_injected;
+ 	cover_t cov;
+ 	bool extra_cover;
++	int monpipe;
+ };
+ 
+ static thread_t threads[kMaxThreads];
+@@ -291,11 +297,11 @@ struct feature_t {
+ 	void (*setup)();
+ };
+ 
+-static thread_t* schedule_call(int call_index, int call_num, bool colliding, uint64 copyout_index, uint64 num_args, uint64* args, uint64* pos, bool extra_cover);
++static thread_t* schedule_call(int call_index, int call_num, bool colliding, uint64 copyout_index, uint64 num_args, uint64* args, uint64* pos, bool extra_cover, int monpipe);
+ static void handle_completion(thread_t* th);
+ static void copyout_call_results(thread_t* th);
+ static void write_call_output(thread_t* th, bool finished);
+-static void write_extra_output();
++static void write_extra_output(int monpipe);
+ static void execute_call(thread_t* th);
+ static void thread_create(thread_t* th, int id);
+ static void* worker_thread(void* arg);
+@@ -566,8 +572,24 @@ void reply_execute(int status)
+ }
+ 
+ // execute_one executes program stored in input_data.
+-void execute_one()
++void execute_one(int monpipe)
+ {
++	/* Set the monpipe to NOBLOCK fd */
++	if (fcntl(monpipe, F_SETFL, O_NONBLOCK) < 0)
++		fail("Failed to set O_NONBLOCK");
++	int n = 0;
++	char buf[0x11];
++	int ret = 17;
++	/* There may be some remnant data should be cleared */
++	while (ret > 0 || n < 100) {
++		ret = read(monpipe, buf, sizeof(buf));
++		if (ret > 0) {
++			n = 0;
++		}
++		n++;
++	}
++	debug("Pipe is clear now!\n");
++
+ 	// Duplicate global collide variable on stack.
+ 	// Fuzzer once come up with ioctl(fd, FIONREAD, 0x920000),
+ 	// where 0x920000 was exactly collide address, so every iteration reset collide to 0.
+@@ -722,7 +744,7 @@ retry:
+ 		for (uint64 i = num_args; i < kMaxArgs; i++)
+ 			args[i] = 0;
+ 		thread_t* th = schedule_call(call_index++, call_num, colliding, copyout_index,
+-					     num_args, args, input_pos, call_extra_cover);
++					     num_args, args, input_pos, call_extra_cover, monpipe);
+ 
+ 		if (colliding && (call_index % 2) == 0) {
+ 			// Don't wait for every other call.
+@@ -781,7 +803,7 @@ retry:
+ 				}
+ 			}
+ 			if (prog_extra_cover)
+-				write_extra_output();
++				write_extra_output(monpipe);
+ 		}
+ 	}
+ 
+@@ -792,7 +814,7 @@ retry:
+ 	if (prog_extra_cover) {
+ 		sleep_ms(500);
+ 		if (!colliding && !collide)
+-			write_extra_output();
++			write_extra_output(monpipe);
+ 	}
+ 
+ 	if (flag_collide && !flag_inject_fault && !colliding && !collide) {
+@@ -802,17 +824,20 @@ retry:
+ 	}
+ }
+ 
+-thread_t* schedule_call(int call_index, int call_num, bool colliding, uint64 copyout_index, uint64 num_args, uint64* args, uint64* pos, bool extra_cover)
++thread_t* schedule_call(int call_index, int call_num, bool colliding, uint64 copyout_index, uint64 num_args, uint64* args, uint64* pos, bool extra_cover, int monpipe)
+ {
+ 	// Find a spare thread to execute the call.
+ 	int i;
+ 	for (i = 0; i < kMaxThreads; i++) {
+ 		thread_t* th = &threads[i];
+-		if (!th->created)
++		if (!th->created) {
+ 			thread_create(th, i);
++			th->monpipe = monpipe;
++		}
+ 		if (event_isset(&th->done)) {
+ 			if (th->executing)
+ 				handle_completion(th);
++			th->monpipe = monpipe;
+ 			break;
+ 		}
+ 	}
+@@ -841,13 +866,43 @@ thread_t* schedule_call(int call_index, int call_num, bool colliding, uint64 cop
+ 
+ #if SYZ_EXECUTOR_USES_SHMEM
+ template <typename cover_data_t>
+-void write_coverage_signal(cover_t* cov, uint32* signal_count_pos, uint32* cover_count_pos)
++void write_coverage_signal(cover_t* cov, uint32* signal_count_pos, uint32* cover_count_pos, int monpipe)
+ {
+ 	// Write out feedback signals.
+ 	// Currently it is code edges computed as xor of two subsequent basic block PCs.
+ 	cover_data_t* cover_data = ((cover_data_t*)cov->data) + 1;
+ 	uint32 nsig = 0;
+ 	cover_data_t prev = 0;
++
++	/* Read both state signal and coverage signal is OK */
++	debug("Reading ...\n");
++	/* 64bit hex and a '\n' */
++	char buf[0x11];
++	int ret = 0x11, n = 0;
++	/* Be sure the signal of a syscall is really read */
++	while (ret > 0 || n < 1000) {
++		memset(buf, 0, sizeof(buf));
++		ret = read(monpipe, buf, sizeof(buf));
++		uint32_t sig = 0;
++		uint64_t state = 0;
++		if (ret > 0) {
++			state = strtol(buf, NULL, 16);
++			/* Only for deduplication */
++			sig = hash((state & 0xffffffff) ^ ((state >> 32) & 0xffffffff));
++			if (dedup2(sig))
++				continue;
++			/* state signal start with 0xf
++			 * Write out real state for fuzzer's further handle
++			 */
++			write_output64(state | STATE_SIG_MASK);
++			debug("A state signal %016lx\n", state);
++			n = 0;
++			nsig++;
++		}
++		sig = 0;
++		n++;
++	}
++
+ 	for (uint32 i = 0; i < cov->size; i++) {
+ 		cover_data_t pc = cover_data[i];
+ 		if (!cover_check(pc)) {
+@@ -858,7 +913,8 @@ void write_coverage_signal(cover_t* cov, uint32* signal_count_pos, uint32* cover
+ 		prev = hash(pc);
+ 		if (dedup(sig))
+ 			continue;
+-		write_output(sig);
++		sig |= 0xe000000000000000;
++		write_output64(sig & COVERAGE_SIG_MASK);
+ 		nsig++;
+ 	}
+ 	// Write out number of signals.
+@@ -893,7 +949,7 @@ void handle_completion(thread_t* th)
+ 	if (!collide && !th->colliding) {
+ 		write_call_output(th, true);
+ 		if (th->extra_cover)
+-			write_extra_output();
++			write_extra_output(th->monpipe);
+ 	}
+ 	th->executing = false;
+ 	running--;
+@@ -974,9 +1030,9 @@ void write_call_output(thread_t* th, bool finished)
+ 		*comps_count_pos = comps_size;
+ 	} else if (flag_cover) {
+ 		if (is_kernel_64_bit)
+-			write_coverage_signal<uint64>(&th->cov, signal_count_pos, cover_count_pos);
++			write_coverage_signal<uint64>(&th->cov, signal_count_pos, cover_count_pos, th->monpipe);
+ 		else
+-			write_coverage_signal<uint32>(&th->cov, signal_count_pos, cover_count_pos);
++			write_coverage_signal<uint32>(&th->cov, signal_count_pos, cover_count_pos, th->monpipe);
+ 	}
+ 	debug_verbose("out #%u: index=%u num=%u errno=%d finished=%d blocked=%d sig=%u cover=%u comps=%u\n",
+ 		      completed, th->call_index, th->call_num, reserrno, finished, blocked,
+@@ -1002,7 +1058,7 @@ void write_call_output(thread_t* th, bool finished)
+ #endif
+ }
+ 
+-void write_extra_output()
++void write_extra_output(int monpipe)
+ {
+ #if SYZ_EXECUTOR_USES_SHMEM
+ 	if (!flag_cover || !flag_extra_cover || flag_collect_comps)
+@@ -1018,9 +1074,9 @@ void write_extra_output()
+ 	uint32* cover_count_pos = write_output(0); // filled in later
+ 	write_output(0); // comps_count_pos
+ 	if (is_kernel_64_bit)
+-		write_coverage_signal<uint64>(&extra_cov, signal_count_pos, cover_count_pos);
++		write_coverage_signal<uint64>(&extra_cov, signal_count_pos, cover_count_pos, monpipe);
+ 	else
+-		write_coverage_signal<uint32>(&extra_cov, signal_count_pos, cover_count_pos);
++		write_coverage_signal<uint32>(&extra_cov, signal_count_pos, cover_count_pos, monpipe);
+ 	cover_reset(&extra_cov);
+ 	debug_verbose("extra: sig=%u cover=%u\n", *signal_count_pos, *cover_count_pos);
+ 	completed++;
+@@ -1114,6 +1170,8 @@ static uint32 hash(uint32 a)
+ 
+ const uint32 dedup_table_size = 8 << 10;
+ uint32 dedup_table[dedup_table_size];
++const uint32 dedup_table_size2 = 8 << 10;
++uint32 dedup_table2[dedup_table_size2];
+ 
+ // Poorman's best-effort hashmap-based deduplication.
+ // The hashmap is global which means that we deduplicate across different calls.
+@@ -1132,6 +1190,22 @@ static bool dedup(uint32 sig)
+ 	dedup_table[sig % dedup_table_size] = sig;
+ 	return false;
+ }
++
++static bool dedup2(uint32 sig)
++{
++	for (uint32 i = 0; i < 4; i++) {
++		uint32 pos = (sig + i) % dedup_table_size2;
++		if (dedup_table2[pos] == sig)
++			return true;
++		if (dedup_table2[pos] == 0) {
++			dedup_table2[pos] = sig;
++			return false;
++		}
++	}
++	dedup_table2[sig % dedup_table_size2] = sig;
++	return false;
++}
++
+ #endif
+ 
+ template <typename T>
+@@ -1307,6 +1381,18 @@ uint32* write_output(uint32 v)
+ 	return output_pos++;
+ }
+ 
++uint32* write_output64(uint64 v)
++{
++	if (output_pos < output_data || (char*)output_pos >= (char*)output_data + kMaxOutput)
++		fail("output overflow: pos=%p region=[%p:%p]",
++		     output_pos, output_data, (char*)output_data + kMaxOutput);
++	uint64* tmp64 = (uint64*)output_pos;
++	*tmp64 = v;
++	tmp64++;
++	output_pos = (uint32*)tmp64;
++	return output_pos;
++}
++
+ void write_completed(uint32 completed)
+ {
+ 	__atomic_store_n(output_data, completed, __ATOMIC_RELEASE);
+diff --git a/pkg/csource/generated.go b/pkg/csource/generated.go
+index 1dc6bf4c..ef3bb1ca 100644
+--- a/pkg/csource/generated.go
++++ b/pkg/csource/generated.go
+@@ -4350,7 +4350,7 @@ static void setup_common()
+ #include <sys/time.h>
+ #include <sys/wait.h>
+ 
+-static void loop();
++static void loop(int monpipe);
+ 
+ static void sandbox_common()
+ {
+@@ -4367,7 +4367,7 @@ static void sandbox_common()
+ 	close(netns);
+ #endif
+ 
+-	struct rlimit rlim;
++	/*struct rlimit rlim;
+ #if SYZ_EXECUTOR
+ 	rlim.rlim_cur = rlim.rlim_max = (200 << 20) +
+ 					(kMaxThreads * kCoverSize + kExtraCoverSize) * sizeof(void*);
+@@ -4384,7 +4384,7 @@ static void sandbox_common()
+ 	rlim.rlim_cur = rlim.rlim_max = 0;
+ 	setrlimit(RLIMIT_CORE, &rlim);
+ 	rlim.rlim_cur = rlim.rlim_max = 256;
+-	setrlimit(RLIMIT_NOFILE, &rlim);
++	setrlimit(RLIMIT_NOFILE, &rlim);*/
+ 	if (unshare(CLONE_NEWNS)) {
+ 		debug("unshare(CLONE_NEWNS): %d\n", errno);
+ 	}
+@@ -4457,7 +4457,32 @@ static int do_sandbox_none(void)
+ #if SYZ_EXECUTOR || SYZ_ENABLE_NETDEV
+ 	initialize_netdevices();
+ #endif
+-	loop();
++	/* if the rawSignal is a single uint64,
++         * but not state convert edge, use pipe is ok
++         */
++	int monpipefd[2];
++	int ret = pipe(monpipefd);
++	if (ret < 0)
++		fail("Pipe create failed\n");
++
++	int monpid = fork();
++	if (monpid == 0) {
++		prctl(PR_SET_PDEATHSIG, SIGINT);
++		dup2(monpipefd[1], STDOUT_FILENO);
++		/* For reading monitor log print */
++		close(monpipefd[0]);
++		close(monpipefd[1]);
++		debug("single ebpf start ...\n");
++		execl("/root/pipe_monitor", "/root/pipe_monitor", "--debug", NULL);
++		return 0;
++	}
++	/* ebpf loading is very slow, one time a vm restart */
++	sleep(6);
++
++	close(monpipefd[1]);
++	/*Only sandbox_none, feed zero to others sandbox_* */
++	loop(monpipefd[0]);
++
+ 	doexit(1);
+ }
+ #endif
+@@ -4501,7 +4526,7 @@ static int do_sandbox_setuid(void)
+ 		fail("failed to setresuid");
+ 	prctl(PR_SET_DUMPABLE, 1, 0, 0, 0);
+ 
+-	loop();
++	loop(0);
+ 	doexit(1);
+ }
+ #endif
+@@ -4597,7 +4622,7 @@ static int namespace_sandbox_proc(void* arg)
+ 	if (syscall(SYS_capset, &cap_hdr, &cap_data))
+ 		fail("capset failed");
+ 
+-	loop();
++	loop(0);
+ 	doexit(1);
+ }
+ 
+@@ -4723,7 +4748,7 @@ static int do_sandbox_android_untrusted_app(void)
+ 	initialize_netdevices();
+ #endif
+ 
+-	loop();
++	loop(0);
+ 	doexit(1);
+ }
+ #endif
+@@ -5415,7 +5440,7 @@ again:
+ #endif
+ 
+ #if SYZ_EXECUTOR || SYZ_REPEAT
+-static void execute_one(void);
++static void execute_one(int monpipe);
+ #if SYZ_EXECUTOR_USES_FORK_SERVER
+ #include <signal.h>
+ #include <sys/types.h>
+@@ -5431,7 +5456,7 @@ static void execute_one(void);
+ static void reply_handshake();
+ #endif
+ 
+-static void loop(void)
++static void loop(int monpipe)
+ {
+ #if SYZ_HAVE_SETUP_LOOP
+ 	setup_loop();
+@@ -5488,7 +5513,7 @@ static void loop(void)
+ #if SYZ_EXECUTOR && SYZ_EXECUTOR_USES_SHMEM
+ 			close(kOutPipeFd);
+ #endif
+-			execute_one();
++			execute_one(monpipe);
+ #if SYZ_HAVE_CLOSE_FDS && !SYZ_THREADED
+ 			close_fds();
+ #endif
+diff --git a/pkg/ipc/ipc.go b/pkg/ipc/ipc.go
+index 89799b45..dcf8c507 100644
+--- a/pkg/ipc/ipc.go
++++ b/pkg/ipc/ipc.go
+@@ -83,7 +83,7 @@ const (
+ 
+ type CallInfo struct {
+ 	Flags  CallFlags
+-	Signal []uint32 // feedback signal, filled if FlagSignal is set
++	Signal []uint64 // feedback signal, filled if FlagSignal is set
+ 	Cover  []uint32 // per-call coverage, filled if FlagSignal is set and cover == true,
+ 	// if dedup == false, then cov effectively contains a trace, otherwise duplicates are removed
+ 	Comps prog.CompMap // per-call comparison operands
+@@ -351,7 +351,7 @@ func (env *Env) parseOutput(p *prog.Prog) (*ProgInfo, error) {
+ 			extraParts = append(extraParts, CallInfo{})
+ 			inf = &extraParts[len(extraParts)-1]
+ 		}
+-		if inf.Signal, ok = readUint32Array(&out, reply.signalSize); !ok {
++		if inf.Signal, ok = readUint64Array(&out, reply.signalSize); !ok {
+ 			return nil, fmt.Errorf("call %v/%v/%v: signal overflow: %v/%v",
+ 				i, reply.index, reply.num, reply.signalSize, len(out))
+ 		}
+@@ -381,10 +381,10 @@ func convertExtra(extraParts []CallInfo) CallInfo {
+ 		extraSignal.Merge(signal.FromRaw(part.Signal, 0))
+ 	}
+ 	extra.Cover = extraCover.Serialize()
+-	extra.Signal = make([]uint32, len(extraSignal))
++	extra.Signal = make([]uint64, len(extraSignal))
+ 	i := 0
+ 	for s := range extraSignal {
+-		extra.Signal[i] = uint32(s)
++		extra.Signal[i] = uint64(s)
+ 		i++
+ 	}
+ 	return extra
+@@ -464,6 +464,20 @@ func readUint32Array(outp *[]byte, size uint32) ([]uint32, bool) {
+ 	return res, true
+ }
+ 
++/* For reading 64-bit signal */
++func readUint64Array(outp *[]byte, size uint32) ([]uint64, bool) {
++	out := *outp
++	/* 4 = sizeof(uint32)? */
++	if int(size)*8 > len(out) {
++		return nil, false
++	}
++	/* range byte flow to 64-bit array  */
++	arr := ((*[1 << 28]uint64)(unsafe.Pointer(&out[0])))
++	res := arr[:size:size]
++	*outp = out[size*8:]
++	return res, true
++}
++
+ type command struct {
+ 	pid      int
+ 	config   *Config
+diff --git a/pkg/runtest/run.go b/pkg/runtest/run.go
+index 46a3f09c..ad176902 100644
+--- a/pkg/runtest/run.go
++++ b/pkg/runtest/run.go
+@@ -577,10 +577,10 @@ func RunTest(req *RunRequest, executor string) {
+ 		}
+ 		// Detach Signal and Cover because they point into the output shmem region.
+ 		for i := range info.Calls {
+-			info.Calls[i].Signal = append([]uint32{}, info.Calls[i].Signal...)
++			info.Calls[i].Signal = append([]uint64{}, info.Calls[i].Signal...)
+ 			info.Calls[i].Cover = append([]uint32{}, info.Calls[i].Cover...)
+ 		}
+-		info.Extra.Signal = append([]uint32{}, info.Extra.Signal...)
++		info.Extra.Signal = append([]uint64{}, info.Extra.Signal...)
+ 		info.Extra.Cover = append([]uint32{}, info.Extra.Cover...)
+ 		req.Info = append(req.Info, info)
+ 	}
+diff --git a/pkg/signal/signal.go b/pkg/signal/signal.go
+index 20deba46..82132d2b 100644
+--- a/pkg/signal/signal.go
++++ b/pkg/signal/signal.go
+@@ -9,7 +9,7 @@ import (
+ )
+ 
+ type (
+-	elemType uint32
++	elemType uint64
+ 	prioType int8
+ )
+ 
+@@ -55,7 +55,7 @@ func (s *Signal) Split(n int) Signal {
+ 	return c
+ }
+ 
+-func FromRaw(raw []uint32, prio uint8) Signal {
++func FromRaw(raw []uint64, prio uint8) Signal {
+ 	if len(raw) == 0 {
+ 		return nil
+ 	}
+@@ -114,7 +114,7 @@ func (s Signal) Diff(s1 Signal) Signal {
+ 	return res
+ }
+ 
+-func (s Signal) DiffRaw(raw []uint32, prio uint8) Signal {
++func (s Signal) DiffRaw(raw []uint64, prio uint8) Signal {
+ 	var res Signal
+ 	for _, e := range raw {
+ 		if p, ok := s[elemType(e)]; ok && p >= prioType(prio) {
+diff --git a/prog/analysis.go b/prog/analysis.go
+index 383ba15d..04cc004d 100644
+--- a/prog/analysis.go
++++ b/prog/analysis.go
+@@ -182,7 +182,7 @@ const (
+ type CallInfo struct {
+ 	Flags  CallFlags
+ 	Errno  int
+-	Signal []uint32
++	Signal []uint64
+ }
+ 
+ const (
+@@ -280,7 +280,7 @@ func extractArgSignal(arg Arg, callID, flags int, inf *CallInfo, resources map[*
+ 	return flags
+ }
+ 
+-func DecodeFallbackSignal(s uint32) (callID, errno int) {
++func DecodeFallbackSignal(s uint64) (callID, errno int) {
+ 	typ, id, aux := decodeFallbackSignal(s)
+ 	switch typ {
+ 	case fallbackSignalErrno, fallbackSignalErrnoBlocked:
+@@ -292,16 +292,16 @@ func DecodeFallbackSignal(s uint32) (callID, errno int) {
+ 	}
+ }
+ 
+-func encodeFallbackSignal(typ, id, aux int) uint32 {
++func encodeFallbackSignal(typ, id, aux int) uint64 {
+ 	if typ & ^7 != 0 {
+ 		panic(fmt.Sprintf("bad fallback signal type %v", typ))
+ 	}
+ 	if id & ^fallbackCallMask != 0 {
+ 		panic(fmt.Sprintf("bad call id in fallback signal %v", id))
+ 	}
+-	return uint32(typ) | uint32(id&fallbackCallMask)<<3 | uint32(aux)<<16
++	return uint64(typ) | uint64(id&fallbackCallMask)<<3 | uint64(aux)<<16
+ }
+ 
+-func decodeFallbackSignal(s uint32) (typ, id, aux int) {
++func decodeFallbackSignal(s uint64) (typ, id, aux int) {
+ 	return int(s & 7), int((s >> 3) & fallbackCallMask), int(s >> 16)
+ }
+diff --git a/syz-fuzzer/proc.go b/syz-fuzzer/proc.go
+index 3b884b2a..ca12a97c 100644
+--- a/syz-fuzzer/proc.go
++++ b/syz-fuzzer/proc.go
+@@ -265,7 +265,7 @@ func (proc *Proc) execute(execOpts *ipc.ExecOpts, p *prog.Prog, flags ProgTypes,
+ 
+ func (proc *Proc) enqueueCallTriage(p *prog.Prog, flags ProgTypes, callIndex int, info ipc.CallInfo) {
+ 	// info.Signal points to the output shmem region, detach it before queueing.
+-	info.Signal = append([]uint32{}, info.Signal...)
++	info.Signal = append([]uint64{}, info.Signal...)
+ 	// None of the caller use Cover, so just nil it instead of detaching.
+ 	// Note: triage input uses executeRaw to get coverage.
+ 	info.Cover = nil
+diff --git a/syz-manager/html.go b/syz-manager/html.go
+index a0700199..ea5ec76e 100644
+--- a/syz-manager/html.go
++++ b/syz-manager/html.go
+@@ -213,9 +213,10 @@ func (mgr *Manager) httpCorpus(w http.ResponseWriter, r *http.Request) {
+ 			return
+ 		}
+ 		data.Inputs = append(data.Inputs, &UIInput{
+-			Sig:   sig,
+-			Short: p.String(),
+-			Cover: len(inp.Cover),
++			Sig:    sig,
++			Short:  p.String(),
++			Cover:  len(inp.Cover),
++			Signal: inp.Signal.Deserialize(),
+ 		})
+ 	}
+ 	sort.Slice(data.Inputs, func(i, j int) bool {
+@@ -279,7 +280,7 @@ func (mgr *Manager) httpCoverFallback(w http.ResponseWriter, r *http.Request) {
+ 	}
+ 	calls := make(map[int][]int)
+ 	for s := range maxSignal {
+-		id, errno := prog.DecodeFallbackSignal(uint32(s))
++		id, errno := prog.DecodeFallbackSignal(uint64(s))
+ 		calls[id] = append(calls[id], errno)
+ 	}
+ 	data := &UIFallbackCoverData{}
+@@ -376,6 +377,11 @@ func (mgr *Manager) httpInput(w http.ResponseWriter, r *http.Request) {
+ 	}
+ 	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+ 	w.Write(inp.Prog)
++	buf := bufio.NewWriter(w)
++	for _, e := range inp.Signal.Elems {
++		fmt.Fprintf(buf, "0x%x\n", e)
++	}
++	buf.Flush()
+ }
+ 
+ func (mgr *Manager) httpReport(w http.ResponseWriter, r *http.Request) {
+@@ -623,9 +629,10 @@ type UICorpus struct {
+ }
+ 
+ type UIInput struct {
+-	Sig   string
+-	Short string
+-	Cover int
++	Sig    string
++	Short  string
++	Cover  int
++	Signal signal.Signal
+ }
+ 
+ var summaryTemplate = html.CreatePage(`
+-- 
+2.20.1
+
