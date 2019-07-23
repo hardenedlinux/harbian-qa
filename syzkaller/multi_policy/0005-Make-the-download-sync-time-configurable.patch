@@ -1,0 +1,269 @@
+From d2f5f79bfb751b3d6b7ec4e31f6f9e0430f47c11 Mon Sep 17 00:00:00 2001
+From: Bins94 <kaipeng94@gmail.com>
+Date: Wed, 17 Jul 2019 05:19:37 -0400
+Subject: [PATCH 5/5] Make the download sync time configurable
+
+---
+ pkg/mgrconfig/config.go |  7 ++++---
+ pkg/mgrconfig/load.go   | 17 +++++++++--------
+ pkg/rpctype/rpctype.go  |  3 ++-
+ syz-hub/hub.go          | 26 +++++++++++++++++++-------
+ syz-hub/state/state.go  | 20 ++++++++++++++++++++
+ syz-manager/html.go     |  1 +
+ syz-manager/hub.go      | 21 ++++++++++++++-------
+ syz-manager/manager.go  |  7 +++++++
+ 8 files changed, 76 insertions(+), 26 deletions(-)
+
+diff --git a/pkg/mgrconfig/config.go b/pkg/mgrconfig/config.go
+index 7f1dffe9..80f332dd 100644
+--- a/pkg/mgrconfig/config.go
++++ b/pkg/mgrconfig/config.go
+@@ -34,9 +34,10 @@ type Config struct {
+ 	// SSH user ("root" by default).
+ 	SSHUser string `json:"ssh_user,omitempty"`
+ 
+-	HubClient string `json:"hub_client,omitempty"`
+-	HubAddr   string `json:"hub_addr,omitempty"`
+-	HubKey    string `json:"hub_key,omitempty"`
++	HubClient   string `json:"hub_client,omitempty"`
++	HubAddr     string `json:"hub_addr,omitempty"`
++	HubKey      string `json:"hub_key,omitempty"`
++	HubSyncTime int    `json:"hub_synctime"`
+ 
+ 	// List of email addresses to receive notifications when bugs are encountered for the first time (optional).
+ 	// Mailx is the only supported mailer. Please set it up prior to using this function.
+diff --git a/pkg/mgrconfig/load.go b/pkg/mgrconfig/load.go
+index 6cbbba31..07a92bbe 100644
+--- a/pkg/mgrconfig/load.go
++++ b/pkg/mgrconfig/load.go
+@@ -56,14 +56,15 @@ func LoadPartialFile(filename string) (*Config, error) {
+ 
+ func defaultValues() *Config {
+ 	return &Config{
+-		SSHUser:   "root",
+-		Cover:     true,
+-		Ebpfsig:   false,
+-		Covfilter: false,
+-		Reproduce: true,
+-		Sandbox:   "none",
+-		RPC:       ":0",
+-		Procs:     1,
++		SSHUser:     "root",
++		Cover:       true,
++		Ebpfsig:     false,
++		Covfilter:   false,
++		Reproduce:   true,
++		Sandbox:     "none",
++		RPC:         ":0",
++		HubSyncTime: 1,
++		Procs:       1,
+ 	}
+ }
+ 
+diff --git a/pkg/rpctype/rpctype.go b/pkg/rpctype/rpctype.go
+index 61d98dac..6bc2886a 100644
+--- a/pkg/rpctype/rpctype.go
++++ b/pkg/rpctype/rpctype.go
+@@ -94,7 +94,8 @@ type HubSyncArgs struct {
+ 	// Hashes of programs removed from corpus since last sync or connect.
+ 	Del []string
+ 	// Repros found since last sync.
+-	Repros [][]byte
++	Repros     [][]byte
++	NeedCorpus bool
+ }
+ 
+ type HubSyncRes struct {
+diff --git a/syz-hub/hub.go b/syz-hub/hub.go
+index db8dd506..b6d91923 100644
+--- a/syz-hub/hub.go
++++ b/syz-hub/hub.go
+@@ -90,13 +90,25 @@ func (hub *Hub) Sync(a *rpctype.HubSyncArgs, r *rpctype.HubSyncRes) error {
+ 	hub.mu.Lock()
+ 	defer hub.mu.Unlock()
+ 
+-	progs, more, err := hub.st.Sync(name, a.Add, a.Del)
+-	if err != nil {
+-		log.Logf(0, "sync error: %v", err)
+-		return err
++	if a.NeedCorpus {
++		log.Logf(0, "Need corpus sync")
++		progs, more, err := hub.st.Sync(name, a.Add, a.Del)
++		if err != nil {
++			log.Logf(0, "sync error: %v", err)
++			return err
++		}
++		r.Progs = progs
++		r.More = more
++	} else {
++		log.Logf(0, "Send progs sync")
++		err := hub.st.SyncUpOnly(name, a.Add, a.Del)
++		if err != nil {
++			log.Logf(0, "sync up error: %v", err)
++			return err
++		}
++		r.Progs = nil
++		r.More = 0
+ 	}
+-	r.Progs = progs
+-	r.More = more
+ 	for _, repro := range a.Repros {
+ 		if err := hub.st.AddRepro(name, repro); err != nil {
+ 			log.Logf(0, "add repro error: %v", err)
+@@ -112,7 +124,7 @@ func (hub *Hub) Sync(a *rpctype.HubSyncArgs, r *rpctype.HubSyncRes) error {
+ 		}
+ 	}
+ 	log.Logf(0, "sync from %v: recv: add=%v del=%v repros=%v; send: progs=%v repros=%v pending=%v",
+-		name, len(a.Add), len(a.Del), len(a.Repros), len(r.Progs), len(r.Repros), more)
++		name, len(a.Add), len(a.Del), len(a.Repros), len(r.Progs), len(r.Repros), r.More)
+ 	return nil
+ }
+ 
+diff --git a/syz-hub/state/state.go b/syz-hub/state/state.go
+index 7ccdf182..35d6d521 100644
+--- a/syz-hub/state/state.go
++++ b/syz-hub/state/state.go
+@@ -197,6 +197,26 @@ func (st *State) Sync(name string, add [][]byte, del []string) ([][]byte, int, e
+ 	return progs, more, err
+ }
+ 
++func (st *State) SyncUpOnly(name string, add [][]byte, del []string) error {
++	mgr := st.Managers[name]
++	if mgr == nil || mgr.Connected.IsZero() {
++		return fmt.Errorf("unconnected manager %v", name)
++	}
++	if len(del) != 0 {
++		for _, sig := range del {
++			mgr.Corpus.Delete(sig)
++		}
++		if err := mgr.Corpus.Flush(); err != nil {
++			log.Logf(0, "failed to flush corpus database: %v", err)
++		}
++		st.purgeCorpus()
++	}
++	st.addInputs(mgr, add)
++	mgr.Added += len(add)
++	mgr.Deleted += len(del)
++	return nil
++}
++
+ func (st *State) AddRepro(name string, repro []byte) error {
+ 	mgr := st.Managers[name]
+ 	if mgr == nil || mgr.Connected.IsZero() {
+diff --git a/syz-manager/html.go b/syz-manager/html.go
+index ea5ec76e..382553d2 100644
+--- a/syz-manager/html.go
++++ b/syz-manager/html.go
+@@ -123,6 +123,7 @@ func (mgr *Manager) collectStats() []UIStat {
+ 		{Name: "config", Value: mgr.cfg.Name, Link: "/config"},
+ 		{Name: "uptime", Value: fmt.Sprint(time.Since(mgr.startTime) / 1e9 * 1e9)},
+ 		{Name: "fuzzing", Value: fmt.Sprint(mgr.fuzzingTime / 60e9 * 60e9)},
++		{Name: "last input", Value: fmt.Sprint(time.Since(mgr.lastInputTime) / 1e9 * 1e9)},
+ 		{Name: "corpus", Value: fmt.Sprint(len(mgr.corpus)), Link: "/corpus"},
+ 		{Name: "triage queue", Value: fmt.Sprint(len(mgr.candidates))},
+ 		{Name: "cover", Value: fmt.Sprint(rawStats["cover"]), Link: "/cover"},
+diff --git a/syz-manager/hub.go b/syz-manager/hub.go
+index 5f85c8fe..a3c3716f 100644
+--- a/syz-manager/hub.go
++++ b/syz-manager/hub.go
+@@ -48,14 +48,20 @@ type HubConnector struct {
+ 
+ // HubManagerView restricts interface between HubConnector and Manager.
+ type HubManagerView interface {
++	getNoInputTime() time.Duration
+ 	getMinimizedCorpus() (corpus, repros [][]byte)
+ 	addNewCandidates(progs [][]byte)
+ }
+ 
+ func (hc *HubConnector) loop() {
++	noInput := false
+ 	var hub *rpctype.RPCClient
+ 	for {
+ 		time.Sleep(time.Minute)
++		noCovTime := hc.mgr.getNoInputTime()
++		if noCovTime > time.Duration(hc.cfg.HubSyncTime)*time.Minute {
++			noInput = true
++		}
+ 		corpus, repros := hc.mgr.getMinimizedCorpus()
+ 		hc.newRepros = append(hc.newRepros, repros...)
+ 		if hub == nil {
+@@ -66,7 +72,7 @@ func (hc *HubConnector) loop() {
+ 			}
+ 			log.Logf(0, "connected to hub at %v, corpus %v", hc.cfg.HubAddr, len(corpus))
+ 		}
+-		if err := hc.sync(hub, corpus); err != nil {
++		if err := hc.sync(hub, corpus, noInput); err != nil {
+ 			log.Logf(0, "hub sync failed: %v", err)
+ 			hub.Close()
+ 			hub = nil
+@@ -103,11 +109,12 @@ func (hc *HubConnector) connect(corpus [][]byte) (*rpctype.RPCClient, error) {
+ 	return hub, nil
+ }
+ 
+-func (hc *HubConnector) sync(hub *rpctype.RPCClient, corpus [][]byte) error {
++func (hc *HubConnector) sync(hub *rpctype.RPCClient, corpus [][]byte, noInput bool) error {
+ 	a := &rpctype.HubSyncArgs{
+-		Client:  hc.cfg.HubClient,
+-		Key:     hc.cfg.HubKey,
+-		Manager: hc.cfg.Name,
++		Client:     hc.cfg.HubClient,
++		Key:        hc.cfg.HubKey,
++		Manager:    hc.cfg.Name,
++		NeedCorpus: noInput,
+ 	}
+ 	sigs := make(map[hash.Sig]bool)
+ 	for _, inp := range corpus {
+@@ -147,9 +154,9 @@ func (hc *HubConnector) sync(hub *rpctype.RPCClient, corpus [][]byte) error {
+ 		hc.stats.hubRecvRepro.add(len(r.Repros) - reproDropped)
+ 		hc.stats.hubRecvReproDrop.add(reproDropped)
+ 		log.Logf(0, "hub sync: send: add %v, del %v, repros %v;"+
+-			" recv: progs %v, repros %v; more %v",
++			" recv: progs %v, repros %v; more %v; need corpus: %v",
+ 			len(a.Add), len(a.Del), len(a.Repros),
+-			len(r.Progs)-progDropped, len(r.Repros)-reproDropped, r.More)
++			len(r.Progs)-progDropped, len(r.Repros)-reproDropped, r.More, noInput)
+ 		a.Add = nil
+ 		a.Del = nil
+ 		a.Repros = nil
+diff --git a/syz-manager/manager.go b/syz-manager/manager.go
+index d05167fb..99c9a97c 100644
+--- a/syz-manager/manager.go
++++ b/syz-manager/manager.go
+@@ -56,6 +56,7 @@ type Manager struct {
+ 	startTime      time.Time
+ 	firstConnect   time.Time
+ 	fuzzingTime    time.Duration
++	lastInputTime  time.Time
+ 	stats          *Stats
+ 	crashTypes     map[string]bool
+ 	vmStop         chan bool
+@@ -163,6 +164,7 @@ func RunManager(cfg *mgrconfig.Config, target *prog.Target, sysTarget *targets.T
+ 		reporter:         reporter,
+ 		crashdir:         crashdir,
+ 		startTime:        time.Now(),
++		lastInputTime:    time.Now(),
+ 		stats:            new(Stats),
+ 		crashTypes:       make(map[string]bool),
+ 		enabledSyscalls:  syscalls,
+@@ -831,6 +833,10 @@ func saveReproStats(filename string, stats *repro.Stats) {
+ 	osutil.WriteFile(filename, []byte(text))
+ }
+ 
++func (mgr *Manager) getNoInputTime() time.Duration {
++	return time.Now().Sub(mgr.lastInputTime)
++}
++
+ func (mgr *Manager) getMinimizedCorpus() (corpus, repros [][]byte) {
+ 	mgr.mu.Lock()
+ 	defer mgr.mu.Unlock()
+@@ -943,6 +949,7 @@ func (mgr *Manager) machineChecked(a *rpctype.CheckArgs) {
+ func (mgr *Manager) newInput(inp rpctype.RPCInput, sign signal.Signal) {
+ 	mgr.mu.Lock()
+ 	defer mgr.mu.Unlock()
++	mgr.lastInputTime = time.Now()
+ 	sig := hash.String(inp.Prog)
+ 	if old, ok := mgr.corpus[sig]; ok {
+ 		// The input is already present, but possibly with diffent signal/coverage/call.
+-- 
+2.20.1
+
