@@ -4,8 +4,8 @@
 Syz-hub is a great tool to connect all the syz-managers. After all syz-managers connect to syz-hub, Every syz-manager will exchange their whole corpus with each other. This is called "Sync" in syz-hub, the interval of "Sync" is one minute which you can see a time.Sleep() in syz-manager/hub.go:loop(). After "Sync", every manager will check if the received progs can hit more coverage. You can immediately see a great number of "triage queue" after "Sync". That means syz-managers with different configure can exchange progs with each other also.
 
 ## Policy of fuzzer
-### Original syzkaller's fuzzer
-Actrually, there is some property of syzkaller:
+### Original syzkaller fuzzer
+Actrually, there are some mechanisms of syzkaller:
 1. The feedback( coverage) of progs determin if it can be sent to corpus
 2. Corpus will affect the progs generating( by mutating, syscall-choisetable, affect the probability)
 3. Generated progs determin which feedback may be received.
