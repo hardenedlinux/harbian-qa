@@ -4,20 +4,20 @@
 1. Socket state( historical state) feedback.
 2. Coverage filter
 
-I implement runtime state( sk->sk_state, tp->repair ...) feedback by using ebpf. ebpf collect a 64-bit state send to executor, executor separate to two 32-bit state. Then calculate low-32-bit ^ hash(high-32-bit). The result of it will look like original syzkaller coverage signal. Send these signals to fuzzer. Coverage filter implement in executor. You can get kernel function address region use the [fun2addr](https://github.com/hardenedlinux/harbian-qa/blob/master/syz_patch/fun2addr.go).
+I implement runtime state( sk->sk_state, tp->repair ...) feedback by using ebpf. ebpf collect a 64-bit state send to executor. The feedback looks like original syzkaller coverage signal. Send these signals to fuzzer. Coverage filter implement in executor. You can get kernel function address region use the [fun2addr](https://github.com/hardenedlinux/harbian-qa/blob/master/syz_patch/fun2addr.go).
 
 ## Usage  
 Command for build ebpf monitor:
 ```  
 cd harbian-qa/syzkaller/kstat_demo
-mv kstat_demo/tcp-ipv6/ebpftext.go kstat_demo/ebpf/ebpftext.go
+mv kstat_demo/ebpf_sample/$YOUR_EBPF.go kstat_demo/ebpf/ebpftext.go
 go build pipe_monitor
 ```  
 Command for patching syzkaller:
 ```  
 cd /path/to/your/syzkaller/source
-git checkout c1718ecf
-git apply /path/to/harbian-qa/syzkaller/kstat_demo/tcp-ipv6.patch
+git checkout bc2c6e45
+git apply /path/to/harbian-qa/syzkaller/kstat_demo/$PATCH_YOU_NEED.patch
 ```
 After patching syzkaller, to filter coverage, address in executor/cov_filter.h should fit to you kernel. Use fun2addr as:
 ```  
@@ -39,7 +39,7 @@ This is some coverage( customize vs. original in the table) of functions which m
 | inet_accept | 2/2 | 2/2 | 2/2 | 2/2 | 2/2 | 2/2 |  
 | tcp_ioctl | 9/9 | 9/9 | 9/9 | 9/9 | 9/9 | 9/9 |
 
-Other example, I run six times both original and customize syzkaller. Two hours per time. These lines can be easily covered:  
+Other example, I run six times both original and customize syzkaller. 2.5 hours per time. These lines can be easily covered:  
 #### tp->repair/tp->repair_queue
 https://elixir.bootlin.com/linux/v4.17/source/net/ipv4/tcp.c#L1233 (5:0)
 https://elixir.bootlin.com/linux/v4.17/source/net/ipv4/tcp.c#L2687 (6:0)
@@ -51,11 +51,11 @@ https://elixir.bootlin.com/linux/v4.17/source/net/ipv4/tcp.c#L1259 (6:0)
 https://elixir.bootlin.com/linux/v4.17/source/net/ipv4/tcp.c#L2137 (6:2)
 
 ## Concludsion
-1. Greater coverage then original syzkaller especially in function tcp_sendmsg. It is because historical state and nested condition. We can see in the second example.
+1. Greater coverage than original syzkaller especially in function tcp_sendmsg. It is because historical state and nested condition can be covered easily. We can see in the second example.
 
 2. The tcp_setsockopt coverage of customize syzkaller is only a little more then original syzkaller's because of powerful syscalls script. Most of uncovered code is similar in original syzkaller. Is it because of powerful syscalls script and mutation is not enough?
 
 ## RawData
-* [Data](data.zip) get from syzkaller web. It's not macth to the table.
-* The test will keep the same enable syscalls, run time, vm evironment.
-* Collect different data as feedback( ebpftext) get different result.
+* [Data](data.tar.bz2) get from syzkaller web. It's not macth to the table.
+* The test will keep the same enable syscalls, run time, vm evironment... as more as possible.
+* Collect different data as feedback( ebpftext) get a great different result.
