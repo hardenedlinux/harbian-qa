@@ -1,0 +1,52 @@
+From 1d290b1cb2333d931942cad3bda9bda447942f5d Mon Sep 17 00:00:00 2001
+From: Bins94 <kaipeng94@gmail.com>
+Date: Sun, 24 Nov 2019 22:23:26 -0500
+Subject: [PATCH 6/6] Add monitot binary option to manager configure
+
+---
+ executor/common_linux.h | 2 +-
+ pkg/mgrconfig/config.go | 1 +
+ syz-manager/manager.go  | 4 ++++
+ 3 files changed, 6 insertions(+), 1 deletion(-)
+
+diff --git a/executor/common_linux.h b/executor/common_linux.h
+index bc58d71b..0a60a54f 100644
+--- a/executor/common_linux.h
++++ b/executor/common_linux.h
+@@ -2164,7 +2164,7 @@ static int do_sandbox_none(void)
+ 		close(monpipefd[0]);
+ 		close(monpipefd[1]);
+ 		debug("single ebpf start ...\n");
+-		execl("/root/pipe_monitor", "/root/pipe_monitor", "--debug", NULL);
++		execl("/pipe_monitor", "/pipe_monitor", "--debug", NULL);
+ 		return 0;
+ 	}
+ 	/* ebpf loading is very slow, one time a vm restart */
+diff --git a/pkg/mgrconfig/config.go b/pkg/mgrconfig/config.go
+index 0316d835..637ea249 100644
+--- a/pkg/mgrconfig/config.go
++++ b/pkg/mgrconfig/config.go
+@@ -107,4 +107,5 @@ type Config struct {
+ 	SyzFuzzerBin   string `json:"-"`
+ 	SyzExecprogBin string `json:"-"`
+ 	SyzExecutorBin string `json:"-"`
++	SyzMonitorBin  string `json:"ebpfmonitor"`
+ }
+diff --git a/syz-manager/manager.go b/syz-manager/manager.go
+index 46aa0228..aab55c7e 100644
+--- a/syz-manager/manager.go
++++ b/syz-manager/manager.go
+@@ -536,6 +536,10 @@ func (mgr *Manager) runInstance(index int) (*Crash, error) {
+ 	if err != nil {
+ 		return nil, fmt.Errorf("failed to copy binary: %v", err)
+ 	}
++	_, err = inst.Copy(mgr.cfg.SyzMonitorBin)
++	if err != nil {
++		return nil, fmt.Errorf("failed to copy binary: %v", err)
++	}
+ 
+ 	fuzzerV := 0
+ 	procs := mgr.cfg.Procs
+-- 
+2.20.1
+
