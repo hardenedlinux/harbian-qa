@@ -26,7 +26,7 @@ bin/syz-func2addr -v PATH_to_YOUR_VMLINUX -f FUNC_NAME -s
 Get address of all functions you want to test. And write them to cov_filter.h. Then run make as original syzkaller to build it.
 
 ## Testcase
-I run six times both original and customize syzkaller. Two hours per time. The enable syscalls is extract from socket_inet6.txt and socket_inet_tcp.txt using this [tool](https://github.com/hardenedlinux/harbian-qa/blob/master/syz_patch/extract_syscall_names_from_prog.py). There is also some syscalls for ipv4_tcp have to be removed by hand.
+I run six times both original and customize syzkaller. Two hours per time. The enable syscalls is extract from socket_inet6.txt and socket_inet_tcp.txt using this [tool](https://github.com/hardenedlinux/harbian-qa/blob/master/syz_patch/extract_syscall_names_from_prog.py). There are also some syscalls for ipv4_tcp have to be removed by hand.
 This is some coverage( customize vs. original in the table) of functions which monitored by my ebpf:  
 
 |kern_func | 1 | 2 | 3 | 4 | 5 | 6 |  
@@ -39,16 +39,17 @@ This is some coverage( customize vs. original in the table) of functions which m
 | inet_accept | 2/2 | 2/2 | 2/2 | 2/2 | 2/2 | 2/2 |  
 | tcp_ioctl | 9/9 | 9/9 | 9/9 | 9/9 | 9/9 | 9/9 |
 
-Other example, I run six times both original and customize syzkaller. 2.5 hours per time. These lines can be easily covered:  
-#### tp->repair/tp->repair_queue
-https://elixir.bootlin.com/linux/v4.17/source/net/ipv4/tcp.c#L1233 (5:0)
-https://elixir.bootlin.com/linux/v4.17/source/net/ipv4/tcp.c#L2687 (6:0)
-https://elixir.bootlin.com/linux/v4.17/source/net/ipv4/tcp.c#L2689 (5:0)
-https://elixir.bootlin.com/linux/v4.17/source/net/ipv4/tcp.c#L3106 (5:2)
+Other example, I run six times both original and customize syzkaller. 2.5 hours per time. Number in brackets means: how many time syzkaller cover this line in 6-time-run, customize vs. original. It can be see that these lines can be easily covered in customize syzkaller:  
+#### tp->repair/tp->repair_queue  
+https://elixir.bootlin.com/linux/v4.17/source/net/ipv4/tcp.c#L1233 (5:0)  
+https://elixir.bootlin.com/linux/v4.17/source/net/ipv4/tcp.c#L2687 (6:0)  
+https://elixir.bootlin.com/linux/v4.17/source/net/ipv4/tcp.c#L2689 (5:0)  
+https://elixir.bootlin.com/linux/v4.17/source/net/ipv4/tcp.c#L3106 (5:2)  
 
-#### sk->sk_state
-https://elixir.bootlin.com/linux/v4.17/source/net/ipv4/tcp.c#L1259 (6:0)
-https://elixir.bootlin.com/linux/v4.17/source/net/ipv4/tcp.c#L2137 (6:2)
+#### sk->sk_state  
+https://elixir.bootlin.com/linux/v4.17/source/net/ipv4/tcp.c#L1259 (6:0)  
+https://elixir.bootlin.com/linux/v4.17/source/net/ipv4/tcp.c#L2137 (6:2)  
+Why can customize syzkaller cover these line more efficiently? Refer to [this](../README.md).
 
 ## Concludsion
 1. Greater coverage than original syzkaller especially in function tcp_sendmsg. It is because historical state and nested condition can be covered easily. We can see in the second example.
