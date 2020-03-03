@@ -9,6 +9,8 @@
 #include "clang/AST/ParentMap.h"
 #include "clang/Basic/TargetInfo.h"
 #include "clang/StaticAnalyzer/Core/BugReporter/BugType.h"
+#include "clang/StaticAnalyzer/Core/PathSensitive/ProgramState.h"
+#include "clang/StaticAnalyzer/Core/PathSensitive/ExprEngine.h"
 
 #include <iostream>
 #include <map>
@@ -21,14 +23,17 @@ using namespace ento;
 /* FuncMap[FUNC_NAME] = SUBSTMT_INFO_STRUCT*/
 std::map<std::string, std::vector<stmtInfo>> FuncMap;
 /* MemCount[BASE->MEMBER] = COUNT_OF_APPEARING_IN_CONDITION  */
-std::map<std::string, unsigned int> MemCount;
+std::map<std::string, unsigned int> ASTMemCount;
+std::map<std::string, unsigned int> CFGMemCount;
 
 namespace {
   class ConditionChecker : public Checker< check::ASTDecl<FunctionDecl>,
+					   check::BranchCondition,
 					   check::EndAnalysis> {
   public:
     void checkASTDecl(const FunctionDecl *FD, AnalysisManager &Mgr, BugReporter &BR) const;
     void checkEndAnalysis(ExplodedGraph &G, BugReporter &BR, ExprEngine &Eng) const;
+    void checkBranchCondition(const Stmt *s, CheckerContext &Ctx) const;
   };
 } // end anonymous namespace
 
@@ -65,17 +70,20 @@ void ConditionChecker::checkASTDecl(const FunctionDecl *FD, AnalysisManager &Mgr
     for (Stmt *c : FD->getBody()->children()) {
       std::vector<stmtInfo> condInfo;
       handleChildrenStmt(SM, c, searchCondition, &condInfo);
-      if (condInfo.size()>0) {
-	funcInfoVec.insert(funcInfoVec.end(), condInfo.begin(), condInfo.end());
+      for (stmtInfo tmpInfo : condInfo) {
+	if(tmpInfo.typeName == "MemExpr" || tmpInfo.typeName == "ParmVar") {
+	  funcInfoVec.insert(funcInfoVec.end(), condInfo.begin(), condInfo.end());
+	  break;
+	}
       }
       for (stmtInfo i : condInfo) {
 	/* calculate the using of member operation */
 	if (i.typeName == "MemExpr") {
 	  std::string key = i.base + "->" + i.target;
-	  if (MemCount.find(key) != MemCount.end()) {
-	    MemCount[key]++;
+	  if (ASTMemCount.find(key) != ASTMemCount.end()) {
+	    ASTMemCount[key]++;
 	  } else {
-	    MemCount[key] = 1;
+	    ASTMemCount[key] = 1;
 	  }
 	}
       }
@@ -90,16 +98,80 @@ void ConditionChecker::checkASTDecl(const FunctionDecl *FD, AnalysisManager &Mgr
 }
 
 void ConditionChecker::checkEndAnalysis(ExplodedGraph &G, BugReporter &BR, ExprEngine &Eng) const {
-  static int count = 0;
-  if (count < 1) {
-    llvm::outs() << "MemberExpr count of condition statement: " << "\n";
-    for (auto const & m : MemCount) {
-      llvm::outs() << m.first << ":" << m.second << "\n";
-    }
+  llvm::outs() << "Count MemberExpr in condition statement(AST Parse): " << "\n";
+  for (auto const & m : ASTMemCount) {
+    llvm::outs() << m.first << ":" << m.second << "\n";
   }
-  count++;
+  llvm::outs() << "Count MemberExpr in condition statement(CFG Parse): " << "\n";
+  for (auto const & m : CFGMemCount) {
+    llvm::outs() << m.first << ":" << m.second << "\n";
+  }
 }
 
+void ConditionChecker::checkBranchCondition(const Stmt *s, CheckerContext &Ctx) const {
+  ProgramStateRef State = Ctx.getState();
+  const LocationContext *LC = Ctx.getLocationContext();
+  SVal val = State->getSVal(s, LC);
+
+  const SymExpr *SE = val.getAsSymbolicExpression();
+  std::vector<symInfo> SymbolInfo;
+  std::string thisMemRegStr = "";
+  if (SE != nullptr) {
+    std::vector<symInfo> tmp;
+    if (SE->getOriginRegion() != nullptr) {
+      thisMemRegStr = SE->getOriginRegion()->getString();
+    }
+    const Decl *D = LC->getDecl();
+    if (D != nullptr) {
+      const FunctionDecl *FD = D->getAsFunction();
+      if (FD != nullptr) {
+	llvm::outs() << "FunctionName: " << FD->getName() << "\n";
+      }
+    }
+    parseSymExpr(SE, &tmp);
+    if (tmp.size() > 0) {
+      llvm::outs() << "Condition parse:\n";
+      for (symInfo s : tmp) {
+	llvm::outs() << s.toString() << "\n";
+	if (s.typeName == "MemSymbol") {
+	  std::string key = s.targetStr;
+	  if (CFGMemCount.find(key) != CFGMemCount.end()) {
+	    CFGMemCount[key]++;
+	  } else {
+	    CFGMemCount[key] = 1;
+	  }
+	}
+      }
+    }
+  } else {
+    return;
+  }
+
+  Optional<DefinedOrUnknownSVal> dval = val.getAs<DefinedOrUnknownSVal>();
+  if (dval) {
+    ProgramStateRef cstate = State->assume(*dval, true);
+    if (cstate != nullptr) {
+      ConstraintRangeTy Constraints = cstate->get<ConstraintRange>();
+      if (!Constraints.isEmpty()) {
+	for (ConstraintRangeTy::iterator i = Constraints.begin();
+	     i != Constraints.end(); i++) {
+	  if (i.getKey()->getOriginRegion() != nullptr) {
+	    if (i.getKey()->getOriginRegion()->getString() == thisMemRegStr) {
+	      parseSymExpr(i.getKey(), &SymbolInfo);
+	      for (symInfo s : SymbolInfo) {
+		llvm::outs() << s.toString() << "\n";
+	      }
+	      i.getData().print(llvm::outs());
+	      llvm::outs() << "\n";
+	    }
+	  }
+	}
+      }
+    }
+  }
+  llvm::outs() << "\n";
+  return;
+}
 
 void ento::registerConditionChecker(CheckerManager &mgr) {
   mgr.registerChecker<ConditionChecker>();
@@ -108,12 +180,3 @@ void ento::registerConditionChecker(CheckerManager &mgr) {
 bool ento::shouldRegisterConditionChecker(const LangOptions &LO) {
   return true;
 }
-
-
-
-
-
-
-
-
-

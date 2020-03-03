@@ -13,6 +13,7 @@
 using namespace clang;
 using namespace ento;
 
+
 class stmtInfo {
  public:
   std::string  typeName;
@@ -48,8 +49,34 @@ class stmtInfo {
     }
     retStr = retStr.append(target);
     if (srcLine != "") {
-      retStr = retStr.append("\nRawSrcLine: " + srcLine);
+      if (target != "") {
+	retStr = retStr.append("\n");
+      }
+      retStr = retStr.append("RawSrcLine: " + srcLine);
     }
+    return retStr;
+  }
+};
+
+class symInfo {
+ public:
+  std::string typeName;
+  unsigned int ID;
+  std::string targetStr;
+  std::string funcName;
+
+  void init(std::string nm, unsigned int id, std::string ts){
+    typeName = nm;
+    ID = id;
+    targetStr = ts;
+  }
+  void addFuncName(std::string fn) {
+    funcName = fn;
+  }
+  std::string toString() {
+    std::string retStr = "";
+    retStr = retStr.append("[" + typeName + "] ");
+    retStr = retStr.append(targetStr);
     return retStr;
   }
 };
@@ -58,8 +85,10 @@ typedef bool(*stmtHandle)(const SourceManager &SM, const Stmt *s, std::vector<st
 
 /* Recursicely parse the children statement, use the stmtHandle function */
 void handleChildrenStmt(const SourceManager &SM, const Stmt *s, stmtHandle handle, std::vector<stmtInfo> *info);
+void parseSymExpr(const SymExpr *s, std::vector<symInfo> *SymbolInfo);
 
 /* Implement of handle specified statement */
+bool searchCondVar(const SourceManager &SM, const Stmt *s, std::vector<stmtInfo> *info);
 bool searchLocalVar(const SourceManager &SM, const Stmt *s, std::vector<stmtInfo> *info);
 bool searchParm(const SourceManager &SM, const Stmt *s, std::vector<stmtInfo> *info);
 bool searchCondition(const SourceManager &SM, const Stmt *s, std::vector<stmtInfo> *info);
