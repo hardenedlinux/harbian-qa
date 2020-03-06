@@ -114,24 +114,26 @@ void ConditionChecker::checkBranchCondition(const Stmt *s, CheckerContext &Ctx) 
   SVal val = State->getSVal(s, LC);
 
   const SymExpr *SE = val.getAsSymbolicExpression();
-  std::vector<symInfo> SymbolInfo;
   std::string thisMemRegStr = "";
+  std::string funcName = "";
   if (SE != nullptr) {
     std::vector<symInfo> tmp;
     if (SE->getOriginRegion() != nullptr) {
       thisMemRegStr = SE->getOriginRegion()->getString();
     }
     const Decl *D = LC->getDecl();
+
     if (D != nullptr) {
       const FunctionDecl *FD = D->getAsFunction();
       if (FD != nullptr) {
-	llvm::outs() << "FunctionName: " << FD->getName() << "\n";
+	funcName = FD->getName();
       }
     }
     parseSymExpr(SE, &tmp);
     if (tmp.size() > 0) {
       llvm::outs() << "Condition parse:\n";
       for (symInfo s : tmp) {
+	s.addFuncName(funcName);
 	llvm::outs() << s.toString() << "\n";
 	if (s.typeName == "MemSymbol") {
 	  std::string key = s.targetStr;
@@ -147,29 +149,39 @@ void ConditionChecker::checkBranchCondition(const Stmt *s, CheckerContext &Ctx) 
     return;
   }
 
+  std::vector<symInfo> SymbolInfo;
   Optional<DefinedOrUnknownSVal> dval = val.getAs<DefinedOrUnknownSVal>();
   if (dval) {
-    ProgramStateRef cstate = State->assume(*dval, true);
-    if (cstate != nullptr) {
-      ConstraintRangeTy Constraints = cstate->get<ConstraintRange>();
+    ProgramStateRef cState = State->assume(*dval, true);
+    if (cState != nullptr) {
+      ConstraintRangeTy Constraints = cState->get<ConstraintRange>();
       if (!Constraints.isEmpty()) {
 	for (ConstraintRangeTy::iterator i = Constraints.begin();
 	     i != Constraints.end(); i++) {
 	  if (i.getKey()->getOriginRegion() != nullptr) {
 	    if (i.getKey()->getOriginRegion()->getString() == thisMemRegStr) {
 	      parseSymExpr(i.getKey(), &SymbolInfo);
+	      symInfo *tmp = nullptr;
+	      for (unsigned int j = 0; j < SymbolInfo.size(); j++) {
+		if (SymbolInfo[j].typeName == "MemSymbol") {
+		  tmp = &SymbolInfo[j];
+		}
+	      }
+	      for (llvm::APSInt e : splitRangeSet(i.getData())) {
+		if (tmp != nullptr) {
+		  tmp->addConcreteValue(e);
+		}
+	      }
 	      for (symInfo s : SymbolInfo) {
 		llvm::outs() << s.toString() << "\n";
 	      }
-	      i.getData().print(llvm::outs());
-	      llvm::outs() << "\n";
+	      llvm::outs() << "\n\n";
 	    }
 	  }
 	}
       }
     }
   }
-  llvm::outs() << "\n";
   return;
 }
 

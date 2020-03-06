@@ -64,6 +64,7 @@ class symInfo {
   unsigned int ID;
   std::string targetStr;
   std::string funcName;
+  std::vector<llvm::APSInt> concreteVal;
 
   void init(std::string nm, unsigned int id, std::string ts){
     typeName = nm;
@@ -73,10 +74,19 @@ class symInfo {
   void addFuncName(std::string fn) {
     funcName = fn;
   }
+  void addConcreteValue(llvm::APSInt e) {
+    concreteVal.push_back(e);
+  }
   std::string toString() {
     std::string retStr = "";
+    retStr = retStr.append(funcName + " ");
     retStr = retStr.append("[" + typeName + "] ");
     retStr = retStr.append(targetStr);
+    retStr = retStr.append(" {");
+    for (llvm::APSInt e : concreteVal) {
+      retStr = retStr.append("0x" + e.toString(0x10) + ", ");
+    }
+    retStr = retStr.append("}");
     return retStr;
   }
 };
@@ -96,9 +106,4 @@ bool searchCondition(const SourceManager &SM, const Stmt *s, std::vector<stmtInf
 std::string srcLineToString(const SourceManager &SM, SourceLocation SRs, SourceLocation SRe);
 stmtInfo FuncInfo(const FunctionDecl *FD);
 std::vector<stmtInfo> ListAllParmInfo(const SourceManager &SM, const FunctionDecl *FD);
-
-
-
-
-
-
+std::vector<llvm::APSInt> splitRangeSet(RangeSet RS);

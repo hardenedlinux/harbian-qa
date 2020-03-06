@@ -432,7 +432,7 @@ void parseSymExpr(const SymExpr *s, std::vector<symInfo> *SymbolInfo) {
 	parseSymExpr(RHS, SymbolInfo);
       }
       // TODO: ISE->getOpcode()
-      tmpSymInfo.init("IntSymExpr", 0, ISE->getLHS().toString(0x10));
+      tmpSymInfo.init("IntSymExpr", 0, "0x" + ISE->getLHS().toString(0x10));
       SymbolInfo->push_back(tmpSymInfo);
     }
     break;
@@ -446,7 +446,7 @@ void parseSymExpr(const SymExpr *s, std::vector<symInfo> *SymbolInfo) {
 	parseSymExpr(LHS, SymbolInfo);
       }
       // TODO: SIE->getOpcode() << "\n";
-      tmpSymInfo.init("SymIntExpr", 0, SIE->getRHS().toString(0x10));
+      tmpSymInfo.init("SymIntExpr", 0, "0x" + SIE->getRHS().toString(0x10));
       SymbolInfo->push_back(tmpSymInfo);
     }
     break;
@@ -518,4 +518,13 @@ void parseSymExpr(const SymExpr *s, std::vector<symInfo> *SymbolInfo) {
   default: {return;}
   }
   return;
+}
+
+std::vector<llvm::APSInt> splitRangeSet(RangeSet RS) {
+  std::vector<llvm::APSInt> ret;
+  for (RangeSet::iterator i = RS.begin(), e = RS.end(); i != e; ++i) {
+    ret.push_back(i->From());
+    ret.push_back(i->To());
+  }
+  return ret;
 }
