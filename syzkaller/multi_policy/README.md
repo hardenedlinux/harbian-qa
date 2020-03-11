@@ -8,14 +8,16 @@ Syz-hub is a great tool to connect all the syz-managers. After all syz-managers 
 Actrually, there are some mechanisms of syzkaller:
 1. The feedback( coverage) of progs determin if it can be sent to corpus
 2. Corpus will affect the progs generating( by mutating, syscall-choisetable, affect the probability)
-3. Generated progs determin which feedback may be received.  
+3. Generated progs determin which feedback may be received.
+
 Syzkaller run these iteratively, and the feedback probabily determin where to fuzz. Original syzkaller use coverage of the whole kernel as feedback. So, syzkaller is a coverage-guided fuzzer of kernel. And the "coverage-guided" is what we called the policy of syzkaller.
 
 ### Faster or deeper fuzzer.
 We have some survey of different-policy syzkaller. It shows that there is several point can be optimize if you want a directed fuzzer. For example, only want to fuzz sub-system of kernel. The customizing of these can be list:
 1. Limit the coverage to a smaller scope. Include building kernel with partial-coverage( KCOV_INSTRUMENT_ALL=n), filtering coverage( by address).
 2. Add other feedback. For example, we use ebpf collect the state of socket as feedbeck.
-3. Directed fail-injection help cover the corners shouldn't be covered.  
+3. Directed fail-injection help cover the corners shouldn't be covered.
+
 Both 1 and 2 change the feedback of syzkaller. 1 limit syzkaller to fuzz a smaller scope of kernel. 2 directly introduce other feedback into syzkaller.
 Our test shows that using these features properly can help syzkaller more directed, deeper and faster.
 
