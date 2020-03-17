@@ -1,55 +1,51 @@
-## Brief
+## Overview
 
-This document will introduce some features or design of customizing fuzzer. Firstly, most of fuzzer implemented its own Genetic Algorithm( GA). Some features can be classified to one of GA component. For example, the optimizing of generate, mutate and crossover. Other features, such as special feedback or satifying deep nested condition, is strongly depend on what project you fuzz, although these problem is very common in real-world project.
+This document will introduce some features or design of the customized fuzzer. Firstly, most of fuzzer implemented its own Genetic Algorithm (GA). Some features can be classified into one of the GA components. For example, the optimizing of generating, mutate and crossover. Other features, such as special feedback or satisfying deep nested condition, strongly depend on what project you fuzz, although this problem is very common in real-world projects.
 
-Because this document is a by-product of customizing Linux kernel fuzzer(base on Syzkaller), Some problem appeared kernel fuzzing only. At the end this document, i will attach the paper the document involved, with a short introduction.  
+Because this document is a by-product of customizing Linux kernel fuzzer(base on Syzkaller), Some problems appeared in kernel fuzzing only. At the end of this document, I will attach the paper to the document involved, with a short introduction.  
 
 
 ## GA of fuzzer
 
-In most fuzzers, GA is the engine of evolving testcase. For different purpose, the design of GA's components can be quite different.
-
+In most fuzzers, GA is the engine of evolving testcase. For different purposes, the design of GA's components can be quite different.
 
 ### Generate & Mutate in evaluating programming
 
-In evolutionary programming, if mutation and generating only base on random inputs, that fuzzer will perform badly. Useful information help reducing the search space of evolving the testcase you want. Generally, these following informations can benefit mutating or generating:
-1. symbolic execution: static analyse target, deriver which inputs is useful.( KLEE)
-2. Dynamically taint analysis( DTA): Dynamically trace and derive which input satisfy which conditions efficiently.( Vuzzer)
-3. Manually write manner: hard-code some special inputs or enum inputs.( Syzkaller)
-4. Extract input from real-world program( Moonshine).
+In evolutionary programming, if mutation and generating only base on random inputs, that fuzzer will perform badly. Useful information help to reduce the search space of evolving the testcase you want. Generally, these following information can benefit mutating or generating:
+1. symbolic execution: static analysis target, deriver which inputs are useful. (KLEE)
+2. Dynamically taint analysis( DTA): Dynamically trace and derive which input satisfy which conditions efficiently. (Vuzzer)
+3. Manually write manner: hard-code some special inputs or enum inputs. (Syzkaller)
+4. Extract input from real-world programs ( Moonshine).
 
 
 ### Crossover
 
-In real-world, if you want to fuzz the entire project, generated testcases always should be length-indeterminate. The classical single-point randomly crossover couldn't work well. Block stacking evolutionary programming would be more efficient. Specially, some testcase is state-base( for example: socket programming), generate and crossover base on state-base blocks help evolving complex context testcase. In our practice, in state-base programming, state-base block-stacking evolution perform better than randomly crossover. Here are some idea of block-stacking crossover:
-1. Static analysis state dependence of real world testcase( Moonshine).
-2. Resource centric: treat generated testcase which use( create&operation) the same resource as a complex resource. Use them in the subsequent syscalls.( Syzkaller)
-3. State-base Resource centric: classify testcase by states they trigger( base on syzkaller resource centric).  
-
+In the real world, if you want to fuzz the entire project, the generated testcases always should be length-indeterminate. The classical single-point randomly crossover couldn't work well. Block stacking evolutionary programming would be more efficient. Especially, some testcase is state-based (e.g. socket programming), generate and crossover base on state-based blocks help evolving complex context testcase. In our practice, in state-based programming, state-based block-stacking evolution performs better than randomly crossover. Here are some ideas of block-stacking crossover:
+1. Static analysis: get the state dependence in real-world testcases (Moonshine).
+2. Resource centric: treat generated testcase which use( create&operation) the same resource as a complex resource. Use them in the subsequent syscalls. (Syzkaller)
+3. State-base Resource centric: classify testcase by states they trigger( based on syzkaller resource-centric).   
 
 ### Fitness
 
-Fitness is motivation of evolution in GA. A appropriate fitness reward helps efficiently select potential inputs or testcases. Moreover, gradient fitness will help evolving also. Fitness always base on what feedback fuzzer collected.
-
+Fitness is the motivation of evolution in GA. An appropriate fitness reward helps efficiently select potential inputs or testcases. Moreover, gradient fitness will help evolving also. Fitness always base on what feedback fuzzer collected.
 
 #### coverage
 
-1. CFG position weight fitness( Vuzzer)
-2. Sum of basic-block weight fitness( Syzkaller)
-3. Class code: lower error handle fitness. (Vuzzer)
-4. Statistical calculation of testcase( Syzkaller).  
+1. CFG position weight fitness (Vuzzer).
+2. Sum of basic-block weight fitness (Syzkaller).
+3. Class code: lower error handle fitness (Vuzzer).
+4. Statistical calculation of testcase (Syzkaller).
 * refer to the following survey
-
 
 #### state
 
-1. Symbolic execution: static analyse call-stack input, weight them base on its CFG  
+1. Symbolic execution: static analysis call-stack input, weight them base on its CFG  
 
 
 #### Exploit vs Explore
 
-A fuzzer for the entire project is usually a Multi-armed bandit problem. You may need to trade off explore and exploit.
-Trade off them in a fuzzer is difficult, so we try to combinate several fuzzer with different policy( base on syz-hub). Refer to our [multi-policy fuzzer](syzkaller/multi_policy/README.md).
+A fuzzer for the entire project is usually a Multi-armed bandit problem. You may need to balance explore and exploit.
+It is difficult to balance them in a single fuzzer, so we try to combinate several fuzzer with different policies (based on syz-hub). Refer to our [multi-policy fuzzer](syzkaller/multi_policy/README.md).
 
 
 ## Other design
