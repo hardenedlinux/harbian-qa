@@ -35,7 +35,7 @@ Compare to KLEE, clang checker is totally a static analyzer. Clang won't execute
 * We have two tutorials for [KLEE](https://github.com/hardenedlinux/Debian-GNU-Linux-Profiles/blob/master/docs/harbian_qa/symexec/klee.md) and [CBMC](https://github.com/hardenedlinux/Debian-GNU-Linux-Profiles/blob/master/docs/harbian_qa/symexec/cbmc_kern.md).
 
 ## For kernel fuzzing
-In our case, we use syzkaller for kernel fuzzing. While syzkaller only collect coverage as feedback. We try to trace more state if it is widely use in condition statement. Clang path-sensitive checker is what we actually need. After static analysis, we calculate which states( data) are widely used in conditions. These states will be collected as state-base block( syzkaller resource) at runtime. And we also collect inputs of some important functions to help to fuzz important paths more efficiently.
+In our case, we use syzkaller for kernel fuzzing. While syzkaller only collect coverage as feedback. We try to [trace more state](../syzkaller/kstat_demo/README.md) if it is widely use in condition statement. Clang path-sensitive checker is what we actually need. After static analysis, we calculate which states( data) are widely used in conditions. These states will be collected as state-base block( syzkaller resource) at runtime. And we also collect inputs of some important functions to help to fuzz important paths more efficiently.
 An example of part output:
 ```
 clang -Xclang -analyze -Xclang -analyzer-checker=debug.ConditionChecker ... -c /root/linux/net/ipv4/tcp.c
