@@ -54,7 +54,7 @@ It got a great improvement in the second type of branch. [Here](tcp-ipv6/test.md
 ### Patch syzkaller  
 First, you need to patch original syzkaller. 
 ```  
-git checkout bc2c6e45
+git checkout a34e2c33
 git apply *.patch
 ```
 ### Gobpf as syzkaller feedback  
@@ -74,7 +74,7 @@ Just run syz-manager as original syzkaller.
 3. pipe_monitor.go: load a ebpf text, monitor the socket state, feedback to syzkaller by using pipe memory. But it can't trace the historical state of a specific socket.
 4. Add ret ebpfsig as resource: only prog with a special kernel state can be resource.
 
-* These patch base on upstream syzkaller: bc2c6e45  
+* These patch base on upstream syzkaller: a34e2c33  
 More detail refer to the code comments. 
 
 #### ebpf, kernel data type
