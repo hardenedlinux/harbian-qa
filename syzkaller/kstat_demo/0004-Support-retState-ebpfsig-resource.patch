@@ -1,49 +1,45 @@
-From 9101f2871aa729cc9dd8812aec6c37f9b642fc1c Mon Sep 17 00:00:00 2001
+From 5d5632a31d9185118c2d48c4c4a02babb0e2f2a1 Mon Sep 17 00:00:00 2001
 From: Bins94 <kaipeng94@gmail.com>
-Date: Sun, 24 Nov 2019 22:19:09 -0500
-Subject: [PATCH 5/6] Add ret ebpfsig as resource
+Date: Thu, 2 Apr 2020 23:03:44 -0400
+Subject: [PATCH 4/5] Support retState ebpfsig resource
 
 ---
- executor/executor.cc   |  8 ++++----
+ executor/executor.cc   |  7 ++++---
  pkg/rpctype/rpctype.go |  1 +
  prog/clone.go          |  5 +++--
+ prog/prog.go           |  1 +
  prog/rand.go           |  2 +-
- syz-fuzzer/proc.go     | 15 +++++++++++++++
+ syz-fuzzer/proc.go     | 16 ++++++++++++++++
  syz-manager/html.go    |  4 ++++
- 6 files changed, 28 insertions(+), 7 deletions(-)
+ 7 files changed, 30 insertions(+), 6 deletions(-)
 
 diff --git a/executor/executor.cc b/executor/executor.cc
-index 28f0bdb1..fdff884a 100644
+index 69fa44ca..964b3ec4 100644
 --- a/executor/executor.cc
 +++ b/executor/executor.cc
-@@ -36,8 +36,8 @@
+@@ -36,6 +36,7 @@
  #endif
  
  #define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
--#define RETSTATE_SIG_MASK 0xf000000000000000
--#define STATE_SIG_MASK 0xe000000000000000
-+/*#define RETSTATE_SIG_MASK 0xf000000000000000*/
-+/*#define STATE_SIG_MASK 0xe000000000000000*/
++/* refer to the ebpf text */
+ #define RETSTATE_SIG_MASK 0xf000000000000000
+ #define STATE_SIG_MASK 0xe000000000000000
  #define COVERAGE_SIG_MASK 0xd0000000ffffffff
- 
- 
-@@ -905,12 +905,12 @@ void write_coverage_signal(cover_t* cov, uint32* signal_count_pos, uint32* cover
- 		uint64_t state = 0;
- 		if (ret > 0) {
- 		        state = strtol(buf, NULL, 16);
--			/* state signal start with 0xf
-+			/* state/retstate signal start with 0xe/0xf
-                         * Write out real state for fuzzer's further handle
-                         */
- 			if (flag_enable_ebpf_signal) {
- 			        write_output64(state);
--				debug("A state signal %016lx\n", state);
-+				debug("A state signal %016lx\n", (uint64)state);
+@@ -924,9 +925,9 @@ void write_coverage_signal(cover_t* cov, uint32* signal_count_pos, uint32* cover
+ 			uint64_t state = 0;
+ 			if (ret > 0) {
+ 				state = strtoul(buf, NULL, 16);
+-				/* state signal start with 0xf
+-	       * Write out real state for fuzzer's further handle
+-	       */
++				/* state/retstate signal start with 0xe/0xf
++				 * Write out real state for fuzzer's further handle
++				 */
+ 				write_output64(state);
+ 				debug("A state signal 0x%016lx\n", state);
  				n = 0;
- 				nsig++;
- 			}
 diff --git a/pkg/rpctype/rpctype.go b/pkg/rpctype/rpctype.go
-index dc8c6892..357f0e96 100644
+index fcc01a99..ac99e73c 100644
 --- a/pkg/rpctype/rpctype.go
 +++ b/pkg/rpctype/rpctype.go
 @@ -16,6 +16,7 @@ type RPCInput struct {
@@ -55,10 +51,10 @@ index dc8c6892..357f0e96 100644
  
  type RPCCandidate struct {
 diff --git a/prog/clone.go b/prog/clone.go
-index 5ad82c35..855ab09b 100644
+index c95ae206..6f5cdd64 100644
 --- a/prog/clone.go
 +++ b/prog/clone.go
-@@ -5,8 +5,9 @@ package prog
+@@ -9,8 +9,9 @@ import (
  
  func (p *Prog) Clone() *Prog {
  	p1 := &Prog{
@@ -70,11 +66,23 @@ index 5ad82c35..855ab09b 100644
  	}
  	newargs := make(map[*ResultArg]*ResultArg)
  	for ci, c := range p.Calls {
+diff --git a/prog/prog.go b/prog/prog.go
+index 1600c0a2..1ff27046 100644
+--- a/prog/prog.go
++++ b/prog/prog.go
+@@ -11,6 +11,7 @@ type Prog struct {
+ 	Target   *Target
+ 	Calls    []*Call
+ 	Comments []string
++	Resource bool
+ }
+ 
+ type Call struct {
 diff --git a/prog/rand.go b/prog/rand.go
-index 70a93687..6ade7dc7 100644
+index 8583fbdc..2b8fcc2a 100644
 --- a/prog/rand.go
 +++ b/prog/rand.go
-@@ -816,7 +816,7 @@ func resourceCentric(t *ResourceType, s *state, r *randGen) (resource *ResultArg
+@@ -856,7 +856,7 @@ func (r *randGen) resourceCentric(s *state, t *ResourceType) (arg Arg, calls []*
  	for idx := range r.Perm(len(s.corpus)) {
  		p = s.corpus[idx].Clone()
  		resources := getCompatibleResources(p, t.TypeName, r)
@@ -84,23 +92,30 @@ index 70a93687..6ade7dc7 100644
  			break
  		}
 diff --git a/syz-fuzzer/proc.go b/syz-fuzzer/proc.go
-index 98deebb9..a38df022 100644
+index 0cb186b4..dabe3ce2 100644
 --- a/syz-fuzzer/proc.go
 +++ b/syz-fuzzer/proc.go
-@@ -166,6 +166,12 @@ func (proc *Proc) triageInput(item *WorkTriage) {
+@@ -162,12 +162,19 @@ func (proc *Proc) triageInput(item *WorkTriage) {
  	data := item.p.Serialize()
  	sig := hash.Hash(data)
  
 +	item.p.Resource = true
-+	/* ebpfsig feedback */
-+	if proc.fuzzer.config.Flags&(1<<14) > 0 {
++	/* base ebpfsig retstate feedback */
++	if proc.fuzzer.config.Flags&ipc.FlagEnableEbpfSignal != 0 {
 +		item.p.Resource = getResourceFlagFromSignal(item.info.Signal)
 +	}
 +
  	log.Logf(2, "added new input for %v to corpus:\n%s", logCallName, data)
  	proc.fuzzer.sendInputToManager(rpctype.RPCInput{
  		Call:   callName,
-@@ -204,6 +210,15 @@ func getSignalAndCover(p *prog.Prog, info *ipc.ProgInfo, call int) (signal.Signa
+ 		Prog:   data,
+ 		Signal: inputSignal.Serialize(),
+ 		Cover:  inputCover.Serialize(),
++		SpeRes: item.p.Resource,
+ 	})
+ 
+ 	proc.fuzzer.addInputToCorpus(item.p, inputSignal, sig)
+@@ -200,6 +207,15 @@ func getSignalAndCover(p *prog.Prog, info *ipc.ProgInfo, call int) (signal.Signa
  	return signal.FromRaw(inf.Signal, signalPrio(p, inf, call)), inf.Cover
  }
  
@@ -117,10 +132,10 @@ index 98deebb9..a38df022 100644
  	if proc.fuzzer.faultInjectionEnabled && item.call != -1 {
  		proc.failCall(item.p, item.call)
 diff --git a/syz-manager/html.go b/syz-manager/html.go
-index e616898c..8c563ef7 100644
+index 46d61eda..66e0bfa9 100644
 --- a/syz-manager/html.go
 +++ b/syz-manager/html.go
-@@ -218,6 +218,7 @@ func (mgr *Manager) httpCorpus(w http.ResponseWriter, r *http.Request) {
+@@ -195,6 +195,7 @@ func (mgr *Manager) httpCorpus(w http.ResponseWriter, r *http.Request) {
  			Short:  p.String(),
  			Cover:  len(inp.Cover),
  			Signal: inp.Signal.Deserialize(),
@@ -128,7 +143,7 @@ index e616898c..8c563ef7 100644
  		})
  	}
  	sort.Slice(data.Inputs, func(i, j int) bool {
-@@ -641,6 +642,7 @@ type UIInput struct {
+@@ -607,6 +608,7 @@ type UIInput struct {
  	Short  string
  	Cover  int
  	Signal signal.Signal
@@ -136,11 +151,11 @@ index e616898c..8c563ef7 100644
  }
  
  var summaryTemplate = html.CreatePage(`
-@@ -786,11 +788,13 @@ var corpusTemplate = html.CreatePage(`
+@@ -752,11 +754,13 @@ var corpusTemplate = html.CreatePage(`
  	<tr>
  		<th>Coverage</th>
  		<th>Program</th>
-+                <th>Resource</th>
++		<th>Resource</th>
  	</tr>
  	{{range $inp := $.Inputs}}
  	<tr>

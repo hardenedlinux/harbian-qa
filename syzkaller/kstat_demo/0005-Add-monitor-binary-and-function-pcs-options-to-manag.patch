@@ -1,0 +1,75 @@
+From 5fbf7df6dae52f1ef8375e7f8d2118828e07e03f Mon Sep 17 00:00:00 2001
+From: Bins94 <kaipeng94@gmail.com>
+Date: Thu, 2 Apr 2020 23:06:27 -0400
+Subject: [PATCH 5/5] Add monitor binary and function pcs options to manager
+ configure options
+
+---
+ executor/bitmap.h       |  2 +-
+ executor/common_linux.h |  2 +-
+ pkg/mgrconfig/config.go |  2 ++
+ syz-manager/manager.go  | 11 +++++++++++
+ 4 files changed, 15 insertions(+), 2 deletions(-)
+
+diff --git a/executor/bitmap.h b/executor/bitmap.h
+index cb00e543..785513ba 100644
+--- a/executor/bitmap.h
++++ b/executor/bitmap.h
+@@ -8,7 +8,7 @@ uint32* func_pcs;
+ 
+ uint32 readPcs()
+ {
+-	FILE* f = fopen("/root/funcaddr.map", "r");
++	FILE* f = fopen("/funcaddr.map", "r");
+ 	uint32 count = 0;
+ 	if (f == NULL)
+ 		return -1;
+diff --git a/executor/common_linux.h b/executor/common_linux.h
+index b64f413c..4046ae8b 100644
+--- a/executor/common_linux.h
++++ b/executor/common_linux.h
+@@ -2707,7 +2707,7 @@ static int do_sandbox_none(void)
+ 		close(monpipefd[0]);
+ 		close(monpipefd[1]);
+ 		debug("single ebpf start ...\n");
+-		execl("/root/pipe_monitor", "/root/pipe_monitor", "--debug", NULL);
++		execl("/pipe_monitor", "/pipe_monitor", "--debug", NULL);
+ 		return 0;
+ 	}
+ 	/* ebpf loading is very slow, one time a vm restart */
+diff --git a/pkg/mgrconfig/config.go b/pkg/mgrconfig/config.go
+index ac618096..e32a5cde 100644
+--- a/pkg/mgrconfig/config.go
++++ b/pkg/mgrconfig/config.go
+@@ -119,4 +119,6 @@ type Config struct {
+ 	SyzFuzzerBin   string `json:"-"`
+ 	SyzExecprogBin string `json:"-"`
+ 	SyzExecutorBin string `json:"-"`
++	SyzMonitorBin  string `json:"ebpfmonitor"`
++	SyzCovPcs      string `json:"coverpcs"`
+ }
+diff --git a/syz-manager/manager.go b/syz-manager/manager.go
+index 77379468..f6d88e3f 100644
+--- a/syz-manager/manager.go
++++ b/syz-manager/manager.go
+@@ -556,6 +556,17 @@ func (mgr *Manager) runInstance(index int) (*Crash, error) {
+ 		}
+ 	}
+ 
++	/* scp ebpf monitor binary to machine */
++	_, err = inst.Copy(mgr.cfg.SyzMonitorBin)
++	if err != nil {
++		return nil, fmt.Errorf("failed to copy binary: %v", err)
++	}
++	/* scp coverage filter pcs to machine */
++	_, err = inst.Copy(mgr.cfg.SyzCovPcs)
++	if err != nil {
++		return nil, fmt.Errorf("failed to copy binary: %v", err)
++	}
++
+ 	fuzzerV := 0
+ 	procs := mgr.cfg.Procs
+ 	if *flagDebug {
+-- 
+2.20.1
+
