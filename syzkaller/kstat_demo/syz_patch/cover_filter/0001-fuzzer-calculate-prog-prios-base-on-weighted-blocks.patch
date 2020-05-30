@@ -1,0 +1,722 @@
+From 9fdb6ea63874f7dad2f796da6c967bf50dd6a230 Mon Sep 17 00:00:00 2001
+From: bins <bins@kp-test>
+Date: Sat, 30 May 2020 01:12:29 -0400
+Subject: [PATCH] fuzzer: calculate prog prios base on weighted blocks
+
+---
+ executor/bitmap.h            | 37 ++++++++++++++++++++
+ executor/executor.cc         | 39 +++++++++++++++++++++
+ pkg/instance/instance.go     | 12 +++----
+ pkg/ipc/ipc.go               | 25 ++++++-------
+ pkg/mgrconfig/config.go      |  3 ++
+ pkg/mgrconfig/load.go        |  1 +
+ pkg/rpctype/rpctype.go       |  8 +++++
+ prog/clone.go                |  1 +
+ prog/prio.go                 |  2 +-
+ prog/prog.go                 |  1 +
+ syz-fuzzer/fuzzer.go         | 57 ++++++++++++++++++++++++------
+ syz-fuzzer/proc.go           | 23 ++++++++++++
+ syz-manager/html.go          | 68 ++++++++++++++++++++++++++++++++----
+ syz-manager/manager.go       | 33 ++++++++++++++++-
+ syz-manager/rpc.go           | 10 ++++++
+ tools/syz-runtest/runtest.go |  2 +-
+ 16 files changed, 285 insertions(+), 37 deletions(-)
+ create mode 100644 executor/bitmap.h
+
+diff --git a/executor/bitmap.h b/executor/bitmap.h
+new file mode 100644
+index 00000000..e129f673
+--- /dev/null
++++ b/executor/bitmap.h
+@@ -0,0 +1,37 @@
++#include <stdio.h>
++
++#define KERNEL_TEXT_BASE 0x81000000
++
++typedef unsigned int uint32;
++
++uint32* func_pcs;
++
++uint32 readPcs()
++{
++	FILE* f = fopen("/funcaddr.map", "r");
++	uint32 count = 0;
++	if (f == NULL)
++		return -1;
++	while (!feof(f)) {
++		uint32 pc;
++		int ret = fscanf(f, "0x%x\n", &pc);
++		if (ret > 0) {
++			count++;
++		}
++	}
++	func_pcs = (uint32*)malloc(count * sizeof(uint32));
++	if (func_pcs == NULL)
++		return -2;
++	fseek(f, 0, SEEK_SET);
++	uint32* pp = func_pcs;
++	while (!feof(f)) {
++		uint32 pc;
++		int ret = fscanf(f, "0x%x\n", &pc);
++		if (ret > 0) {
++			*(pp) = pc & 0xffffffff;
++			pp++;
++		}
++	}
++	fclose(f);
++	return count;
++}
+diff --git a/executor/executor.cc b/executor/executor.cc
+index 4e6a3705..9dfb7c58 100644
+--- a/executor/executor.cc
++++ b/executor/executor.cc
+@@ -15,6 +15,7 @@
+ #include <time.h>
+ #include <unistd.h>
+ 
++#include "bitmap.h"
+ #include "defs.h"
+ 
+ #if defined(__GNUC__)
+@@ -44,6 +45,10 @@ typedef unsigned int uint32;
+ typedef unsigned short uint16;
+ typedef unsigned char uint8;
+ 
++#define COVERAGE_BITMAP_SIZE 0x300000 / sizeof(uint32)
++static uint32 kTextBitMap[COVERAGE_BITMAP_SIZE];
++extern uint32* func_pcs;
++
+ // exit/_exit do not necessary work (e.g. if fuzzer sets seccomp filter that prohibits exit_group).
+ // Use doexit instead.  We must redefine exit to something that exists in stdlib,
+ // because some standard libraries contain "using ::exit;", but has different signature.
+@@ -115,6 +120,7 @@ static bool flag_net_reset;
+ static bool flag_cgroups;
+ static bool flag_close_fds;
+ static bool flag_devlink_pci;
++static bool flag_cover_filter;
+ 
+ static bool flag_collect_cover;
+ static bool flag_dedup_cover;
+@@ -401,6 +407,19 @@ int main(int argc, char** argv)
+ 			// Don't enable comps because we don't use them in the fuzzer yet.
+ 			cover_enable(&extra_cov, false, true);
+ 		}
++		debug("Read pcs for bitmap ...\n");
++		uint32 c = readPcs();
++		for (uint32 i = 0; i < c; i++) {
++			uint32 pc = func_pcs[i];
++			i++;
++			pc -= KERNEL_TEXT_BASE;
++			uint32 pcc = pc >> 4;
++			uint32 index = pcc / 32;
++			uint32 shift = pcc % 32;
++			if (pcc > 0x300000)
++				continue;
++			kTextBitMap[index] |= (0x1 << shift);
++		}
+ 	}
+ 
+ 	int status = 0;
+@@ -475,6 +494,7 @@ void parse_env_flags(uint64 flags)
+ 	flag_cgroups = flags & (1 << 9);
+ 	flag_close_fds = flags & (1 << 10);
+ 	flag_devlink_pci = flags & (1 << 11);
++	flag_cover_filter = flags & (1 << 12);
+ }
+ 
+ #if SYZ_EXECUTOR_USES_FORK_SERVER
+@@ -826,6 +846,23 @@ thread_t* schedule_call(int call_index, int call_num, bool colliding, uint64 cop
+ }
+ 
+ #if SYZ_EXECUTOR_USES_SHMEM
++
++bool cover_filter(uint64 pc)
++{
++	pc &= 0xffffffff;
++	pc -= KERNEL_TEXT_BASE;
++	uint64 pcc = pc >> 4;
++	uint64 index = pcc / 32;
++	uint64 shift = pcc % 32;
++	if (pcc > 0x300000) {
++		return false;
++	}
++	if ((kTextBitMap[index] & (0x1 << shift))) {
++		return true;
++	}
++	return false;
++}
++
+ template <typename cover_data_t>
+ void write_coverage_signal(cover_t* cov, uint32* signal_count_pos, uint32* cover_count_pos)
+ {
+@@ -842,6 +879,8 @@ void write_coverage_signal(cover_t* cov, uint32* signal_count_pos, uint32* cover
+ 		}
+ 		cover_data_t sig = pc ^ prev;
+ 		prev = hash(pc);
++		if (flag_cover_filter && !cover_filter(pc))
++			continue;
+ 		if (dedup(sig))
+ 			continue;
+ 		write_output(sig);
+diff --git a/pkg/instance/instance.go b/pkg/instance/instance.go
+index 201c07cf..8c8eceeb 100644
+--- a/pkg/instance/instance.go
++++ b/pkg/instance/instance.go
+@@ -318,7 +318,7 @@ func (inst *inst) testInstance() error {
+ 	}
+ 
+ 	cmd := OldFuzzerCmd(fuzzerBin, executorCmd, "test", inst.cfg.TargetOS, inst.cfg.TargetArch, fwdAddr,
+-		inst.cfg.Sandbox, 0, inst.cfg.Cover, true)
++		inst.cfg.Sandbox, 0, inst.cfg.Cover, true, false)
+ 	outc, errc, err := inst.vm.Run(10*time.Minute, nil, cmd)
+ 	if err != nil {
+ 		return fmt.Errorf("failed to run binary in VM: %v", err)
+@@ -424,7 +424,7 @@ func (inst *inst) testProgram(command string, testTime time.Duration) error {
+ }
+ 
+ func FuzzerCmd(fuzzer, executor, name, OS, arch, fwdAddr, sandbox string, procs, verbosity int,
+-	cover, debug, test, runtest bool) string {
++	cover, debug, test, runtest bool, covfilter bool) string {
+ 	osArg := ""
+ 	if targets.Get(OS, arch).HostFuzzer {
+ 		// Only these OSes need the flag, because the rest assume host OS.
+@@ -441,13 +441,13 @@ func FuzzerCmd(fuzzer, executor, name, OS, arch, fwdAddr, sandbox string, procs,
+ 		verbosityArg = fmt.Sprintf(" -vv=%v", verbosity)
+ 	}
+ 	return fmt.Sprintf("%v -executor=%v -name=%v -arch=%v%v -manager=%v -sandbox=%v"+
+-		" -procs=%v -cover=%v -debug=%v -test=%v%v%v",
++		" -procs=%v -cover=%v -debug=%v -test=%v%v%v -covfilter=%v",
+ 		fuzzer, executor, name, arch, osArg, fwdAddr, sandbox,
+-		procs, cover, debug, test, runtestArg, verbosityArg)
++		procs, cover, debug, test, runtestArg, verbosityArg, covfilter)
+ }
+ 
+-func OldFuzzerCmd(fuzzer, executor, name, OS, arch, fwdAddr, sandbox string, procs int, cover, test bool) string {
+-	return FuzzerCmd(fuzzer, executor, name, OS, arch, fwdAddr, sandbox, procs, 0, cover, false, test, false)
++func OldFuzzerCmd(fuzzer, executor, name, OS, arch, fwdAddr, sandbox string, procs int, cover, test bool, covfilter bool) string {
++	return FuzzerCmd(fuzzer, executor, name, OS, arch, fwdAddr, sandbox, procs, 0, cover, false, test, false, covfilter)
+ }
+ 
+ func ExecprogCmd(execprog, executor, OS, arch, sandbox string, repeat, threaded, collide bool,
+diff --git a/pkg/ipc/ipc.go b/pkg/ipc/ipc.go
+index 9ee7843d..01ef86e0 100644
+--- a/pkg/ipc/ipc.go
++++ b/pkg/ipc/ipc.go
+@@ -29,18 +29,19 @@ type EnvFlags uint64
+ 
+ // Note: New / changed flags should be added to parse_env_flags in executor.cc
+ const (
+-	FlagDebug            EnvFlags = 1 << iota // debug output from executor
+-	FlagSignal                                // collect feedback signals (coverage)
+-	FlagSandboxSetuid                         // impersonate nobody user
+-	FlagSandboxNamespace                      // use namespaces for sandboxing
+-	FlagSandboxAndroid                        // use Android sandboxing for the untrusted_app domain
+-	FlagExtraCover                            // collect extra coverage
+-	FlagEnableTun                             // setup and use /dev/tun for packet injection
+-	FlagEnableNetDev                          // setup more network devices for testing
+-	FlagEnableNetReset                        // reset network namespace between programs
+-	FlagEnableCgroups                         // setup cgroups for testing
+-	FlagEnableCloseFds                        // close fds after each program
+-	FlagEnableDevlinkPCI                      // setup devlink PCI device
++	FlagDebug             EnvFlags = 1 << iota // debug output from executor
++	FlagSignal                                 // collect feedback signals (coverage)
++	FlagSandboxSetuid                          // impersonate nobody user
++	FlagSandboxNamespace                       // use namespaces for sandboxing
++	FlagSandboxAndroid                         // use Android sandboxing for the untrusted_app domain
++	FlagExtraCover                             // collect extra coverage
++	FlagEnableTun                              // setup and use /dev/tun for packet injection
++	FlagEnableNetDev                           // setup more network devices for testing
++	FlagEnableNetReset                         // reset network namespace between programs
++	FlagEnableCgroups                          // setup cgroups for testing
++	FlagEnableCloseFds                         // close fds after each program
++	FlagEnableDevlinkPCI                       // setup devlink PCI device
++	FlagEnableCoverFilter                      // maintain a bitmap for coverage filter
+ )
+ 
+ // Per-exec flags for ExecOpts.Flags:
+diff --git a/pkg/mgrconfig/config.go b/pkg/mgrconfig/config.go
+index 69df2a80..86d3b91f 100644
+--- a/pkg/mgrconfig/config.go
++++ b/pkg/mgrconfig/config.go
+@@ -83,6 +83,8 @@ type Config struct {
+ 
+ 	// Use KCOV coverage (default: true).
+ 	Cover bool `json:"cover"`
++	Covfilter bool `json:"covfilter"`
++
+ 	// Reproduce, localize and minimize crashers (default: true).
+ 	Reproduce bool `json:"reproduce"`
+ 
+@@ -114,4 +116,5 @@ type Config struct {
+ 	SyzFuzzerBin   string `json:"-"`
+ 	SyzExecprogBin string `json:"-"`
+ 	SyzExecutorBin string `json:"-"`
++	SyzCoverPCs    string `json:"coverpcs"`
+ }
+diff --git a/pkg/mgrconfig/load.go b/pkg/mgrconfig/load.go
+index fc0f6b65..8d5fab4a 100644
+--- a/pkg/mgrconfig/load.go
++++ b/pkg/mgrconfig/load.go
+@@ -59,6 +59,7 @@ func defaultValues() *Config {
+ 	return &Config{
+ 		SSHUser:   "root",
+ 		Cover:     true,
++		Covfilter: false,
+ 		Reproduce: true,
+ 		Sandbox:   "none",
+ 		RPC:       ":0",
+diff --git a/pkg/rpctype/rpctype.go b/pkg/rpctype/rpctype.go
+index fcc01a99..95326ae8 100644
+--- a/pkg/rpctype/rpctype.go
++++ b/pkg/rpctype/rpctype.go
+@@ -128,3 +128,11 @@ type RunTestDoneArgs struct {
+ 	Info   []*ipc.ProgInfo
+ 	Error  string
+ }
++
++type GetPCsWeightArgs struct {
++	Nop int
++}
++
++type GetPCsWeightRes struct {
++	PCsWeight map[uint32]float32
++}
+diff --git a/prog/clone.go b/prog/clone.go
+index c95ae206..f653d88e 100644
+--- a/prog/clone.go
++++ b/prog/clone.go
+@@ -11,6 +11,7 @@ func (p *Prog) Clone() *Prog {
+ 	p1 := &Prog{
+ 		Target: p.Target,
+ 		Calls:  make([]*Call, len(p.Calls)),
++		Weight: p.Weight,
+ 	}
+ 	newargs := make(map[*ResultArg]*ResultArg)
+ 	for ci, c := range p.Calls {
+diff --git a/prog/prio.go b/prog/prio.go
+index bda5df47..48e5c218 100644
+--- a/prog/prio.go
++++ b/prog/prio.go
+@@ -164,7 +164,7 @@ func (target *Target) calcDynamicPrio(corpus []*Prog) [][]float32 {
+ 			for _, c1 := range p.Calls[idx0+1:] {
+ 				id0 := c0.Meta.ID
+ 				id1 := c1.Meta.ID
+-				prios[id0][id1] += 1.0
++				prios[id0][id1] += 1.0 * p.Weight
+ 			}
+ 		}
+ 	}
+diff --git a/prog/prog.go b/prog/prog.go
+index 3e46e15e..8c804e17 100644
+--- a/prog/prog.go
++++ b/prog/prog.go
+@@ -11,6 +11,7 @@ type Prog struct {
+ 	Target   *Target
+ 	Calls    []*Call
+ 	Comments []string
++	Weight   float32
+ }
+ 
+ type Call struct {
+diff --git a/syz-fuzzer/fuzzer.go b/syz-fuzzer/fuzzer.go
+index 3694190a..a8e7b436 100644
+--- a/syz-fuzzer/fuzzer.go
++++ b/syz-fuzzer/fuzzer.go
+@@ -53,6 +53,8 @@ type Fuzzer struct {
+ 	corpusHashes map[hash.Sig]struct{}
+ 	corpusPrios  []int64
+ 	sumPrios     int64
++	pcsWeight    map[uint32]float32
++	pcsWeightMu  sync.RWMutex
+ 
+ 	signalMu     sync.RWMutex
+ 	corpusSignal signal.Signal // signal of inputs in corpus
+@@ -106,15 +108,16 @@ func main() {
+ 	debug.SetGCPercent(50)
+ 
+ 	var (
+-		flagName    = flag.String("name", "test", "unique name for manager")
+-		flagOS      = flag.String("os", runtime.GOOS, "target OS")
+-		flagArch    = flag.String("arch", runtime.GOARCH, "target arch")
+-		flagManager = flag.String("manager", "", "manager rpc address")
+-		flagProcs   = flag.Int("procs", 1, "number of parallel test processes")
+-		flagOutput  = flag.String("output", "stdout", "write programs to none/stdout/dmesg/file")
+-		flagPprof   = flag.String("pprof", "", "address to serve pprof profiles")
+-		flagTest    = flag.Bool("test", false, "enable image testing mode")      // used by syz-ci
+-		flagRunTest = flag.Bool("runtest", false, "enable program testing mode") // used by pkg/runtest
++		flagName      = flag.String("name", "test", "unique name for manager")
++		flagOS        = flag.String("os", runtime.GOOS, "target OS")
++		flagArch      = flag.String("arch", runtime.GOARCH, "target arch")
++		flagManager   = flag.String("manager", "", "manager rpc address")
++		flagProcs     = flag.Int("procs", 1, "number of parallel test processes")
++		flagOutput    = flag.String("output", "stdout", "write programs to none/stdout/dmesg/file")
++		flagPprof     = flag.String("pprof", "", "address to serve pprof profiles")
++		flagTest      = flag.Bool("test", false, "enable image testing mode")      // used by syz-ci
++		flagRunTest   = flag.Bool("runtest", false, "enable program testing mode") // used by pkg/runtest
++		flagCovFilter = flag.Bool("covfilter", false, "enable coverage filter")
+ 	)
+ 	flag.Parse()
+ 	outputType := parseOutputType(*flagOutput)
+@@ -130,6 +133,10 @@ func main() {
+ 		log.Fatalf("failed to create default ipc config: %v", err)
+ 	}
+ 	sandbox := ipc.FlagsToSandbox(config.Flags)
++	if *flagCovFilter {
++		config.Flags |= (1 << 12)
++	}
++
+ 	shutdown := make(chan struct{})
+ 	osutil.HandleInterrupts(shutdown)
+ 	go func() {
+@@ -237,7 +244,11 @@ func main() {
+ 		faultInjectionEnabled:    r.CheckResult.Features[host.FeatureFault].Enabled,
+ 		comparisonTracingEnabled: r.CheckResult.Features[host.FeatureComparisons].Enabled,
+ 		corpusHashes:             make(map[hash.Sig]struct{}),
++		pcsWeight:                make(map[uint32]float32),
+ 	}
++
++	fuzzer.getPCsWeight()
++
+ 	gateCallback := fuzzer.useBugFrames(r, *flagProcs)
+ 	fuzzer.gate = ipc.NewGate(2**flagProcs, gateCallback)
+ 
+@@ -261,6 +272,26 @@ func main() {
+ 	fuzzer.pollLoop()
+ }
+ 
++func (fuzzer *Fuzzer) getPCsWeight() {
++	a := &rpctype.GetPCsWeightArgs{}
++	r := &rpctype.GetPCsWeightRes{
++		PCsWeight: make(map[uint32]float32),
++	}
++	if err := fuzzer.manager.Call("Manager.GetPCsWeight", a, r); err != nil {
++		log.Fatalf("manager call failed: %v", err)
++	}
++	if len(r.PCsWeight) < 1 {
++		log.Fatalf("got a empty pcs weight map")
++	}
++	log.Logf(0, "Got a new weighted pcs map:\n")
++	for pc, w := range r.PCsWeight {
++		log.Logf(0, "pc: 0x%x weight: %.5f", pc, w)
++	}
++	fuzzer.pcsWeightMu.Lock()
++	fuzzer.pcsWeight = r.PCsWeight
++	fuzzer.pcsWeightMu.Unlock()
++}
++
+ // Returns gateCallback for leak checking if enabled.
+ func (fuzzer *Fuzzer) useBugFrames(r *rpctype.ConnectRes, flagProcs int) func() {
+ 	var gateCallback func()
+@@ -437,11 +468,17 @@ func (fuzzer *Fuzzer) addInputToCorpus(p *prog.Prog, sign signal.Signal, sig has
+ 	if _, ok := fuzzer.corpusHashes[sig]; !ok {
+ 		fuzzer.corpus = append(fuzzer.corpus, p)
+ 		fuzzer.corpusHashes[sig] = struct{}{}
++		weight := float64(p.Weight)
++		if weight < 1 {
++			weight = 1
++		}
+ 		prio := int64(len(sign))
+ 		if sign.Empty() {
+ 			prio = 1
+ 		}
+-		fuzzer.sumPrios += prio
++		prio = 1
++		weightedPrio := int64(float64(prio) * float64(weight))
++		fuzzer.sumPrios += weightedPrio
+ 		fuzzer.corpusPrios = append(fuzzer.corpusPrios, fuzzer.sumPrios)
+ 	}
+ 	fuzzer.corpusMu.Unlock()
+diff --git a/syz-fuzzer/proc.go b/syz-fuzzer/proc.go
+index 3c39879c..fbf71407 100644
+--- a/syz-fuzzer/proc.go
++++ b/syz-fuzzer/proc.go
+@@ -9,6 +9,7 @@ import (
+ 	"math/rand"
+ 	"os"
+ 	"runtime/debug"
++	"sync"
+ 	"sync/atomic"
+ 	"syscall"
+ 	"time"
+@@ -170,6 +171,13 @@ func (proc *Proc) triageInput(item *WorkTriage) {
+ 		Cover:  inputCover.Serialize(),
+ 	})
+ 
++	proc.fuzzer.getPCsWeight()
++	weight := calCoverWeight(proc.fuzzer.pcsWeight, proc.fuzzer.pcsWeightMu, inputCover.Serialize())
++	item.p.Weight = weight
++
++	for _, p := range proc.fuzzer.corpus {
++		log.Logf(3, "Prog: %s weight: %.5f", p.Comments, p.Weight)
++	}
+ 	proc.fuzzer.addInputToCorpus(item.p, inputSignal, sig)
+ 
+ 	if item.flags&ProgSmashed == 0 {
+@@ -216,6 +224,21 @@ func (proc *Proc) smashInput(item *WorkSmash) {
+ 	}
+ }
+ 
++func calCoverWeight(pcsWeight map[uint32]float32, pcsWeightMu sync.RWMutex, pcs []uint32) float32 {
++	var weight float32 = 0.0
++	var count uint32 = 0
++	pcsWeightMu.Lock()
++	for _, pc := range pcs {
++		if _, ok := pcsWeight[pc]; ok {
++			weight += pcsWeight[pc]
++			count++
++		}
++	}
++	pcsWeightMu.Unlock()
++	weight = weight - float32(count) + 1
++	return weight
++}
++
+ func (proc *Proc) failCall(p *prog.Prog, call int) {
+ 	for nth := 0; nth < 100; nth++ {
+ 		log.Logf(1, "#%v: injecting fault into call %v/%v", proc.pid, call, nth)
+diff --git a/syz-manager/html.go b/syz-manager/html.go
+index 5538bf77..01baada3 100644
+--- a/syz-manager/html.go
++++ b/syz-manager/html.go
+@@ -36,6 +36,7 @@ func (mgr *Manager) initHTTP() {
+ 	http.HandleFunc("/corpus", mgr.httpCorpus)
+ 	http.HandleFunc("/crash", mgr.httpCrash)
+ 	http.HandleFunc("/cover", mgr.httpCover)
++	http.HandleFunc("/bitmap", mgr.httpBitmap)
+ 	http.HandleFunc("/prio", mgr.httpPrio)
+ 	http.HandleFunc("/file", mgr.httpFile)
+ 	http.HandleFunc("/report", mgr.httpReport)
+@@ -190,10 +191,22 @@ func (mgr *Manager) httpCorpus(w http.ResponseWriter, r *http.Request) {
+ 			http.Error(w, fmt.Sprintf("failed to deserialize program: %v", err), http.StatusInternalServerError)
+ 			return
+ 		}
++		count := 0
++		var weight float32 = 0.0
++		for _, pc := range inp.Cover {
++			if _, ok := mgr.pcsWeight[pc]; ok {
++				count++
++				weight += mgr.pcsWeight[pc]
++			}
++		}
++		weight = weight - float32(count) + 1
+ 		data.Inputs = append(data.Inputs, &UIInput{
+-			Sig:   sig,
+-			Short: p.String(),
+-			Cover: len(inp.Cover),
++			Sig:    sig,
++			Short:  p.String(),
++			Cover:  len(inp.Cover),
++			Weight: weight,
++			Signal: inp.Signal.Deserialize(),
++			SigLen: inp.Signal.Deserialize().Len(),
+ 		})
+ 	}
+ 	sort.Slice(data.Inputs, func(i, j int) bool {
+@@ -290,6 +303,42 @@ func (mgr *Manager) httpCoverFallback(w http.ResponseWriter, r *http.Request) {
+ 	}
+ }
+ 
++func (mgr *Manager) httpBitmap(w http.ResponseWriter, r *http.Request) {
++	if !mgr.cfg.Cover {
++		mgr.mu.Lock()
++		defer mgr.mu.Unlock()
++		mgr.httpCoverFallback(w, r)
++	}
++	// Note: initCover is executed without mgr.mu because it takes very long time
++	// (but it only reads config and it protected by initCoverOnce).
++	if err := initCover(mgr.cfg.KernelObj, mgr.sysTarget.KernelObject, mgr.cfg.KernelSrc, mgr.cfg.KernelBuildSrc, mgr.cfg.TargetVMArch, mgr.cfg.TargetOS); err != nil {
++		http.Error(w, fmt.Sprintf("failed to generate coverage profile: %v", err), http.StatusInternalServerError)
++		return
++	}
++	mgr.mu.Lock()
++	defer mgr.mu.Unlock()
++	mgr.httpBitmapCover(w, r)
++}
++
++func (mgr *Manager) httpBitmapCover(w http.ResponseWriter, r *http.Request) {
++	var progs []cover.Prog
++	for pc, weight := range mgr.pcsWeight {
++		for i := 0; i < int(weight); i++ {
++			var pcs []uint32
++			pcs = append(pcs, pc)
++			progs = append(progs, cover.Prog{
++				Data: "From pcs weight table: " + string(pc) + ":" + string(i),
++				PCs:  coverToPCs(pcs, mgr.cfg.TargetVMArch),
++			})
++		}
++	}
++	if err := reportGenerator.Do(w, progs); err != nil {
++		http.Error(w, fmt.Sprintf("failed to generate coverage profile: %v", err), http.StatusInternalServerError)
++		return
++	}
++	runtime.GC()
++}
++
+ func (mgr *Manager) httpPrio(w http.ResponseWriter, r *http.Request) {
+ 	mgr.mu.Lock()
+ 	defer mgr.mu.Unlock()
+@@ -597,9 +646,12 @@ type UICorpus struct {
+ }
+ 
+ type UIInput struct {
+-	Sig   string
+-	Short string
+-	Cover int
++	Sig    string
++	Short  string
++	Cover  int
++	Weight float32
++	Signal signal.Signal
++	SigLen int
+ }
+ 
+ var summaryTemplate = html.CreatePage(`
+@@ -745,11 +797,15 @@ var corpusTemplate = html.CreatePage(`
+ 	<tr>
+ 		<th>Coverage</th>
+ 		<th>Program</th>
++		<th>#Signal</th>
++		<th>Weight</th>
+ 	</tr>
+ 	{{range $inp := $.Inputs}}
+ 	<tr>
+ 		<td><a href='/cover?input={{$inp.Sig}}'>{{$inp.Cover}}</a></td>
+ 		<td><a href="/input?sig={{$inp.Sig}}">{{$inp.Short}}</a></td>
++		<td><a href="/input?sig={{$inp.Sig}}">{{$inp.SigLen}}</a></td>
++		<td><a href="/input?sig={{$inp.Sig}}">{{$inp.Weight}}</a></td>
+ 	</tr>
+ 	{{end}}
+ </table>
+diff --git a/syz-manager/manager.go b/syz-manager/manager.go
+index 3e44d24e..9d34fec7 100644
+--- a/syz-manager/manager.go
++++ b/syz-manager/manager.go
+@@ -86,6 +86,7 @@ type Manager struct {
+ 	// For checking that files that we are using are not changing under us.
+ 	// Maps file name to modification time.
+ 	usedFiles map[string]time.Time
++	pcsWeight map[uint32]float32
+ }
+ 
+ const (
+@@ -179,6 +180,7 @@ func RunManager(cfg *mgrconfig.Config, target *prog.Target, sysTarget *targets.T
+ 		reproRequest:          make(chan chan map[string]bool),
+ 		usedFiles:             make(map[string]time.Time),
+ 		saturatedCalls:        make(map[string]bool),
++		pcsWeight:             make(map[uint32]float32),
+ 	}
+ 
+ 	log.Logf(0, "loading corpus...")
+@@ -187,6 +189,8 @@ func RunManager(cfg *mgrconfig.Config, target *prog.Target, sysTarget *targets.T
+ 		log.Fatalf("failed to open corpus database: %v", err)
+ 	}
+ 
++	mgr.readPCsWeight()
++
+ 	// Create HTTP server.
+ 	mgr.initHTTP()
+ 	mgr.collectUsedFiles()
+@@ -556,6 +560,11 @@ func (mgr *Manager) runInstance(index int) (*Crash, error) {
+ 		}
+ 	}
+ 
++	_, err = inst.Copy(mgr.cfg.SyzCoverPCs)
++	if err != nil {
++		return nil, fmt.Errorf("failed to copy binary: %v", err)
++	}
++
+ 	fuzzerV := 0
+ 	procs := mgr.cfg.Procs
+ 	if *flagDebug {
+@@ -569,7 +578,7 @@ func (mgr *Manager) runInstance(index int) (*Crash, error) {
+ 	defer atomic.AddUint32(&mgr.numFuzzing, ^uint32(0))
+ 	cmd := instance.FuzzerCmd(fuzzerBin, executorCmd, fmt.Sprintf("vm-%v", index),
+ 		mgr.cfg.TargetOS, mgr.cfg.TargetArch, fwdAddr, mgr.cfg.Sandbox, procs, fuzzerV,
+-		mgr.cfg.Cover, *flagDebug, false, false)
++		mgr.cfg.Cover, *flagDebug, false, false, mgr.cfg.Covfilter)
+ 	outc, errc, err := inst.Run(time.Hour, mgr.vmStop, cmd)
+ 	if err != nil {
+ 		return nil, fmt.Errorf("failed to run fuzzer: %v", err)
+@@ -1089,12 +1098,34 @@ func (mgr *Manager) candidateBatch(size int) []rpctype.RPCCandidate {
+ 	return res
+ }
+ 
++func (mgr *Manager) getPCsWeight() map[uint32]float32 {
++	mgr.mu.Lock()
++	defer mgr.mu.Unlock()
++	return mgr.pcsWeight
++}
++
+ func (mgr *Manager) rotateCorpus() bool {
+ 	mgr.mu.Lock()
+ 	defer mgr.mu.Unlock()
+ 	return mgr.phase == phaseTriagedHub
+ }
+ 
++func (mgr *Manager) readPCsWeight() {
++	bitmapFile, _ := os.Open(mgr.cfg.SyzCoverPCs)
++	defer bitmapFile.Close()
++	for true {
++		var encode uint64
++		_, err := fmt.Fscanf(bitmapFile, "0x%x\n", &encode)
++		if err != nil {
++			break
++		}
++		var pc uint32 = uint32(encode & 0xffffffff)
++		var weight float32 = float32((encode >> 32) & 0xffff)
++		mgr.pcsWeight[pc] = weight
++		log.Logf(0, "Init PCs weight: pc: %x weight: %f\n", pc, mgr.pcsWeight[pc])
++	}
++}
++
+ func (mgr *Manager) collectUsedFiles() {
+ 	if mgr.vmPool == nil {
+ 		return
+diff --git a/syz-manager/rpc.go b/syz-manager/rpc.go
+index 6cf979a3..9c8db2a4 100644
+--- a/syz-manager/rpc.go
++++ b/syz-manager/rpc.go
+@@ -55,6 +55,7 @@ type RPCManagerView interface {
+ 	newInput(inp rpctype.RPCInput, sign signal.Signal) bool
+ 	candidateBatch(size int) []rpctype.RPCCandidate
+ 	rotateCorpus() bool
++	getPCsWeight() map[uint32]float32
+ }
+ 
+ func startRPCServer(mgr *Manager) (int, error) {
+@@ -281,6 +282,7 @@ func (serv *RPCServer) Poll(a *rpctype.PollArgs, r *rpctype.PollRes) error {
+ 	if a.NeedCandidates {
+ 		r.Candidates = serv.mgr.candidateBatch(serv.batchSize)
+ 	}
++
+ 	if len(r.Candidates) == 0 {
+ 		batchSize := serv.batchSize
+ 		// When the fuzzer starts, it pumps the whole corpus.
+@@ -305,3 +307,11 @@ func (serv *RPCServer) Poll(a *rpctype.PollArgs, r *rpctype.PollRes) error {
+ 		a.Name, len(r.Candidates), len(r.NewInputs), len(r.MaxSignal.Elems))
+ 	return nil
+ }
++
++func (serv *RPCServer) GetPCsWeight(a *rpctype.GetPCsWeightArgs, r *rpctype.GetPCsWeightRes) error {
++	serv.mu.Lock()
++	defer serv.mu.Unlock()
++	pcsWeight := serv.mgr.getPCsWeight()
++	r.PCsWeight = pcsWeight
++	return nil
++}
+diff --git a/tools/syz-runtest/runtest.go b/tools/syz-runtest/runtest.go
+index e7b41be6..4032849b 100644
+--- a/tools/syz-runtest/runtest.go
++++ b/tools/syz-runtest/runtest.go
+@@ -187,7 +187,7 @@ func (mgr *Manager) boot(name string, index int) (*report.Report, error) {
+ 	}
+ 	cmd := instance.FuzzerCmd(fuzzerBin, executorCmd, name,
+ 		mgr.cfg.TargetOS, mgr.cfg.TargetArch, fwdAddr, mgr.cfg.Sandbox, mgr.cfg.Procs, 0,
+-		mgr.cfg.Cover, mgr.debug, false, true)
++		mgr.cfg.Cover, mgr.debug, false, true, false)
+ 	outc, errc, err := inst.Run(time.Hour, mgr.vmStop, cmd)
+ 	if err != nil {
+ 		return nil, fmt.Errorf("failed to run fuzzer: %v", err)
+-- 
+2.20.1
+
