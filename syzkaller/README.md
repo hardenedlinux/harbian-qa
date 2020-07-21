@@ -33,20 +33,25 @@ More design detail and usage can be found [here](kstate_resource.md). We will sh
 #### Explicitly display the prior of prog and resource of a testcase
 
 We attach "signal len", "cover weight", "state len" and "Resource weight" to "/corpus" interface. The original use signal length as prog prior. We recalculate the prog prior base on what it covered. And we priorly choose prog to extract resource base on which state it triggers while original syzkaller is totally random.
+
 ![Corpus](Corpus.png)
 
 #### Coverage count of target functions
 
 No matter if you use coverage filter or not, you can pass a PCs table to patch syzkaller, and access the "/kernfunc" interface to get the information about how much of a function was covered in this fuzzer.
-![KernFunc](KerfFunc.png)
+
+![KernFunc](KernFunc.png)
 
 #### Check the coverage filter configuration
 
 Access "/bitmap" interface to get the colored source code to check if your PCs table is right.
 
+![Bitmap](Bitmap.png)
+
 #### Display which syscall trigger which kernel state
 
 We attach kernel states triggered by prog to "/input" interface. You can conveniently trace syscalls behavior.
+
 ![ProgState](ProgState.png)
 
 ## 3. Practice and result
