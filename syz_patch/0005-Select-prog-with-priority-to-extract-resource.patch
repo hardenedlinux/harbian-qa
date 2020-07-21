@@ -1,0 +1,325 @@
+From e1155f06c0da90c7080e3554a44d449a077a8d12 Mon Sep 17 00:00:00 2001
+From: bins <bins@kp-test>
+Date: Thu, 16 Jul 2020 02:28:05 -0400
+Subject: [PATCH 5/6] Select prog with priority to extract resource
+
+---
+ pkg/kstate/kstate.go   | 18 ++++++++++++++++++
+ prog/prog.go           |  1 +
+ prog/rand.go           | 25 ++++++++++++++++++++++++-
+ syz-fuzzer/fuzzer.go   | 31 +++++++++++++++++++++++++++++++
+ syz-fuzzer/proc.go     | 21 +++++++++++++++++++++
+ syz-manager/html.go    | 24 ++++++++++++++++++++----
+ syz-manager/manager.go | 10 +++++++++-
+ 7 files changed, 124 insertions(+), 6 deletions(-)
+
+diff --git a/pkg/kstate/kstate.go b/pkg/kstate/kstate.go
+index cd04a674..6f0fe713 100644
+--- a/pkg/kstate/kstate.go
++++ b/pkg/kstate/kstate.go
+@@ -7,6 +7,10 @@ type KernState struct {
+ 	Value uint64
+ }
+ 
++func (state KernState) Hash() uint64 {
++	return (state.ID & 0xffffffff) ^ state.Value
++}
++
+ func (states KernStates) Merge(id uint64, value uint64) KernStates {
+ 	for i, s := range states {
+ 		/* duplicate state set */
+@@ -23,6 +27,20 @@ func (states KernStates) Merge(id uint64, value uint64) KernStates {
+ 	return states
+ }
+ 
++func (states KernStates) Dedup() KernStates {
++	dedupMap := make(map[uint32]bool)
++	var retStates KernStates
++	for _, s := range states {
++		id := uint32(s.ID & 0xffffffff)
++		val := uint32(s.Value & 0xffffffff)
++		if _, ok := dedupMap[id ^ val]; !ok {
++			dedupMap[id ^ val] = true
++			retStates = append(retStates, s)
++		}
++	}
++	return retStates;
++}
++
+ func (states KernStates) Len() int {
+ 	return len([]KernState(states))
+ }
+diff --git a/prog/prog.go b/prog/prog.go
+index a441374b..39903d06 100644
+--- a/prog/prog.go
++++ b/prog/prog.go
+@@ -13,6 +13,7 @@ type Prog struct {
+ 	Calls    []*Call
+ 	Comments []string
+ 	Weight   float32
++	ResPrio  float32
+ }
+ 
+ type Call struct {
+diff --git a/prog/rand.go b/prog/rand.go
+index a6c013fd..accf29ea 100644
+--- a/prog/rand.go
++++ b/prog/rand.go
+@@ -835,7 +835,16 @@ func (r *randGen) existingResource(s *state, res *ResourceType, dir Dir) Arg {
+ func (r *randGen) resourceCentric(s *state, t *ResourceType, dir Dir) (arg Arg, calls []*Call) {
+ 	var p *Prog
+ 	var resource *ResultArg
+-	for idx := range r.Perm(len(s.corpus)) {
++	var sumPrios int64 = 0
++	for _, tmp := range s.corpus {
++		sumPrios += int64(tmp.ResPrio)
++	}
++	for i := 0; i < len(s.corpus); i++ {
++		randVal := r.Int63n(sumPrios + 1)
++		found, idx := chooseResProgramIdx(randVal, s.corpus)
++		if !found {
++			return nil, nil
++		}
+ 		p = s.corpus[idx].Clone()
+ 		resources := getCompatibleResources(p, t.TypeName, r)
+ 		if len(resources) > 0 {
+@@ -887,6 +896,20 @@ func (r *randGen) resourceCentric(s *state, t *ResourceType, dir Dir) (arg Arg,
+ 	return MakeResultArg(t, dir, resource, 0), p.Calls
+ }
+ 
++func chooseResProgramIdx(randVal int64, corpus []*Prog) (bool, int) {
++	idx := 0
++	found := false
++	for i, p := range corpus {
++		randVal -= int64(p.ResPrio)
++		if randVal <= 0 {
++			found = true
++			idx = i
++			break
++		}
++	}
++	return found, idx
++}
++
+ func getCompatibleResources(p *Prog, resourceType string, r *randGen) (resources []*ResultArg) {
+ 	for _, c := range p.Calls {
+ 		ForeachArg(c, func(arg Arg, _ *ArgCtx) {
+diff --git a/syz-fuzzer/fuzzer.go b/syz-fuzzer/fuzzer.go
+index 91058117..22021c9a 100644
+--- a/syz-fuzzer/fuzzer.go
++++ b/syz-fuzzer/fuzzer.go
+@@ -55,6 +55,8 @@ type Fuzzer struct {
+ 	sumPrios     int64
+ 	pcsWeight    map[uint32]float32
+ 	pcsWeightMu  sync.RWMutex
++	kstateMap    map[uint64]float32
++	kstateMapMu  sync.RWMutex
+ 
+ 	signalMu     sync.RWMutex
+ 	corpusSignal signal.Signal // signal of inputs in corpus
+@@ -246,6 +248,7 @@ func main() {
+ 		comparisonTracingEnabled: r.CheckResult.Features[host.FeatureComparisons].Enabled,
+ 		corpusHashes:             make(map[hash.Sig]struct{}),
+ 		pcsWeight:                make(map[uint32]float32),
++		kstateMap:                make(map[uint64]float32),
+ 	}
+ 
+ 	fuzzer.getPCsWeight()
+@@ -293,6 +296,34 @@ func (fuzzer *Fuzzer) getPCsWeight() {
+ 	fuzzer.pcsWeightMu.Unlock()
+ }
+ 
++func (fuzzer *Fuzzer) getKstateMap() {
++	kstateFile, err := os.Open("/kstate.map")
++	if err != nil {
++		log.Fatalf("failed to open kernstatemap file: %v", err)
++	}
++	defer kstateFile.Close()
++	for true {
++		var varName string
++		var id uint64
++		var count uint32
++		_, err := fmt.Fscan(kstateFile, &varName)
++		if err != nil {
++			break
++		}
++		varName = varName[:len(varName)-1]
++		_, err = fmt.Fscan(kstateFile, &id)
++		if err != nil {
++			break
++		}
++		_, err = fmt.Fscan(kstateFile, &count)
++		if err != nil {
++			break
++		}
++		fuzzer.kstateMap[id] = float32(count)
++		log.Logf(0, "Init KernState map: %s: %x: %f\n", varName, id, float32(count))
++	}
++}
++
+ // Returns gateCallback for leak checking if enabled.
+ func (fuzzer *Fuzzer) useBugFrames(r *rpctype.ConnectRes, flagProcs int) func() {
+ 	var gateCallback func()
+diff --git a/syz-fuzzer/proc.go b/syz-fuzzer/proc.go
+index 311a46d6..fb3009b1 100644
+--- a/syz-fuzzer/proc.go
++++ b/syz-fuzzer/proc.go
+@@ -178,6 +178,7 @@ func (proc *Proc) triageInput(item *WorkTriage) {
+ 				})
+ 		}
+ 	}
++	inputKernState = inputKernState.Dedup()
+ 	log.Logf(2, "added new input for %v to corpus:\n%s", logCallName, data)
+ 	proc.fuzzer.sendInputToManager(rpctype.RPCInput{
+ 		Call:   callName,
+@@ -189,7 +190,9 @@ func (proc *Proc) triageInput(item *WorkTriage) {
+ 
+ 	proc.fuzzer.getPCsWeight()
+ 	weight := calCoverWeight(proc.fuzzer.pcsWeight, proc.fuzzer.pcsWeightMu, inputCover.Serialize())
++	resPrio := calStateWeight(proc.fuzzer.kstateMap, proc.fuzzer.kstateMapMu, inputKernState)
+ 	item.p.Weight = weight
++	item.p.ResPrio = resPrio
+ 	for _, p := range proc.fuzzer.corpus {
+ 		log.Logf(3, "Prog: %s weight: %.5f", p.Comments, p.Weight)
+ 	}
+@@ -265,6 +268,24 @@ func calCoverWeight(pcsWeight map[uint32]float32, pcsWeightMu sync.RWMutex, pcs
+ 	return weight
+ }
+ 
++func calStateWeight(statemap map[uint64]float32, pcsWeightMu sync.RWMutex, state kstate.KernStates) float32 {
++	var weight float32 = 1.0
++	var count float32 = 1.0
++	for _, s := range state {
++		id := s.ID | 0xffffffff
++		hash := s.Hash()
++		if _, ok := statemap[hash]; ok {
++			weight += statemap[hash]
++			count++
++		}else if _, ok := statemap[id]; ok {
++			weight += statemap[id]
++			count++
++		}
++	}
++	weight = weight - count + 1
++	return weight
++}
++
+ func (proc *Proc) failCall(p *prog.Prog, call int) {
+ 	for nth := 0; nth < 100; nth++ {
+ 		log.Logf(1, "#%v: injecting fault into call %v/%v", proc.pid, call, nth)
+diff --git a/syz-manager/html.go b/syz-manager/html.go
+index e0197053..c5e76793 100644
+--- a/syz-manager/html.go
++++ b/syz-manager/html.go
+@@ -204,6 +204,18 @@ func (mgr *Manager) httpCorpus(w http.ResponseWriter, r *http.Request) {
+ 		if !mgr.cfg.Covfilter {
+ 			weight = float32(inp.Signal.Deserialize().Len())
+ 		}
++		var stateWeight float32 = 1.0
++		var scount float32 = 1.0
++		for _, s := range inp.State {
++			if _, ok := mgr.kstateCnt[s.Hash()]; ok {
++				scount++
++				stateWeight += mgr.kstateCnt[s.Hash()]
++			} else if _, ok := mgr.kstateCnt[s.ID&0xffffffff]; ok {
++				scount++
++				stateWeight += mgr.kstateCnt[s.ID&0xffffffff]
++			}
++		}
++		stateWeight = stateWeight - scount + 1
+ 		data.Inputs = append(data.Inputs, &UIInput{
+ 			Sig:      sig,
+ 			Short:    p.String(),
+@@ -212,6 +224,7 @@ func (mgr *Manager) httpCorpus(w http.ResponseWriter, r *http.Request) {
+ 			Signal:   inp.Signal.Deserialize(),
+ 			SigLen:   inp.Signal.Deserialize().Len(),
+ 			StateLen: inp.State.Len(),
++			ResPrio:  stateWeight,
+ 			State:    inp.State,
+ 		})
+ 	}
+@@ -333,7 +346,7 @@ func (mgr *Manager) httpBitmapCover(w http.ResponseWriter, r *http.Request) {
+ 			pcs = append(pcs, pc)
+ 			progs = append(progs, cover.Prog{
+ 				Data: "From pcs weight table: " + string(pc) + ":" + string(i),
+-				PCs: coverToPCs(mgr.sysTarget, pcs),
++				PCs:  coverToPCs(mgr.sysTarget, pcs),
+ 			})
+ 		}
+ 	}
+@@ -664,6 +677,7 @@ type UIInput struct {
+ 	SigLen   int
+ 	StateLen int
+ 	State    kstate.KernStates
++	ResPrio  float32
+ }
+ 
+ var summaryTemplate = html.CreatePage(`
+@@ -809,9 +823,10 @@ var corpusTemplate = html.CreatePage(`
+ 	<tr>
+ 		<th>Coverage</th>
+ 		<th>Program</th>
+-		<th>SignalLen</th>
+-		<th>Prog Weight</th>
+-		<th>StateLen</th>
++		<th>Signal</th>
++		<th>Cover Weight</th>
++		<th>State</th>
++		<th>Resource Weight</th>
+ 	</tr>
+ 	{{range $inp := $.Inputs}}
+ 	<tr>
+@@ -820,6 +835,7 @@ var corpusTemplate = html.CreatePage(`
+ 		<td><a href="/input?sig={{$inp.Sig}}">{{$inp.SigLen}}</a></td>
+ 		<td><a href="/input?sig={{$inp.Sig}}">{{$inp.Weight}}</a></td>
+ 		<td><a href="/input?sig={{$inp.Sig}}">{{$inp.StateLen}}</a></td>
++		<td><a href="/input?sig={{$inp.Sig}}">{{$inp.ResPrio}}</a></td>
+ 	</tr>
+ 	{{end}}
+ </table>
+diff --git a/syz-manager/manager.go b/syz-manager/manager.go
+index 03a06499..f503ada1 100644
+--- a/syz-manager/manager.go
++++ b/syz-manager/manager.go
+@@ -88,6 +88,7 @@ type Manager struct {
+ 	usedFiles map[string]time.Time
+ 	pcsWeight map[uint32]float32
+ 	kstateMap map[uint64]string
++	kstateCnt map[uint64]float32
+ }
+ 
+ const (
+@@ -183,6 +184,7 @@ func RunManager(cfg *mgrconfig.Config, target *prog.Target, sysTarget *targets.T
+ 		saturatedCalls:        make(map[string]bool),
+ 		pcsWeight:             make(map[uint32]float32),
+ 		kstateMap:             make(map[uint64]string),
++		kstateCnt:             make(map[uint64]float32),
+ 	}
+ 
+ 	log.Logf(0, "loading corpus...")
+@@ -1149,6 +1151,7 @@ func (mgr *Manager) readKernStateMap() {
+ 	for true {
+ 		var varName string
+ 		var id uint64
++		var count uint32
+ 		_, err := fmt.Fscan(kstateFile, &varName)
+ 		if err != nil {
+ 			break
+@@ -1158,8 +1161,13 @@ func (mgr *Manager) readKernStateMap() {
+ 		if err != nil {
+ 			break
+ 		}
++		_, err = fmt.Fscan(kstateFile, &count)
++		if err != nil {
++			break
++		}
+ 		mgr.kstateMap[id] = varName
+-		log.Logf(0, "Init KernState map: %s: %x\n", varName, id)
++		mgr.kstateCnt[id] = float32(count)
++		log.Logf(0, "Init KernState map: %s: %x %f\n", varName, id, float32(count))
+ 	}
+ }
+ 
+-- 
+2.20.1
+

@@ -1,0 +1,41 @@
+From 62a0376373eabf8e5386182131dfe9d83e50b30c Mon Sep 17 00:00:00 2001
+From: bins <bins@kp-test>
+Date: Thu, 16 Jul 2020 02:17:05 -0400
+Subject: [PATCH 2/6] Support configure bitmap file in manager configuration
+ file
+
+---
+ pkg/mgrconfig/config.go | 1 +
+ syz-manager/manager.go  | 6 ++++++
+ 2 files changed, 7 insertions(+)
+
+diff --git a/pkg/mgrconfig/config.go b/pkg/mgrconfig/config.go
+index 7031d150..512bd568 100644
+--- a/pkg/mgrconfig/config.go
++++ b/pkg/mgrconfig/config.go
+@@ -117,4 +117,5 @@ type Config struct {
+ 	SyzFuzzerBin   string `json:"-"`
+ 	SyzExecprogBin string `json:"-"`
+ 	SyzExecutorBin string `json:"-"`
++	SyzCoverPCs    string `json:"coverpcs"`
+ }
+diff --git a/syz-manager/manager.go b/syz-manager/manager.go
+index 83359545..f316a216 100644
+--- a/syz-manager/manager.go
++++ b/syz-manager/manager.go
+@@ -559,6 +559,12 @@ func (mgr *Manager) runInstance(index int) (*Crash, error) {
+ 		}
+ 	}
+ 
++	/* scp coverage filter pcs to machine */
++	_, err = inst.Copy(mgr.cfg.SyzCoverPCs)
++	if err != nil {
++		return nil, fmt.Errorf("failed to copy binary: %v", err)
++	}
++
+ 	fuzzerV := 0
+ 	procs := mgr.cfg.Procs
+ 	if *flagDebug {
+-- 
+2.20.1
+

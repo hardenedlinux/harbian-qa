@@ -1,0 +1,105 @@
+From ca304e6e4ab6947eb1da47e9b2f6ac244dad9ea8 Mon Sep 17 00:00:00 2001
+From: bins <bins@kp-test>
+Date: Thu, 16 Jul 2020 02:28:45 -0400
+Subject: [PATCH 6/6] Kernel function cover count
+
+---
+ pkg/cover/report.go |  4 +++
+ syz-manager/html.go | 59 +++++++++++++++++++++++++++++++++++++++++++++
+ 2 files changed, 63 insertions(+)
+
+diff --git a/pkg/cover/report.go b/pkg/cover/report.go
+index a56e7f14..8aa8cab8 100644
+--- a/pkg/cover/report.go
++++ b/pkg/cover/report.go
+@@ -317,6 +317,10 @@ func (rg *ReportGenerator) findSymbol(pc uint64) uint64 {
+ 	return s.start
+ }
+ 
++func (rg *ReportGenerator) PCs() map[uint64][]symbolizer.Frame {
++	return rg.pcs
++}
++
+ func readSymbols(target *targets.Target, obj string) ([]symbol, error) {
+ 	symb := symbolizer.NewSymbolizer(target)
+ 	raw, err := symb.ReadTextSymbols(obj)
+diff --git a/syz-manager/html.go b/syz-manager/html.go
+index c5e76793..9bd07707 100644
+--- a/syz-manager/html.go
++++ b/syz-manager/html.go
+@@ -38,6 +38,7 @@ func (mgr *Manager) initHTTP() {
+ 	http.HandleFunc("/crash", mgr.httpCrash)
+ 	http.HandleFunc("/cover", mgr.httpCover)
+ 	http.HandleFunc("/bitmap", mgr.httpBitmap)
++	http.HandleFunc("/kernfunc", mgr.httpKernFunc)
+ 	http.HandleFunc("/prio", mgr.httpPrio)
+ 	http.HandleFunc("/file", mgr.httpFile)
+ 	http.HandleFunc("/report", mgr.httpReport)
+@@ -357,6 +358,64 @@ func (mgr *Manager) httpBitmapCover(w http.ResponseWriter, r *http.Request) {
+ 	runtime.GC()
+ }
+ 
++func (mgr *Manager) httpKernFunc(w http.ResponseWriter, r *http.Request) {
++	if err := initCover(mgr.sysTarget, mgr.cfg.KernelObj, mgr.cfg.KernelSrc, mgr.cfg.KernelBuildSrc); err != nil {
++		http.Error(w, initCoverError.Error(), http.StatusInternalServerError)
++		return
++	}
++	mgr.mu.Lock()
++	defer mgr.mu.Unlock()
++
++	var cov cover.Cover
++	for _, inp := range mgr.corpus {
++		cov.Merge(inp.Cover)
++	}
++	covArray := make([]uint32, 0, len(cov))
++	for pc := range cov {
++		covArray = append(covArray, pc)
++	}
++	funcCovCount := mgr.getFuncCount(covArray)
++
++	funcMapArray := make([]uint32, 0, len(cov))
++	for pc, _ := range mgr.pcsWeight {
++		funcMapArray = append(funcMapArray, pc)
++	}
++	funcMapCount := mgr.getFuncCount(funcMapArray)
++	totalMap := uint32(0)
++	totalCov := uint32(0)
++	for fn, _ := range funcMapCount {
++		if _, ok := funcCovCount[fn]; ok {
++			w.Write([]byte(fmt.Sprintf("%s: %d/%d\n", fn, funcCovCount[fn], funcMapCount[fn])))
++			totalMap += funcMapCount[fn]
++			totalCov += funcCovCount[fn]
++		} else {
++			totalMap += funcMapCount[fn]
++			w.Write([]byte(fmt.Sprintf("%s: 0/%d\n", fn, funcMapCount[fn])))
++		}
++	}
++	w.Write([]byte(fmt.Sprintf("\nTotal: %d/%d\n", totalCov, totalMap)))
++}
++
++func (mgr *Manager) getFuncCount(cover []uint32) map[string]uint32 {
++	fCount := make(map[string]uint32)
++	fPCs := coverToPCs(mgr.sysTarget, cover)
++	sort.Slice(fPCs, func(i, j int) bool {
++		return fPCs[i] < fPCs[j]
++	})
++	for _, pc := range fPCs {
++		frame, ok := reportGenerator.PCs()[pc]
++		if len(frame) > 0 && ok {
++			funcName := frame[len(frame)-1].Func
++			if _, ok := fCount[funcName]; ok {
++				fCount[funcName]++
++			} else {
++				fCount[funcName] = 1
++			}
++		}
++	}
++	return fCount
++}
++
+ func (mgr *Manager) httpPrio(w http.ResponseWriter, r *http.Request) {
+ 	mgr.mu.Lock()
+ 	defer mgr.mu.Unlock()
+-- 
+2.20.1
+
