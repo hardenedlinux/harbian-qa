@@ -130,7 +130,7 @@ Use the syzkaller web UI "cover", we extend an interface called bitmap. It will 
 
 #### getPCsWeight from syz-manager
 
-Add a getPCsWeight() for fuzzer, so fuzzer can dynamically fetch PCs table from syz-manager. In other words, it's possible to dynamically distribute PCs table to different fuzzers. For example, light PCs weight while some block has been fully explored[]().
+Add a getPCsWeight for fuzzer, so fuzzer can dynamically fetch PCs table from syz-manager. In other words, it's possible to dynamically distribute PCs table to different fuzzers. For example, light PCs weight while some block has been fully explored( [eg.](https://github.com/llvm/llvm-project/blob/master/compiler-rt/lib/fuzzer/FuzzerDataFlowTrace.cpp)).
 
 #### Calculate the prog prio from its cover
 
@@ -171,7 +171,7 @@ Cover filtering is quite certain that you can only set if the edge of that pc wi
 
 ### Cyclomatic complexity base on llvm CFG
 
-In the theory of cyclomatic complexity[1](https://en.wikipedia.org/wiki/Cyclomatic_complexity), a function can be treated as a one-entry and one-exit model, the complexity can be easily calculated. In realistic application, complexity indicates that program testing should pay more attention to those functions that are more complex.
+In the theory of cyclomatic [complexity](https://en.wikipedia.org/wiki/Cyclomatic_complexity), a function can be treated as a one-entry and one-exit model, the complexity can be easily calculated. In realistic application, complexity indicates that program testing should pay more attention to those functions that are more complex.
 
 ### Basic block count base on llvm BlockFrequenceInfo
 

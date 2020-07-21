@@ -16,7 +16,7 @@ These [patches](../syz_patch) base on syzkaller-a2cdad9.
 
 ## 2.1 Support cover filter and weighted PCs
 
-The original syzkaller can only by constraining enable and disable syscalls to do a targeted fuzzing. Lots of code will be covered although we are not interested. And collect the testcase that trigger such edge will occupy a considerable proportion in the corpus while syzkaller generating and mutating new testcases base on corpus statistic. So, it will slow down the exploring and exploiting of the target. Also, in some cases, you may want to specify a code position gradient to tell fuzzer how to evolve testcases to touch the target position gradually. Or, you just want to fuzz some functions more frequently, maybe because of its complexity or importance. To make syzkaller a more targeted fuzzer, we implement a coverage filter and integrate it into syzkaller. It is not so rare in [userspace fuzzer](). And we try to implement it without patching kernel and can be flexibly configured in syzkaller. Even PCs weight can be change dynamically in fuzzing time.
+The original syzkaller can only by constraining enable and disable syscalls to do a targeted fuzzing. Lots of code will be covered although we are not interested. And collect the testcase that trigger such edge will occupy a considerable proportion in the corpus while syzkaller generating and mutating new testcases base on corpus statistic. So, it will slow down the exploring and exploiting of the target. Also, in some cases, you may want to specify a code position gradient to tell fuzzer how to evolve testcases to touch the target position gradually. Or, you just want to fuzz some functions more frequently, maybe because of its complexity or importance. To make syzkaller a more targeted fuzzer, we implement a coverage filter and integrate it into syzkaller. It is not so rare in [userspace fuzzer](http://sharcs-project.eu/m/filer_public/48/8c/488c5fb7-9aad-4c87-ab9c-5ff251ebc73d/vuzzer_ndss17.pdf). And we try to implement it without patching kernel and can be flexibly configured in syzkaller. Even PCs weight can be change dynamically in fuzzing time.
 
 More design detail and usage can be found [here](cover_filter.md). Except how to implement coverage filter efficiently, we also show you some examples of how to use LLVM analysis information to create weighted PCs table to tell customized syzkaller how to evolve testcases.
 
@@ -95,7 +95,7 @@ In the target function coverage aspect, we can see there is a great improvement 
 #### Coverage filter, weighted resource and enable all syscalls.
 This is the most interesting work in this document, while it makes no assumption that fuzzing a kernel subsystem should only use syscalls for this subsystem. But we take another assumption that lots of code except targeted function and state change contribute little in fuzzing target functions. The result shows us some tcp-ipv6 kernel functions can be covered by not-socket-relative syscalls. But, without coverage filtering, fuzzer may pay more attention to explore the potential coverage of these syscalls. And without kernel state collecting, fuzzer may miss it, because it contributes nothing. That means, in kernel subsystem or driver fuzzing, determinate what you want to fuzz, instead of which syscalls can be used to fuzz, could be effective also.
 
-## 4. Acknowlegments
+## 4. Acknowledgments
 
 * Special thanks to Dmtry Vyukov and all contributors of syzkaller!
 * Thanks to LLVM-project!

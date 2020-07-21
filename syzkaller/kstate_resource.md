@@ -16,7 +16,7 @@ To implement collect kernel states as syzkaller resource, we have to follow the 
 
 ### Kernel instrument
 
-First, we need to implement a LLVM pass to do instrument. While we already knew, lots of states of kernel are located in some field of structure. Tracking the store operation of a variable of GEPointer can detect states which may help to fuzzer. Then, refer to [this document]() to build you compiler with field assignment tracker. While building kernel, you have to add line such like:
+First, we need to implement a LLVM pass to do instrument. While we already knew, lots of states of kernel are located in some field of structure. Tracking the store operation of a variable of GEPointer can detect states which may help to fuzzer. Then, refer to [this document](https://llvm.org/docs/WritingAnLLVMPass.html) to build you compiler with field assignment tracker. While building kernel, you have to add line such like:
 ```  
 CFLAGS_*.o = -Xclang -load -Xclang PATH_TO_YOUR_PASS.so -fno-discard-value-names
 ```  
