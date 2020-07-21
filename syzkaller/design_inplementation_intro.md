@@ -97,5 +97,5 @@ This is the most interesting work in this document, while it makes no assumption
 
 ## 4. Acknowledgments
 
-* Special thanks to Dmtry Vyukov and all contributors of syzkaller!
-* Thanks to LLVM-project!
+* [Special thanks to Dmtry Vyukov and all contributors of syzkaller!](https://github.com/google/syzkaller)
+* [Thanks to LLVM-project!](https://github.com/llvm/llvm-project)
