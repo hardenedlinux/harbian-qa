@@ -1,0 +1,334 @@
+From e36eb1a03857b0d6caf455ee530339612c51fb0e Mon Sep 17 00:00:00 2001
+From: bins <bins@kp-test>
+Date: Thu, 16 Jul 2020 02:14:50 -0400
+Subject: [PATCH 1/6] executor: support coverage filtering Maintain a bitmap
+ for filtering coverage
+
+---
+ executor/bitmap.h            | 38 +++++++++++++++++++++++++++++
+ executor/executor.cc         | 46 ++++++++++++++++++++++++++++++++++++
+ pkg/instance/instance.go     | 12 +++++-----
+ pkg/ipc/ipc.go               | 26 ++++++++++----------
+ pkg/mgrconfig/config.go      |  3 +++
+ pkg/mgrconfig/load.go        |  1 +
+ syz-fuzzer/fuzzer.go         | 22 ++++++++++-------
+ syz-manager/manager.go       |  2 +-
+ tools/syz-runtest/runtest.go |  2 +-
+ 9 files changed, 123 insertions(+), 29 deletions(-)
+ create mode 100644 executor/bitmap.h
+
+diff --git a/executor/bitmap.h b/executor/bitmap.h
+new file mode 100644
+index 00000000..4a1b9e51
+--- /dev/null
++++ b/executor/bitmap.h
+@@ -0,0 +1,38 @@
++#include <stdio.h>
++
++#define KERNEL_TEXT_BASE 0x81000000
++
++typedef unsigned int uint32;
++
++uint32* func_pcs;
++
++uint32 readPcs()
++{
++	FILE* f = fopen("/funcaddr.map", "r");
++	uint32 count = 0;
++	if (f == NULL)
++		return -1;
++	/* detect the number of addresses */
++	while (!feof(f)) {
++		uint32 pc;
++		int ret = fscanf(f, "0x%x\n", &pc);
++		if (ret > 0) {
++			count++;
++		}
++	}
++	func_pcs = (uint32*)malloc(count * sizeof(uint32));
++	if (func_pcs == NULL)
++		return -2;
++	fseek(f, 0, SEEK_SET);
++	uint32* pp = func_pcs;
++	while (!feof(f)) {
++		uint32 pc;
++		int ret = fscanf(f, "0x%x\n", &pc);
++		if (ret > 0) {
++			*(pp) = pc & 0xffffffff;
++			pp++;
++		}
++	}
++	fclose(f);
++	return count;
++}
+diff --git a/executor/executor.cc b/executor/executor.cc
+index 2ce50661..6c567e59 100644
+--- a/executor/executor.cc
++++ b/executor/executor.cc
+@@ -15,6 +15,7 @@
+ #include <time.h>
+ #include <unistd.h>
+ 
++#include "bitmap.h"
+ #include "defs.h"
+ 
+ #if defined(__GNUC__)
+@@ -44,6 +45,12 @@ typedef unsigned int uint32;
+ typedef unsigned short uint16;
+ typedef unsigned char uint8;
+ 
++/* Roughly assume that kernel text size( exclude modules) is less than 0x3000000
++ * The lowest 4-bit is discard because of align and small deviation is acceptable */
++#define COVERAGE_BITMAP_SIZE 0x300000 / sizeof(uint32)
++static uint32 kTextBitMap[COVERAGE_BITMAP_SIZE];
++extern uint32* func_pcs;
++
+ // exit/_exit do not necessary work (e.g. if fuzzer sets seccomp filter that prohibits exit_group).
+ // Use doexit instead.  We must redefine exit to something that exists in stdlib,
+ // because some standard libraries contain "using ::exit;", but has different signature.
+@@ -116,6 +123,7 @@ static bool flag_net_reset;
+ static bool flag_cgroups;
+ static bool flag_close_fds;
+ static bool flag_devlink_pci;
++static bool flag_cover_filter;
+ 
+ static bool flag_collect_cover;
+ static bool flag_dedup_cover;
+@@ -404,6 +412,20 @@ int main(int argc, char** argv)
+ 			// Don't enable comps because we don't use them in the fuzzer yet.
+ 			cover_enable(&extra_cov, false, true);
+ 		}
++		/* initialize bitmap for coverage filter */
++		debug("Read pcs for bitmap ...\n");
++		uint32 c = readPcs();
++		for (uint32 i = 0; i < c; i++) {
++			uint32 pc = func_pcs[i];
++			pc -= KERNEL_TEXT_BASE;
++			uint32 pcc = pc >> 4;
++			uint32 index = pcc / 32;
++			uint32 shift = pcc % 32;
++			if (pcc > 0x300000)
++				continue;
++			/* A bit for a address for coverage filtering */
++			kTextBitMap[index] |= (0x1 << shift);
++		}
+ 	}
+ 
+ 	int status = 0;
+@@ -478,6 +500,7 @@ void parse_env_flags(uint64 flags)
+ 	flag_cgroups = flags & (1 << 9);
+ 	flag_close_fds = flags & (1 << 10);
+ 	flag_devlink_pci = flags & (1 << 11);
++	flag_cover_filter = flags & (1 << 12);
+ }
+ 
+ #if SYZ_EXECUTOR_USES_FORK_SERVER
+@@ -829,6 +852,24 @@ thread_t* schedule_call(int call_index, int call_num, bool colliding, uint64 cop
+ }
+ 
+ #if SYZ_EXECUTOR_USES_SHMEM
++
++bool cover_filter(uint64 pc)
++{
++	pc &= 0xffffffff;
++	pc -= KERNEL_TEXT_BASE;
++	uint64 pcc = pc >> 4;
++	uint64 index = pcc / 32;
++	uint64 shift = pcc % 32;
++	/* Kernel text size */
++	if (pcc > 0x300000) {
++		return false;
++	}
++	if ((kTextBitMap[index] & (0x1 << shift))) {
++		return true;
++	}
++	return false;
++}
++
+ template <typename cover_data_t>
+ void write_coverage_signal(cover_t* cov, uint32* signal_count_pos, uint32* cover_count_pos)
+ {
+@@ -845,6 +886,11 @@ void write_coverage_signal(cover_t* cov, uint32* signal_count_pos, uint32* cover
+ 		}
+ 		cover_data_t sig = pc ^ prev;
+ 		prev = hash(pc);
++		/* Be sure cover filtering is after the prev renew,
++		 * the prodecessor information wouldn't be loss.
++		 */
++		if (flag_cover_filter && !cover_filter(pc))
++			continue;
+ 		if (dedup(sig))
+ 			continue;
+ 		write_output(sig);
+diff --git a/pkg/instance/instance.go b/pkg/instance/instance.go
+index 201c07cf..8c8eceeb 100644
+--- a/pkg/instance/instance.go
++++ b/pkg/instance/instance.go
+@@ -318,7 +318,7 @@ func (inst *inst) testInstance() error {
+ 	}
+ 
+ 	cmd := OldFuzzerCmd(fuzzerBin, executorCmd, "test", inst.cfg.TargetOS, inst.cfg.TargetArch, fwdAddr,
+-		inst.cfg.Sandbox, 0, inst.cfg.Cover, true)
++		inst.cfg.Sandbox, 0, inst.cfg.Cover, true, false)
+ 	outc, errc, err := inst.vm.Run(10*time.Minute, nil, cmd)
+ 	if err != nil {
+ 		return fmt.Errorf("failed to run binary in VM: %v", err)
+@@ -424,7 +424,7 @@ func (inst *inst) testProgram(command string, testTime time.Duration) error {
+ }
+ 
+ func FuzzerCmd(fuzzer, executor, name, OS, arch, fwdAddr, sandbox string, procs, verbosity int,
+-	cover, debug, test, runtest bool) string {
++	cover, debug, test, runtest bool, covfilter bool) string {
+ 	osArg := ""
+ 	if targets.Get(OS, arch).HostFuzzer {
+ 		// Only these OSes need the flag, because the rest assume host OS.
+@@ -441,13 +441,13 @@ func FuzzerCmd(fuzzer, executor, name, OS, arch, fwdAddr, sandbox string, procs,
+ 		verbosityArg = fmt.Sprintf(" -vv=%v", verbosity)
+ 	}
+ 	return fmt.Sprintf("%v -executor=%v -name=%v -arch=%v%v -manager=%v -sandbox=%v"+
+-		" -procs=%v -cover=%v -debug=%v -test=%v%v%v",
++		" -procs=%v -cover=%v -debug=%v -test=%v%v%v -covfilter=%v",
+ 		fuzzer, executor, name, arch, osArg, fwdAddr, sandbox,
+-		procs, cover, debug, test, runtestArg, verbosityArg)
++		procs, cover, debug, test, runtestArg, verbosityArg, covfilter)
+ }
+ 
+-func OldFuzzerCmd(fuzzer, executor, name, OS, arch, fwdAddr, sandbox string, procs int, cover, test bool) string {
+-	return FuzzerCmd(fuzzer, executor, name, OS, arch, fwdAddr, sandbox, procs, 0, cover, false, test, false)
++func OldFuzzerCmd(fuzzer, executor, name, OS, arch, fwdAddr, sandbox string, procs int, cover, test bool, covfilter bool) string {
++	return FuzzerCmd(fuzzer, executor, name, OS, arch, fwdAddr, sandbox, procs, 0, cover, false, test, false, covfilter)
+ }
+ 
+ func ExecprogCmd(execprog, executor, OS, arch, sandbox string, repeat, threaded, collide bool,
+diff --git a/pkg/ipc/ipc.go b/pkg/ipc/ipc.go
+index 1abab7f5..e8030735 100644
+--- a/pkg/ipc/ipc.go
++++ b/pkg/ipc/ipc.go
+@@ -28,18 +28,20 @@ type EnvFlags uint64
+ 
+ // Note: New / changed flags should be added to parse_env_flags in executor.cc.
+ const (
+-	FlagDebug            EnvFlags = 1 << iota // debug output from executor
+-	FlagSignal                                // collect feedback signals (coverage)
+-	FlagSandboxSetuid                         // impersonate nobody user
+-	FlagSandboxNamespace                      // use namespaces for sandboxing
+-	FlagSandboxAndroid                        // use Android sandboxing for the untrusted_app domain
+-	FlagExtraCover                            // collect extra coverage
+-	FlagEnableTun                             // setup and use /dev/tun for packet injection
+-	FlagEnableNetDev                          // setup more network devices for testing
+-	FlagEnableNetReset                        // reset network namespace between programs
+-	FlagEnableCgroups                         // setup cgroups for testing
+-	FlagEnableCloseFds                        // close fds after each program
+-	FlagEnableDevlinkPCI                      // setup devlink PCI device
++	FlagDebug             EnvFlags = 1 << iota // debug output from executor
++	FlagSignal                                 // collect feedback signals (coverage)
++	FlagSandboxSetuid                          // impersonate nobody user
++	FlagSandboxNamespace                       // use namespaces for sandboxing
++	FlagSandboxAndroid                         // use Android sandboxing for the untrusted_app domain
++	FlagExtraCover                             // collect extra coverage
++	FlagEnableTun                              // setup and use /dev/tun for packet injection
++	FlagEnableNetDev                           // setup more network devices for testing
++	FlagEnableNetReset                         // reset network namespace between programs
++	FlagEnableCgroups                          // setup cgroups for testing
++	FlagEnableCloseFds                         // close fds after each program
++	FlagEnableDevlinkPCI                       // setup devlink PCI device
++	FlagEnableCoverFilter                      // maintain a bitmap for coverage filter
++
+ )
+ 
+ // Per-exec flags for ExecOpts.Flags.
+diff --git a/pkg/mgrconfig/config.go b/pkg/mgrconfig/config.go
+index 69df2a80..7031d150 100644
+--- a/pkg/mgrconfig/config.go
++++ b/pkg/mgrconfig/config.go
+@@ -83,6 +83,9 @@ type Config struct {
+ 
+ 	// Use KCOV coverage (default: true).
+ 	Cover bool `json:"cover"`
++	/* Enable KCOV filter */
++	Covfilter bool `json:"covfilter"`
++
+ 	// Reproduce, localize and minimize crashers (default: true).
+ 	Reproduce bool `json:"reproduce"`
+ 
+diff --git a/pkg/mgrconfig/load.go b/pkg/mgrconfig/load.go
+index fc0f6b65..8d5fab4a 100644
+--- a/pkg/mgrconfig/load.go
++++ b/pkg/mgrconfig/load.go
+@@ -59,6 +59,7 @@ func defaultValues() *Config {
+ 	return &Config{
+ 		SSHUser:   "root",
+ 		Cover:     true,
++		Covfilter: false,
+ 		Reproduce: true,
+ 		Sandbox:   "none",
+ 		RPC:       ":0",
+diff --git a/syz-fuzzer/fuzzer.go b/syz-fuzzer/fuzzer.go
+index 6791393b..142dcaa2 100644
+--- a/syz-fuzzer/fuzzer.go
++++ b/syz-fuzzer/fuzzer.go
+@@ -107,15 +107,16 @@ func main() {
+ 	debug.SetGCPercent(50)
+ 
+ 	var (
+-		flagName    = flag.String("name", "test", "unique name for manager")
+-		flagOS      = flag.String("os", runtime.GOOS, "target OS")
+-		flagArch    = flag.String("arch", runtime.GOARCH, "target arch")
+-		flagManager = flag.String("manager", "", "manager rpc address")
+-		flagProcs   = flag.Int("procs", 1, "number of parallel test processes")
+-		flagOutput  = flag.String("output", "stdout", "write programs to none/stdout/dmesg/file")
+-		flagPprof   = flag.String("pprof", "", "address to serve pprof profiles")
+-		flagTest    = flag.Bool("test", false, "enable image testing mode")      // used by syz-ci
+-		flagRunTest = flag.Bool("runtest", false, "enable program testing mode") // used by pkg/runtest
++		flagName      = flag.String("name", "test", "unique name for manager")
++		flagOS        = flag.String("os", runtime.GOOS, "target OS")
++		flagArch      = flag.String("arch", runtime.GOARCH, "target arch")
++		flagManager   = flag.String("manager", "", "manager rpc address")
++		flagProcs     = flag.Int("procs", 1, "number of parallel test processes")
++		flagOutput    = flag.String("output", "stdout", "write programs to none/stdout/dmesg/file")
++		flagPprof     = flag.String("pprof", "", "address to serve pprof profiles")
++		flagTest      = flag.Bool("test", false, "enable image testing mode")      // used by syz-ci
++		flagRunTest   = flag.Bool("runtest", false, "enable program testing mode") // used by pkg/runtest
++		flagCovFilter = flag.Bool("covfilter", false, "enable coverage filter")    // used by syz-executor
+ 	)
+ 	flag.Parse()
+ 	outputType := parseOutputType(*flagOutput)
+@@ -131,6 +132,9 @@ func main() {
+ 		log.Fatalf("failed to create default ipc config: %v", err)
+ 	}
+ 	sandbox := ipc.FlagsToSandbox(config.Flags)
++	if *flagCovFilter {
++		config.Flags |= (1 << 12)
++	}
+ 	shutdown := make(chan struct{})
+ 	osutil.HandleInterrupts(shutdown)
+ 	go func() {
+diff --git a/syz-manager/manager.go b/syz-manager/manager.go
+index 7c275e28..83359545 100644
+--- a/syz-manager/manager.go
++++ b/syz-manager/manager.go
+@@ -572,7 +572,7 @@ func (mgr *Manager) runInstance(index int) (*Crash, error) {
+ 	defer atomic.AddUint32(&mgr.numFuzzing, ^uint32(0))
+ 	cmd := instance.FuzzerCmd(fuzzerBin, executorCmd, fmt.Sprintf("vm-%v", index),
+ 		mgr.cfg.TargetOS, mgr.cfg.TargetArch, fwdAddr, mgr.cfg.Sandbox, procs, fuzzerV,
+-		mgr.cfg.Cover, *flagDebug, false, false)
++		mgr.cfg.Cover, *flagDebug, false, false, mgr.cfg.Covfilter)
+ 	outc, errc, err := inst.Run(time.Hour, mgr.vmStop, cmd)
+ 	if err != nil {
+ 		return nil, fmt.Errorf("failed to run fuzzer: %v", err)
+diff --git a/tools/syz-runtest/runtest.go b/tools/syz-runtest/runtest.go
+index e7b41be6..4032849b 100644
+--- a/tools/syz-runtest/runtest.go
++++ b/tools/syz-runtest/runtest.go
+@@ -187,7 +187,7 @@ func (mgr *Manager) boot(name string, index int) (*report.Report, error) {
+ 	}
+ 	cmd := instance.FuzzerCmd(fuzzerBin, executorCmd, name,
+ 		mgr.cfg.TargetOS, mgr.cfg.TargetArch, fwdAddr, mgr.cfg.Sandbox, mgr.cfg.Procs, 0,
+-		mgr.cfg.Cover, mgr.debug, false, true)
++		mgr.cfg.Cover, mgr.debug, false, true, false)
+ 	outc, errc, err := inst.Run(time.Hour, mgr.vmStop, cmd)
+ 	if err != nil {
+ 		return nil, fmt.Errorf("failed to run fuzzer: %v", err)
+-- 
+2.20.1
+
