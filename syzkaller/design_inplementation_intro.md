@@ -1,4 +1,4 @@
-# Syzkaller
+# harbian-qa: State-based target directed fuzzer based on syzkaller
 
 * Author/maintainer: Kaipeng Zeng
 * Co-architect: Shawn C[ a.k.a "citypw"]
