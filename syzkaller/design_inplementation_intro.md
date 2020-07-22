@@ -1,5 +1,8 @@
 # Syzkaller
 
+* Author/maintainer: Kaipeng Zeng
+* Co-architect: Shawn C[ a.k.a "citypw"]
+
 ## 1. Summary & Background
 
 Syzkaller is the state-of-the-art kernel fuzzer. It's effective because of its powerful syscalls descript and resource rules. Particularly, after resource centric was introducted to syzkaller, it can efficiently generate testcases with a complex context. It is the best choice if you want to fuzz your kernel.
@@ -95,7 +98,28 @@ In the target function coverage aspect, we can see there is a great improvement 
 #### Coverage filter, weighted resource and enable all syscalls.
 This is the most interesting work in this document, while it makes no assumption that fuzzing a kernel subsystem should only use syscalls for this subsystem. But we take another assumption that lots of code except targeted function and state change contribute little in fuzzing target functions. The result shows us some tcp-ipv6 kernel functions can be covered by not-socket-relative syscalls. But, without coverage filtering, fuzzer may pay more attention to explore the potential coverage of these syscalls. And without kernel state collecting, fuzzer may miss it, because it contributes nothing. That means, in kernel subsystem or driver fuzzing, determinate what you want to fuzz, instead of which syscalls can be used to fuzz, could be effective also.
 
-## 4. Acknowledgments
+## 4. Conclusions
+
+#### 4.1 Coverage filter and weighted
+
+The syzkaller does targeted fuzz by constraining enable syscalls. It can efficiently explore the potential coverage of a single syscall, because mutate input to trigger new coverage in the whole call stack is easier than exploring paths base on complex states( Actually, one of the reasons that syzkaller is efficient is its resource mechanism). We can see fully exploring the deep corner trigger by a single syscall input to early, will slow down syzkaller exploring other branches. Because, there are a bunch of short testcases occupy a great proportion in the corpus while syzkaller will generate new testcase base on them. Instead of collecting every code edge, we limit the target into a serial of important functions. We preferentially explore those functions, keep a balance in exploring every potential corner. Our example reveals that explore such a kernel without any emphasis, it's not always efficient.
+
+#### 4.2 Kernel state resource
+
+Syzkaller resource mechanism is very important. Unlike most userspace fuzzer, the coverage always triggered by the sequence of syscalls and their input. The return of a syscalls is the input of other syscalls, syscalls may change resource state also. Our work indicated that collect and mutate frequently those resources that have more states changed could help to generate a testcase with a more complex context. Particularly, when a special state is used in target functions for solving condition constraints, that will bring us new coverage. While syzkaller know nothing about kernel state, it can only extract resource from testcases totaly randomly.
+
+But, build a kernel with instrumentation is a little cumbrous if you change you fuzz target. The whole kernel instrumentation is OK, because we use kstate map to filter those states we don't need. But, it will greatly influence the performance of executor, observably it's impossible to do a bitmap filter like coverage filter. But, at the beginning, we used a [ebpf](kstat_demo) to collect kernel state to do a POC. You can manually write ebpf program to get states you need. It's configurable and more flexible but laborious and unstable and hardly scale up.
+
+#### 4.3 Enable all syscalls
+
+Our example shows us another way in fuzzing kernel: choose what to fuzz but not how to fuzz the target. While syzkaller need to pay a lot of effort to write syscalls and choose syscalls to fuzz. That is the only thing that can be controlled by user. If you want to fuzz a part of kernel, you should read the syscalls descript and look for which syscalls will cover this part, then pick them to the enable syscalls.
+
+After introducing coverage filter and kernel state resource, base on syzkaller powerful syscalls descript, we can enable all syscalls to fuzz a target. Those syscalls can hardly cover target code will rarely or never appear in corpus. The only thing you should do is find out what you want to fuzz.
+
+But, we still couldn't extricate from writing syscalls script. We try to run syzkaller without any syscalls with "$", the result is terrible. That means syscalls descript determine the potential coverage presently. We are exploring how to evolve syscalls automatically but not write syscalls script. We think it's possible to classify syscalls if any syscall can trigger a specific kernel state. It's one of the things we are interested in fuzzer.
+
+
+## 5. Acknowledgments
 
 * [Special thanks to Dmtry Vyukov and all contributors of syzkaller!](https://github.com/google/syzkaller)
 * [Thanks to LLVM-project!](https://github.com/llvm/llvm-project)
