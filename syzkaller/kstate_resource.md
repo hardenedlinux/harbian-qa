@@ -1,4 +1,4 @@
-# Kernel state based fuzzer
+# Kernel state based fuzzer: a LLVM approach
 
 ## Content
 
