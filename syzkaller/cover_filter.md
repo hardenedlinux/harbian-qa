@@ -1,4 +1,4 @@
-# Syzkaller cover filter and weighted PCs
+# Syzkaller coverage filter and weighted PCs
 
 ## Content
 1. Usage.
