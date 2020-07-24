@@ -92,8 +92,9 @@ You will get a FUNCTION_LIST.new which you can pass to kcov_map.
 Clone syzkaller, and run:
 
 ```  
+cd PATH_TO_SYZ_SRC
 git checkout a2cdad9
-git apply harbian-qa/syzkaller/cover_filter/*.patch
+git apply PATH_TO_harbian-qa/syz_patch/*.patch
 ```  
 
 Build syzkaller as usual.

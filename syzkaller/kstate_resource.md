@@ -30,8 +30,9 @@ Refer to our [implement](../static_analysis_tools/kern_instrument/kern_patch) of
 
 Clone syzkaller, run:
 ```  
+cd PATH_TO_SYZ_SRC
 git checkout a2cdad9
-git apply harbian-qa/syzkaller/cover_filter/*.patch
+git apply PATH_TO_harbian-qa/syz_patch/*.patch
 ```   
 
 build syzakller as usual. Add the following line to configure file:
