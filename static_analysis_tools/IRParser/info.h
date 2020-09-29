@@ -1,6 +1,16 @@
 #include <string>
 #include <unordered_map>
 
+#include <string>
+#include <iostream>
+#include <sstream>
+#include <fstream>
+#include <sys/types.h>
+#include <dirent.h>
+#include <vector>
+
+#include "log.h"
+
 using namespace std;
 
 class sanCallInfo {
@@ -173,6 +183,50 @@ public:
         ret += "\tBitWidth: " + std::to_string(bitWidth) + ",\n";
         ret += "\tID: " + std::to_string(ID) + "\n";
         ret += "}\n";
+        return ret;
+    }
+};
+
+class funcInfoInCFG {
+private:
+    std::string   funcName;
+    unsigned      blockNum;
+
+    std::vector<std::string> calledFuncs;
+public:
+    funcInfoInCFG(std::string fName, unsigned bNum) {
+        funcName = fName;
+        blockNum = bNum;
+    }
+    
+    funcInfoInCFG(){};
+
+    void addCalledFunc(std::string cFunc) {
+        for (std::string f : calledFuncs) {
+            if (f == cFunc)
+                return;
+        }
+        calledFuncs.push_back(cFunc);
+    }
+
+    unsigned getBlockNum() {return blockNum;}
+
+    std::string callTree(std::map<std::string, funcInfoInCFG> funcInfoList, int startlevel, int depth) {
+        std::string ret = thisFuncInfo(startlevel);
+        if (depth < 1)
+            return ret;
+        for (std::string calledFunc : calledFuncs) {
+            if (funcInfoList.find(calledFunc) != funcInfoList.end()) {
+                ret += funcInfoList[calledFunc].callTree(funcInfoList, startlevel + 1, depth - 1);
+            }
+        }
+        return ret;
+    }
+    std::string thisFuncInfo(int level) {
+        std::string ret = "|";
+        for (unsigned i=0; i<level; i++)
+            ret += "--";
+        ret += (funcName + "( " + std::to_string(blockNum) + ") -depth( " + std::to_string(level) + ")\n");
         return ret;
     }
 };
