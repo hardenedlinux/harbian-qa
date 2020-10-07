@@ -1,17 +1,17 @@
-From a756fae764d6f6d316467ff9eeec7c4dfb4f22cc Mon Sep 17 00:00:00 2001
+From 8ba8bf36997ba5726098cedad261663129f4d806 Mon Sep 17 00:00:00 2001
 From: bins <bins@kp-test>
-Date: Wed, 10 Jun 2020 02:48:56 -0400
-Subject: [PATCH] KCOV_SRT_TRACK ok
+Date: Wed, 7 Oct 2020 04:28:44 -0400
+Subject: [PATCH] kernel struct assignment instrument
 
 ---
- kernel/kcov.c | 61 +++++++++++++++++++++++++++++++++++++++++++++++++++
- 1 file changed, 61 insertions(+)
+ kernel/kcov.c | 62 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 62 insertions(+)
 
 diff --git a/kernel/kcov.c b/kernel/kcov.c
-index f50354202..e2fd7c405 100644
+index 6afae0bcbac4..b6a40fc40a94 100644
 --- a/kernel/kcov.c
 +++ b/kernel/kcov.c
-@@ -312,6 +312,67 @@ void notrace __sanitizer_cov_trace_switch(u64 val, u64 *cases)
+@@ -322,6 +322,68 @@ void notrace __sanitizer_cov_trace_switch(u64 val, u64 *cases)
  EXPORT_SYMBOL(__sanitizer_cov_trace_switch);
  #endif /* ifdef CONFIG_KCOV_ENABLE_COMPARISONS */
  
@@ -26,7 +26,7 @@ index f50354202..e2fd7c405 100644
 +	if (!check_kcov_mode(KCOV_MODE_TRACE_PC, t))
 +		return;
 +
-+    ip = canonicalize_ip(ip);
++	ip = canonicalize_ip(ip);
 +
 +	area = (u64 *)t->kcov_area;
 +	max_pos = t->kcov_size * sizeof(unsigned long);
@@ -44,41 +44,42 @@ index f50354202..e2fd7c405 100644
 +	}
 +}
 +
-+void notrace __sanitizer_cov_trace_srt1(u32 id, u8 val)
++void notrace __sanitizer_cov_trace_srt1(u64 id, u8 val)
 +{
-+    u64 id_64 = ((u64)0xfefe000f << 32) | (u64)id;
-+    u64 val_64 = (u64)val;
++	u64 id_64 = ((u64)0xefe1 << 48) | (u64)id;
++	u64 val_64 = (u64)val;
 +	write_srt_data(id_64, val_64, _RET_IP_);
 +}
 +EXPORT_SYMBOL(__sanitizer_cov_trace_srt1);
 +
-+void notrace __sanitizer_cov_trace_srt2(u32 id, u16 val)
++void notrace __sanitizer_cov_trace_srt2(u64 id, u16 val)
 +{
-+    u64 id_64 = ((u64)0xfefe00f0 << 32) | (u64)id;
-+    u64 val_64 = (u64)val;
++	u64 id_64 = ((u64)0xefe2 << 48) | (u64)id;
++	u64 val_64 = (u64)val;
 +	write_srt_data(id_64, val_64, _RET_IP_);
 +}
 +EXPORT_SYMBOL(__sanitizer_cov_trace_srt2);
 +
-+void notrace __sanitizer_cov_trace_srt4(u32 id, u32 val)
++void notrace __sanitizer_cov_trace_srt4(u64 id, u32 val)
 +{
-+    u64 id_64 = ((u64)0xfefe0f00 << 32)| (u64)id;
-+    u64 val_64 = (u64)val;
++	u64 id_64 = ((u64)0xefe4 << 48) | (u64)id;
++	u64 val_64 = (u64)val;
 +	write_srt_data(id_64, val_64, _RET_IP_);
 +}
 +EXPORT_SYMBOL(__sanitizer_cov_trace_srt4);
 +
-+void notrace __sanitizer_cov_trace_srt8(u32 id, u64 val)
++void notrace __sanitizer_cov_trace_srt8(u64 id, u64 val)
 +{
-+    u64 id_64 = ((u64)0xfefef000 << 32) | (u64)id;
-+    u64 val_64 = (u64)val;
++	u64 id_64 = ((u64)0xefe8 << 48) | (u64)id;
++	u64 val_64 = (u64)val;
 +	write_srt_data(id_64, val_64, _RET_IP_);
 +}
 +EXPORT_SYMBOL(__sanitizer_cov_trace_srt8);
 +
- static void kcov_start(struct task_struct *t, unsigned int size,
- 			void *area, enum kcov_mode mode, int sequence)
- {
++
+ static void kcov_start(struct task_struct *t, struct kcov *kcov,
+ 			unsigned int size, void *area, enum kcov_mode mode,
+ 			int sequence)
 -- 
 2.20.1
 
