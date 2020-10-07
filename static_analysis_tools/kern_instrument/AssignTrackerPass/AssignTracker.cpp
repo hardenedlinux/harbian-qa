@@ -17,6 +17,9 @@
 #include "llvm/Pass.h"
 #include "llvm/Support/raw_ostream.h"
 
+typedef unsigned long long uint64;
+typedef unsigned int uint32;
+typedef unsigned short uint16;
 
 using namespace llvm;
 using namespace legacy;
@@ -38,8 +41,8 @@ namespace {
         Type *Int16Ty;
         Type *Int32Ty;
         Type *Int64Ty;
-        std::hash<std::string> hashSrt;
-        std::map<std::string, unsigned> StructIDMap;
+        std::map<std::string, uint64> StructIDMap;
+        StringRef SourceFileName;
 
         LLVMContext *C;
         AssignTracker() : ModulePass(ID) {}
@@ -54,10 +57,11 @@ namespace {
             Int32Ty = IRB.getInt32Ty();
             Int64Ty = IRB.getInt64Ty();
 
-            SanCovTraceSrt1 = M.getOrInsertFunction(SanCovTraceSrt1Name, VoidTy, Int32Ty, Int8Ty);
-            SanCovTraceSrt2 = M.getOrInsertFunction(SanCovTraceSrt2Name, VoidTy, Int32Ty, Int16Ty);
-            SanCovTraceSrt4 = M.getOrInsertFunction(SanCovTraceSrt4Name, VoidTy, Int32Ty, Int32Ty);
-            SanCovTraceSrt8 = M.getOrInsertFunction(SanCovTraceSrt8Name, VoidTy, Int32Ty, Int64Ty);
+            SanCovTraceSrt1 = M.getOrInsertFunction(SanCovTraceSrt1Name, VoidTy, Int64Ty, Int8Ty);
+            SanCovTraceSrt2 = M.getOrInsertFunction(SanCovTraceSrt2Name, VoidTy, Int64Ty, Int16Ty);
+            SanCovTraceSrt4 = M.getOrInsertFunction(SanCovTraceSrt4Name, VoidTy, Int64Ty, Int32Ty);
+            SanCovTraceSrt8 = M.getOrInsertFunction(SanCovTraceSrt8Name, VoidTy, Int64Ty, Int64Ty);
+            SourceFileName = M.getName();
 
             for (Function &F : M)
                 instrumentFieldAssign(F);
@@ -66,7 +70,7 @@ namespace {
             }
             return true;
         }
-        void injectFieldAssignTracker(Instruction *I, unsigned id);
+        void injectFieldAssignTracker(Instruction *I, uint64 id);
         void instrumentFieldAssign(Function &func);
     };
 }
@@ -91,8 +95,64 @@ std::string stripNum(std::string name) {
     }
     name = name.substr(0, len);
     return name;
+}
 
-;
+uint16 crc16(std::string name) {
+    unsigned len = name.length();
+    if (len == 0)
+        return 0;
+    char *tmp = (char*)malloc(len+1);
+    strcpy(tmp, name.c_str());
+    uint16 data, hash = 0x3e7a, crc = 0xffff;
+    for (unsigned i = 0; i < len; i++) {
+        data = *(uint16*)(tmp + i);
+        if ((crc&0x0001) ^ (data&0x0001))
+            crc = (crc >> 1) ^ (hash |0x8005);
+        else
+            crc >>= 1;
+        hash = data ^ hash;
+    }
+    crc = ~crc;
+    data = crc;
+    crc = (crc << 8) | (data >> 8 &0xff);
+    return crc;
+}
+
+bool isStruct(const Value *val, const Value *var) {
+    if (!val->getType()->isIntegerTy())
+        return false;
+    const GetElementPtrInst *gepInst = dyn_cast<GetElementPtrInst>(var);
+    if (gepInst == nullptr)
+        return false;
+    Type *greTy = gepInst->getResultElementType();
+    if (greTy && greTy->isPointerTy())
+        return false;
+    if (gepInst->getSourceElementType()->isStructTy()) {
+        const StructType *srtTy = dyn_cast<StructType>(gepInst->getSourceElementType());
+        return srtTy->hasName();
+    }
+    return false;
+}
+
+std::string getStructName(const Value *var) {
+    const GetElementPtrInst *gepInst = dyn_cast<GetElementPtrInst>(var);
+    std::string srtName = gepInst->getSourceElementType()->getStructName();
+    std::string fieldName = gepInst->getName();
+    return stripNum(srtName) + "->" + stripNum(fieldName);
+}
+
+uint64 getSrtIDFromName(const Value *var) {
+    const GetElementPtrInst *gepInst = dyn_cast<GetElementPtrInst>(var);
+    std::string srtName = gepInst->getSourceElementType()->getStructName();
+    std::string fieldName = gepInst->getName();
+    uint16 srtID = crc16(stripNum(srtName));
+    uint16 fieldID = crc16(stripNum(fieldName));
+    return (((uint64)srtID << 16) | (uint64)fieldID) & 0xffffffff;
+}
+
+uint64 getSourceFileID(std::string sourceFileName) {
+    uint64 srcID = (uint64)crc16(sourceFileName);
+    return srcID & 0xffff;
 }
 
 void AssignTracker::instrumentFieldAssign(Function &func) {
@@ -103,45 +163,38 @@ void AssignTracker::instrumentFieldAssign(Function &func) {
             if (StoreInst *si = dyn_cast<StoreInst>(&i)) {
                 const Value *val_op = si->getOperand(0);
                 const Value *var_op = si->getPointerOperand();
-                if (!val_op->getType()->isIntegerTy())
-                    continue;
-                if (const GEPOperator *gep = dyn_cast<GEPOperator>(var_op)) {
-                    const Value *intPtr = gep->getPointerOperand(); 
-                    if (Type *gepOpTy = dyn_cast<PointerType>(intPtr->getType())->getElementType()) {
-                        if (gepOpTy->isStructTy()) {
-                            std::string srtName = gepOpTy->getStructName();
-                            std::string fieldName = var_op->getName();
-                            std::string key = stripNum(srtName) + "->" + stripNum(fieldName);
-                            if (StructIDMap.find(key) == StructIDMap.end())
-                                StructIDMap[key] = hashSrt(key);
-                            injectFieldAssignTracker(si, StructIDMap[key]);
-                        }
-                    }
+                if (isStruct(val_op, var_op)) {
+                    std::string srtName = getStructName(var_op);
+                    uint64 srtID = getSrtIDFromName(var_op);
+                    srtID |= (getSourceFileID(SourceFileName) & 0xffff) << 32;
+                    if (StructIDMap.find(srtName) == StructIDMap.end())
+                        StructIDMap[srtName] = srtID;
+                    injectFieldAssignTracker(si, StructIDMap[srtName]);
                 }
             }
         }
     }
 }
 
-void AssignTracker::injectFieldAssignTracker(Instruction *I, unsigned id) {
+void AssignTracker::injectFieldAssignTracker(Instruction *I, uint64 id) {
     IRBuilder<> IRB(I);
     Value *val = I->getOperand(0);
     unsigned bitWidth = val->getType()->getIntegerBitWidth();
     switch (bitWidth) {
         case 8: {
-            IRB.CreateCall(SanCovTraceSrt1, {IRB.getInt32(id), IRB.CreateIntCast(val, Int8Ty, true)});
+            IRB.CreateCall(SanCovTraceSrt1, {IRB.getInt64(id), IRB.CreateIntCast(val, Int8Ty, true)});
             break;
         }
         case 16: {
-            IRB.CreateCall(SanCovTraceSrt2, {IRB.getInt32(id), IRB.CreateIntCast(val, Int16Ty, true)});
+            IRB.CreateCall(SanCovTraceSrt2, {IRB.getInt64(id), IRB.CreateIntCast(val, Int16Ty, true)});
             break;
         }
         case 32: {
-            IRB.CreateCall(SanCovTraceSrt4, {IRB.getInt32(id), IRB.CreateIntCast(val, Int32Ty, true)});
+            IRB.CreateCall(SanCovTraceSrt4, {IRB.getInt64(id), IRB.CreateIntCast(val, Int32Ty, true)});
             break;
         }
         case 64: {
-            IRB.CreateCall(SanCovTraceSrt8, {IRB.getInt32(id), IRB.CreateIntCast(val, Int64Ty, true)});
+            IRB.CreateCall(SanCovTraceSrt8, {IRB.getInt64(id), IRB.CreateIntCast(val, Int64Ty, true)});
             break;
         }
     }

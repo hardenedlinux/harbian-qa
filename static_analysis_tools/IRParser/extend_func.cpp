@@ -24,26 +24,34 @@
 #include <vector>
 
 #include "log.h"
+#include "info.h"
 
 
 using namespace std;
 using namespace llvm;
 
 
+std::map<std::string, funcInfoInCFG> funcsInfo;
+std::map<std::string, funcInfoInCFG> thisModFuncsInfo;
+
+
 std::vector<std::string> readFuncList(std::string funcListPath);
 std::vector<std::string> getIRList(std::string IRDirPath);
-std::map<std::string, int> FuncComplexity;
-
-void getCalledFunc(CallGraph *CG, const Function *f, int blockNum, int level, std::vector<std::string> *funcList, std::string rootFunc);
+void getCalledFunc(CallGraph *CG, const Function *f, int blockNum, int level);
 void writeToNewFuncList(std::vector<std::string> funcList, std::string oldPath);
+void writeToLogDir(std::string fn, std::string funcCallTree, std::string dirPath);
+
 
 int main(int argc, const char *argv[]) {
-    if (argc < 2 || argv[1] == nullptr) {
-        outs() << "./extern_func functions_list ir_dir\n";
+    if (argc < 5 || argv[1] == nullptr) {
+        outs() << "./extern_func functions_list ir_dir call_depth block_num log_dir\n";
         return 1;
     }
     std::string FuncListPath = argv[1];
     std::string IRDirPath = argv[2];
+    unsigned depth = std::stoi(argv[3]);
+    unsigned blockNum = std::stoi(argv[4]);
+    std::string logDir = argv[5];
 
     std::vector<std::string> IRList = getIRList(IRDirPath);
     std::vector<std::string> funcList = readFuncList(FuncListPath);
@@ -63,33 +71,43 @@ int main(int argc, const char *argv[]) {
             const Function *func = constMod->getFunction(fn);
             if (func == nullptr || func->size() < 1)
                 continue;
-            FuncComplexity[fn] = func->size();
-            outs() << "Function: " << fn << " was found\n";
-            if (func->size() < 20)
-                getCalledFunc(&CG, func, 7, 3, &extFuncList, fn);
-            }
+            getCalledFunc(&CG, func, blockNum, depth);
         }
-
-    /* Show the sum blocks of enable functions of a root function */
-    outs() << "Extended function:\n";
-    for (auto &i : FuncComplexity) {
-        outs() << "Function: " << i.first << " with " << i.second << " blocks\n";
     }
-
-    for (std::string f : extFuncList) {
-        bool found = false;
-        for (std::string ff : funcList) {
-            if (f == ff) {
-                found = true;
-                break;
-            }
-        }
-        if (found)
+    for (std::string ir : IRList) {
+        LLVMContext ctx;
+        SMDiagnostic err;
+        std::unique_ptr<Module> mod = parseIRFile(ir, err, ctx);
+        if (mod == nullptr) {
+            outs() << FAIL << "Failed to open ir file: " << ir << "\n" << RESET;
             continue;
-        funcList.push_back(f);
+        }
+        Module *constMod = mod.get();
+        CallGraph CG(*constMod);
+        for (auto &fn : funcsInfo) {
+            std::string funcName = fn.first;
+            const Function *func = constMod->getFunction(funcName);
+            if (func == nullptr || func->size() < 1)
+                continue;
+            thisModFuncsInfo[funcName] = fn.second;
+        }
     }
-    /* Create a FuncListPath.new file for extended functions list */
-    writeToNewFuncList(funcList, FuncListPath);
+    for (std::string fn : funcList) {
+        std::string funcCallTree;
+        if (thisModFuncsInfo.find(fn) != thisModFuncsInfo.end())
+            funcCallTree = funcsInfo[fn].callTree(thisModFuncsInfo, 0, depth);
+        else {
+            funcCallTree = fn;
+            outs() << FAIL << fn << " was not found!\n";
+        }
+        writeToLogDir(fn, funcCallTree, logDir);
+    }
+    std::vector<std::string> newFuncList;
+    for (auto &fn : thisModFuncsInfo) {
+        if (fn.second.getBlockNum() > blockNum)
+            newFuncList.push_back(fn.first);
+    }
+    writeToNewFuncList(newFuncList, FuncListPath);
 }
 
 std::vector<std::string> readFuncList(std::string funcListPath) {
@@ -122,13 +140,17 @@ std::vector<std::string> getIRList(std::string IRDirPath) {
 }
 
 /* Recursively get the called functions, use blockNum and level limit functions */
-void getCalledFunc(CallGraph *CG, const Function *f, int blockNum, int level, std::vector<std::string> *funcList, std::string rootFunc) {
+void getCalledFunc(CallGraph *CG, const Function *f, int blockNum, int level) {
     const CallGraphNode *n = (*CG)[f];
     if (level < 1)
         return;
     if (n == nullptr) {
         outs() << FAIL << "Failed to get call graph node\n" << RESET;
         return;
+    }
+    funcInfoInCFG *thisFunc = new funcInfoInCFG(f->getName(), f->size());
+    if (funcsInfo.find(f->getName()) == funcsInfo.end()) {
+        funcsInfo[f->getName()] = *thisFunc;
     }
     for (auto i : *n) {
         Function *calledFunc = i.second->getFunction();
@@ -138,14 +160,9 @@ void getCalledFunc(CallGraph *CG, const Function *f, int blockNum, int level, st
                 continue;
             if (calledFunc->getName().find("asan") != std::string::npos)
                 continue;
-            if (calledFunc->size() > blockNum) {
-                funcList->push_back(calledFunc->getName());
-                outs() << "Add function " << calledFunc->getName() << " to root " << rootFunc << " at level " << level << "\n";
-                /* Calculate the sum of blocks from root function to every called functions */
-                FuncComplexity[rootFunc] += calledFunc->size();
-            }
             /* Recursive call with a depth level */
-            getCalledFunc(CG, calledFunc, blockNum, level - 1, funcList, rootFunc);
+            funcsInfo[f->getName()].addCalledFunc(calledFunc->getName());
+            getCalledFunc(CG, calledFunc, blockNum, level - 1);
         }
     }
     return;
@@ -158,5 +175,11 @@ void writeToNewFuncList(std::vector<std::string> funcList, std::string oldPath) 
         newFuncList << f << "\n";
     }
     newFuncList.close();
+}
 
+void writeToLogDir(std::string fn, std::string funcCallTree, std::string dirPath) {
+    ofstream funcLogFile;
+    funcLogFile.open(dirPath + "/" + fn);
+    funcLogFile << funcCallTree << "\n";
+    funcLogFile.close();
 }
