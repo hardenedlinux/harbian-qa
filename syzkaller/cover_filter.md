@@ -13,6 +13,8 @@ To implement coverage filter in syzkaller. we have to follow the next steps:
 
 After step 1 and 2, you will get a addresses map contains addresses of any kernel functions you need. Also, you can attach weight to every PC base on LLVM ir analysis, eg. weighted PCs base on CFG information.
 
+[Advice from Dmitry](https://groups.google.com/g/syzkaller/c/IgwfGSdca3Q/m/dCsAiB03BgAJ), we implemented a more general and easy to use coverage filter. If you don't need prog prior base on weighted pcs, you can specify which functions or files to test in patched syzkaller manager configure.
+
 ## Usage
 
 ### Get LLVM ir code and assembly code
@@ -40,6 +42,13 @@ To get the assembly code of tcp.c, run:
 
 ```  
 clang ...... -S -o net/ipv4/tcp.s net/ipv4/tcp.c
+```  
+
+Also, linux kernel support:
+
+```  
+make CC=clang net/ipv4/tcp.ll
+make CC=clang net/ipv4/tcp.s
 ```  
 
 Repeat the mentioned steps to get all ir codes and assembly codes of your target functions. Move them to a IR_DIR and ASM_DIR. Then build your kernel and get a VMLINUX file.
@@ -93,7 +102,7 @@ Clone syzkaller, and run:
 
 ```  
 cd PATH_TO_SYZ_SRC
-git checkout a2cdad9
+git checkout ff4a334
 git apply PATH_TO_harbian-qa/syz_patch/*.patch
 ```  
 
@@ -104,24 +113,39 @@ Build syzkaller as usual.
 Add the following options in syz-manager configure file:
 
 ```  
-"covfilter": true,
-"coverpcs": PATH_TO_FUNCTION_ADDRESS_MAP,
+"cover": true,
+"cover_filter": {
+    "files": [
+        "net/core/sock.c",
+        "net/sctp/*", // all files in the dir
+        "net/dccp/**" // all files in all subdirs
+    ],
+    "functions": [
+        "foo",
+        "bar*", // all functions starting with bar
+        "*baz*" // all functions containing baz
+        ],
+    "pcs": "external/file/with/weighted/raw/pc/list"
+}
 ```  
 
-The "covfilter" enable coverage filter of executor. If you only want to use weighted PCs feature without filter, set it to false. If you want to use cover filter only, without weighted PCs, just create your map that every PC has weight 1.
 Now you can run a syzkaller with cover filter.
 
 ## Implement detail of cover filter
 
 ### manager
 
+### Implement files and functions filter
+
+Syzkaller manager.reportGenerator holds the file and function information of per pc. At the beginning of syz-manager, we use cov_filter.go:initKcovFilter() initialize reportGenerator. Then we walk throught the whole pcs, use regular expression to pich up those pcs belong to coverage filter files or functions.
+
 #### Read weighted pcs from funcaddr.map
 
-The configure specifies which funcaddr.map should be loaded and send to VM. Function readPCsWeight in syz-manager/manager.go will read the funcaddr.map and maintain a pcsWeight map in structure manager. This pcsWeight map can be used while calculating the weight of prog in web UI.
+The configure specifies which funcaddr.map should be loaded and send to VM. Function initWeightedPCs in syz-manager/cov_filter.go will read the funcaddr.map and maintain a weightedPCs map in structure manager.kcovfilter. This weightedPCs map can be used while calculating the weight of prog in web UI.
 
 #### RPC interface for sending addresses map to fuzzer
 
-Extend a getPCsWeight interface in RPCManagerView in syz-manager/rpc.go for waiting client call( fuzzer) for getting a pcsWeight map.
+Extend a getWeightedPCs interface in RPCManagerView in syz-manager/rpc.go for waiting client call( fuzzer) for getting a pcsWeight map.
 
 #### Display the pc and its weight in source code
 
@@ -131,11 +155,11 @@ Use the syzkaller web UI "cover", we extend an interface called bitmap. It will 
 
 #### getPCsWeight from syz-manager
 
-Add a getPCsWeight for fuzzer, so fuzzer can dynamically fetch PCs table from syz-manager. In other words, it's possible to dynamically distribute PCs table to different fuzzers. For example, light PCs weight while some block has been fully explored( [eg.](https://github.com/llvm/llvm-project/blob/master/compiler-rt/lib/fuzzer/FuzzerDataFlowTrace.cpp)).
+Add a getWeightedPCs for fuzzer, so fuzzer can dynamically fetch PCs table from syz-manager. In other words, it's possible to dynamically distribute PCs table to different fuzzers. For example, reduce PCs weight while some block has been fully explored( [eg.](https://github.com/llvm/llvm-project/blob/master/compiler-rt/lib/fuzzer/FuzzerDataFlowTrace.cpp)).
 
 #### Calculate the prog prio from its cover
 
-We implement a function calCoverWeight in syz-fuzzer/proc.go to calculate the weight and attach to structure prog. You can implement your algorithm of calculating weight base on weighted pc in this function.
+We implement a function calCoverWeight in syz-fuzzer/fuzzer.go to calculate the weight and attach to structure prog. You can implement your algorithm of calculating weight base on weighted pc in this function.
 
 #### Choose prog to mutate base on prog prio
 
@@ -149,20 +173,15 @@ The executor/bitmap.h implement function for getting PCs table from the map.
 
 ##### Fast cover filtering.
 
-Unlike manager and fuzzer, executor coverage filter run more frequently. Without a fast search, if the PCs table grow up, the affect of performance can be a disaster. So we use a fast but rough way, bitmap, to address this program. We assume that kernel text size is less than 0x3000000, and we maintain a map:
-```  
-#define COVERAGE_BITMAP_SIZE 0x300000 / sizeof(uint32)
-static uint32 kTextBitMap[COVERAGE_BITMAP_SIZE];
-```  
+Unlike manager and fuzzer, executor coverage filter run more frequently. Without a fast searching, if the PCs table grow up, the affect of performance can be a disaster. So we use a fast but rough way, bitmap, to address this program.
+We use bitmapBytes in syz-manager to create a bitmap for executor. 
 Because address align, the lowest 4-bit is dropped off. So, for quickly setting and accessing the bit which record if a pc should be filtered, we can search by:
 ```  
-pc &= 0xffffffff;
-pc -= KERNEL_TEXT_BASE;
-uint64 pcc = pc >> 4;
-uint64 index = pcc / 32;
-uint64 shift = pcc % 32;
-
-kTextBitMap[index] & (0x1 << shift)
+uint32 pc32 -= pcstart;
+pc32 = pc32 >> 4;
+uint32 idx = pc32 / 8;
+uint32 shift = pc32 % 8;
+bitmap[idx] & (1 << shift)
 ```  
 The affect of performance will not grow up no mater how many PCs should be filtered.
 

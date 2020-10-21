@@ -1,0 +1,921 @@
+From ba5e4ab5704e4785f7aa8926c3c2e2026ea62d84 Mon Sep 17 00:00:00 2001
+From: Kaipeng Zeng <kaipeng94@gmail.con>
+Date: Tue, 20 Oct 2020 23:37:51 -0400
+Subject: [PATCH 1/3] syz-manager/manager.go, executor/executor.cc: support
+ coverage filter
+
+---
+ executor/bitmap.h          |  58 +++++++++
+ executor/executor.cc       |  12 +-
+ executor/test.h            |  34 +++++
+ pkg/cover/report.go        | 117 +++++++++++++-----
+ pkg/cover/report_test.go   |   2 +-
+ pkg/ipc/ipc.go             |  13 +-
+ pkg/mgrconfig/config.go    |  10 ++
+ pkg/rpctype/rpctype.go     |   9 ++
+ syz-fuzzer/fuzzer.go       |  15 +++
+ syz-manager/cover.go       |   2 +-
+ syz-manager/filter.go      | 247 +++++++++++++++++++++++++++++++++++++
+ syz-manager/filter_test.go |  97 +++++++++++++++
+ syz-manager/manager.go     |  15 +++
+ syz-manager/rpc.go         |   9 ++
+ 14 files changed, 602 insertions(+), 38 deletions(-)
+ create mode 100644 executor/bitmap.h
+ create mode 100644 syz-manager/filter.go
+ create mode 100644 syz-manager/filter_test.go
+
+diff --git a/executor/bitmap.h b/executor/bitmap.h
+new file mode 100644
+index 00000000..156c1673
+--- /dev/null
++++ b/executor/bitmap.h
+@@ -0,0 +1,58 @@
++// Copyright 2020 syzkaller project authors. All rights reserved.
++// Use of this source code is governed by Apache 2 LICENSE that can be found in the LICENSE file.
++
++#include <fcntl.h>
++#include <stdio.h>
++
++#if GOOS_linux || GOOS_freebsd || GOOS_netbsd || GOOS_openbsd || GOOS_akaros
++#include <sys/mman.h>
++#endif
++
++static byte* bitmap;
++static uint32 pcstart;
++static uint32 pcsize;
++static uint32 pcend;
++
++inline void init_bitmap()
++{
++#if SYZ_EXECUTOR_USES_SHMEM
++	int f = open("/syz-cover-bitmap", O_RDONLY);
++	if (f < 0) {
++		debug("bitmap is no found, coverage filter disabled\n");
++		return;
++	}
++	// If bitmap is existed, but invalid, executor should exit with error.
++	ssize_t ret = read(f, &pcstart, sizeof(uint32));
++	if (ret < 0)
++		fail("failed to read bitmap start");
++	ret = read(f, &pcsize, sizeof(uint32));
++	if (ret < 0 || pcsize < 0)
++		fail("failed to read bitmap size or bad bitmap size");
++	pcend = pcstart + pcsize;
++	debug("coverage filter from %x to %x, size %x\n", pcstart, pcend, pcsize);
++
++	uint32 bitmapSize = (pcsize >> 4) / 8 + 1;
++	// A random address for bitmap. Don't corrupt output_data.
++	void* preferred = (void*)0x110f230000ull;
++	bitmap = (byte*)mmap(preferred, bitmapSize + 2 * sizeof(uint32), PROT_READ, MAP_PRIVATE, f, 0);
++	if (bitmap != preferred)
++		fail("failed to initialize bitmap at %p", preferred);
++	bitmap += sizeof(uint32) * 2;
++#endif
++}
++
++inline bool coverage_filter(uint64 pc)
++{
++	if (bitmap == NULL)
++		fail("filter was enabled but bitmap initialization failed");
++	// Prevent overflow while searching bitmap.
++	uint32 pc32 = (uint32)(pc & 0xffffffff);
++	if (pc32 < pcstart || pc32 > pcend)
++		return false;
++	// For minimizing the size of bitmap, the lowest 4-bit will be dropped.
++	pc32 -= pcstart;
++	pc32 = pc32 >> 4;
++	uint32 idx = pc32 / 8;
++	uint32 shift = pc32 % 8;
++	return (bitmap[idx] & (1 << shift)) > 0;
++}
+diff --git a/executor/executor.cc b/executor/executor.cc
+index e759a708..78561236 100644
+--- a/executor/executor.cc
++++ b/executor/executor.cc
+@@ -50,6 +50,7 @@ typedef unsigned long long uint64;
+ typedef unsigned int uint32;
+ typedef unsigned short uint16;
+ typedef unsigned char uint8;
++typedef char byte;
+ 
+ // exit/_exit do not necessary work (e.g. if fuzzer sets seccomp filter that prohibits exit_group).
+ // Use doexit instead.  We must redefine exit to something that exists in stdlib,
+@@ -141,6 +142,7 @@ static bool flag_collect_cover;
+ static bool flag_dedup_cover;
+ static bool flag_threaded;
+ static bool flag_collide;
++static bool flag_coverage_filter;
+ 
+ // If true, then executor should write the comparisons data to fuzzer.
+ static bool flag_comparisons;
+@@ -350,6 +352,8 @@ static void setup_features(char** enable, int n);
+ #error "unknown OS"
+ #endif
+ 
++#include "bitmap.h"
++
+ #include "test.h"
+ 
+ int main(int argc, char** argv)
+@@ -428,6 +432,7 @@ int main(int argc, char** argv)
+ 			// Don't enable comps because we don't use them in the fuzzer yet.
+ 			cover_enable(&extra_cov, false, true);
+ 		}
++		init_bitmap();
+ 	}
+ 
+ 	int status = 0;
+@@ -547,14 +552,15 @@ void receive_execute()
+ 	flag_comparisons = req.exec_flags & (1 << 3);
+ 	flag_threaded = req.exec_flags & (1 << 4);
+ 	flag_collide = req.exec_flags & (1 << 5);
++	flag_coverage_filter = req.exec_flags & (1 << 6);
+ 	flag_fault_call = req.fault_call;
+ 	flag_fault_nth = req.fault_nth;
+ 	if (!flag_threaded)
+ 		flag_collide = false;
+-	debug("[%llums] exec opts: procid=%llu threaded=%d collide=%d cover=%d comps=%d dedup=%d fault=%d/%d/%d prog=%llu\n",
++	debug("[%llums] exec opts: procid=%llu threaded=%d collide=%d cover=%d comps=%d dedup=%d fault=%d/%d/%d prog=%llu filter=%d\n",
+ 	      current_time_ms() - start_time_ms, procid, flag_threaded, flag_collide,
+ 	      flag_collect_cover, flag_comparisons, flag_dedup_cover, flag_fault,
+-	      flag_fault_call, flag_fault_nth, req.prog_size);
++	      flag_fault_call, flag_fault_nth, req.prog_size, flag_coverage_filter);
+ 	if (SYZ_EXECUTOR_USES_SHMEM) {
+ 		if (req.prog_size)
+ 			fail("need_prog: no program");
+@@ -873,6 +879,8 @@ void write_coverage_signal(cover_t* cov, uint32* signal_count_pos, uint32* cover
+ 		}
+ 		cover_data_t sig = pc ^ prev;
+ 		prev = hash(pc);
++		if (flag_coverage_filter && !coverage_filter((uint64)pc))
++			continue;
+ 		if (dedup(sig))
+ 			continue;
+ 		write_output(sig);
+diff --git a/executor/test.h b/executor/test.h
+index bd30fb37..c0ae9a60 100644
+--- a/executor/test.h
++++ b/executor/test.h
+@@ -201,6 +201,39 @@ static int test_csum_inet_acc()
+ 	return 0;
+ }
+ 
++static int test_coverage_filter()
++{
++	pcstart = 0x81000000;
++	pcend = 0x81001000;
++	pcsize = 0x1000;
++	uint32 mapsize = (pcsize >> 4) / 8 + 1;
++	byte tmp_bitmap[mapsize];
++	memset(tmp_bitmap, 0, mapsize);
++	bitmap = tmp_bitmap;
++
++	uint64 full_enable_pc = 0xffffffff81000765;
++	uint64 full_disable_pc = 0xffffffff81000627;
++	uint64 full_out_pc = 0xffffffff82000000;
++
++	uint32 enable_pc = (uint32)full_enable_pc & 0xffffffff;
++	uint32 idx = ((enable_pc - pcstart) >> 4) / 8;
++	uint32 shift = ((enable_pc - pcstart) >> 4) % 8;
++	bitmap[idx] |= (1 << shift);
++
++	if (!coverage_filter(full_enable_pc))
++		return 1;
++	if (coverage_filter(full_disable_pc))
++		return 1;
++	if (coverage_filter(full_out_pc))
++		return 1;
++
++	pcstart = 0x0;
++	pcend = 0x0;
++	pcsize = 0x0;
++	bitmap = NULL;
++	return 0;
++}
++
+ static struct {
+ 	const char* name;
+ 	int (*f)();
+@@ -211,6 +244,7 @@ static struct {
+ #if GOOS_linux && GOARCH_amd64
+     {"test_kvm", test_kvm},
+ #endif
++    {"test_coverage_filter", test_coverage_filter},
+ };
+ 
+ static int run_tests()
+diff --git a/pkg/cover/report.go b/pkg/cover/report.go
+index f61c48d1..86a160b3 100644
+--- a/pkg/cover/report.go
++++ b/pkg/cover/report.go
+@@ -832,44 +832,79 @@ func parseFile(fn string) ([][]byte, error) {
+ 	return lines, nil
+ }
+ 
+-func PreviousInstructionPC(target *targets.Target, pc uint64) uint64 {
+-	switch target.Arch {
+-	case "amd64":
+-		return pc - 5
+-	case "386":
+-		return pc - 5
+-	case "arm64":
+-		return pc - 4
+-	case "arm":
+-		// THUMB instructions are 2 or 4 bytes with low bit set.
+-		// ARM instructions are always 4 bytes.
+-		return (pc - 3) & ^uint64(1)
+-	case "ppc64le":
+-		return pc - 4
+-	case "mips64le":
+-		return pc - 8
+-	case "s390x":
+-		return pc - 6
+-	case "riscv64":
+-		return pc - 4
++const (
++	amd64    = "amd64"
++	i386     = "386"
++	arm64    = "arm64"
++	arm      = "arm"
++	ppc64le  = "ppc64le"
++	mips64le = "mips64le"
++	s390x    = "s390x"
++	riscv64  = "riscv64"
++)
++
++func PreviousInstructionPC(arch string, pc uint64) uint64 {
++	offset := instructionLen(arch)
++	pc -= offset
++	// THUMB instructions are 2 or 4 bytes with low bit set.
++	// ARM instructions are always 4 bytes.
++	if arch == arm {
++		return pc & ^uint64(1)
++	}
++	return pc
++}
++
++func NextInstructionPC(arch string, pc uint64) uint64 {
++	offset := instructionLen(arch)
++	pc += offset
++	// THUMB instructions are 2 or 4 bytes with low bit set.
++	// ARM instructions are always 4 bytes.
++	if arch == arm {
++		return pc & ^uint64(1)
++	}
++	return pc
++}
++
++func instructionLen(arch string) uint64 {
++	switch arch {
++	case amd64:
++		return 5
++	case i386:
++		return 5
++	case arm64:
++		return 4
++	case arm:
++		return 3
++	case ppc64le:
++		return 4
++	case mips64le:
++		return 8
++	case s390x:
++		return 6
++	case riscv64:
++		return 4
+ 	default:
+-		panic(fmt.Sprintf("unknown arch %q", target.Arch))
++		panic(fmt.Sprintf("unknown arch %q", arch))
+ 	}
+ }
+ 
+ func archCallInsn(target *targets.Target) ([][]byte, [][]byte) {
+ 	callName := [][]byte{[]byte(" <__sanitizer_cov_trace_pc>")}
+ 	switch target.Arch {
+-	case "386":
++	case amd64:
++		// ffffffff8100206a:       callq  ffffffff815cc1d0 <__sanitizer_cov_trace_pc>
++		// To make life more interesting, llvm-objdump does spaces slightly differently.
++		return [][]byte{[]byte("\tcallq "), []byte("\tcallq\t")}, callName
++	case i386:
+ 		// c1000102:       call   c10001f0 <__sanitizer_cov_trace_pc>
+ 		return [][]byte{[]byte("\tcall ")}, callName
+-	case "arm64":
++	case arm64:
+ 		// ffff0000080d9cc0:       bl      ffff00000820f478 <__sanitizer_cov_trace_pc>
+ 		return [][]byte{[]byte("\tbl\t")}, callName
+-	case "arm":
++	case arm:
+ 		// 8010252c:       bl      801c3280 <__sanitizer_cov_trace_pc>
+ 		return [][]byte{[]byte("\tbl\t")}, callName
+-	case "ppc64le":
++	case ppc64le:
+ 		// c00000000006d904:       bl      c000000000350780 <.__sanitizer_cov_trace_pc>
+ 		// This is only known to occur in the test:
+ 		// 838:   bl      824 <__sanitizer_cov_trace_pc+0x8>
+@@ -880,15 +915,15 @@ func archCallInsn(target *targets.Target) ([][]byte, [][]byte) {
+ 			[]byte("<__sanitizer_cov_trace_pc+0x8>"),
+ 			[]byte(" <.__sanitizer_cov_trace_pc>"),
+ 		}
+-	case "mips64le":
++	case mips64le:
+ 		// ffffffff80100420:       jal     ffffffff80205880 <__sanitizer_cov_trace_pc>
+ 		// This is only known to occur in the test:
+ 		// b58:   bal     b30 <__sanitizer_cov_trace_pc>
+ 		return [][]byte{[]byte("\tjal\t"), []byte("\tbal\t")}, callName
+-	case "s390x":
++	case s390x:
+ 		// 1001de:       brasl   %r14,2bc090 <__sanitizer_cov_trace_pc>
+ 		return [][]byte{[]byte("\tbrasl\t")}, callName
+-	case "riscv64":
++	case riscv64:
+ 		// ffffffe000200018:       jal     ra,ffffffe0002935b0 <__sanitizer_cov_trace_pc>
+ 		// ffffffe0000010da:       jalr    1242(ra) # ffffffe0002935b0 <__sanitizer_cov_trace_pc>
+ 		return [][]byte{[]byte("\tjal\t"), []byte("\tjalr\t")}, callName
+@@ -897,6 +932,32 @@ func archCallInsn(target *targets.Target) ([][]byte, [][]byte) {
+ 	}
+ }
+ 
++func (rg *ReportGenerator) PCs() map[uint64][]symbolizer.Frame {
++	var allPCs []uint64
++	for _, s := range rg.symbols {
++		allPCs = append(allPCs, s.pcs...)
++	}
++	var progs []Prog
++	progs = append(progs, Prog{Data: "allPCs", PCs: allPCs})
++	// Pass a fake prog with all symbol pcs to preoareFileMap, rg.pcs will be initialized.
++	_, err := rg.prepareFileMap(progs)
++	if err != nil {
++		return nil
++	}
++	// Since pcFrame is a unexpected export type, build a Frame map to return.
++	retPCs := make(map[uint64][]symbolizer.Frame)
++	for pc, pcfs := range rg.pcs {
++		for _, pcf := range pcfs {
++			retPCs[pc] = append(retPCs[pc], symbolizer.Frame{PC: pcf.PC,
++				Func:   pcf.Func,
++				File:   pcf.File,
++				Line:   pcf.Line,
++				Inline: pcf.Inline})
++		}
++	}
++	return retPCs
++}
++
+ type templateData struct {
+ 	Root      *templateDir
+ 	Contents  []template.HTML
+diff --git a/pkg/cover/report_test.go b/pkg/cover/report_test.go
+index 7748c3fa..b7b5c618 100644
+--- a/pkg/cover/report_test.go
++++ b/pkg/cover/report_test.go
+@@ -161,7 +161,7 @@ func generateReport(t *testing.T, target *targets.Target, test Test) ([]byte, []
+ 			if err != nil {
+ 				t.Fatal(err)
+ 			}
+-			pcs = append(pcs, PreviousInstructionPC(target, pc))
++			pcs = append(pcs, PreviousInstructionPC(target.Arch, pc))
+ 			t.Logf("using exact coverage PC 0x%x", pcs[0])
+ 		} else if target.OS == runtime.GOOS && (target.Arch == runtime.GOARCH || target.VMArch == runtime.GOARCH) {
+ 			t.Fatal(err)
+diff --git a/pkg/ipc/ipc.go b/pkg/ipc/ipc.go
+index ffa8a4e6..d7f0cbc4 100644
+--- a/pkg/ipc/ipc.go
++++ b/pkg/ipc/ipc.go
+@@ -48,12 +48,13 @@ const (
+ type ExecFlags uint64
+ 
+ const (
+-	FlagCollectCover ExecFlags = 1 << iota // collect coverage
+-	FlagDedupCover                         // deduplicate coverage in executor
+-	FlagInjectFault                        // inject a fault in this execution (see ExecOpts)
+-	FlagCollectComps                       // collect KCOV comparisons
+-	FlagThreaded                           // use multiple threads to mitigate blocked syscalls
+-	FlagCollide                            // collide syscalls to provoke data races
++	FlagCollectCover         ExecFlags = 1 << iota // collect coverage
++	FlagDedupCover                                 // deduplicate coverage in executor
++	FlagInjectFault                                // inject a fault in this execution (see ExecOpts)
++	FlagCollectComps                               // collect KCOV comparisons
++	FlagThreaded                                   // use multiple threads to mitigate blocked syscalls
++	FlagCollide                                    // collide syscalls to provoke data races
++	FlagEnableCoverageFilter                       // setup and use bitmap to do coverage filter
+ )
+ 
+ type ExecOpts struct {
+diff --git a/pkg/mgrconfig/config.go b/pkg/mgrconfig/config.go
+index fc63bb20..9aad1879 100644
+--- a/pkg/mgrconfig/config.go
++++ b/pkg/mgrconfig/config.go
+@@ -85,6 +85,16 @@ type Config struct {
+ 
+ 	// Use KCOV coverage (default: true).
+ 	Cover bool `json:"cover"`
++	// Use coverage filter. Supported types of filter:
++	// "file": support specifying a file, all files in a directory or in all subdirectories,
++	// eg. "file": ["net/core/sock.c", "net/sctp/*", "net/dccp/**"].
++	// "functions": support specifying a function, all functions starting with or contain a string
++	// eg. "functions": ["foo", "bar*", "*baz*"].
++	// "pcs": specify raw PC table paths.
++	// For each 'PC', the lowest 32-bit should be the lowest 32-bit of a kernel text address.
++	// The highest 32bit is the weight of that address.
++	CovFilter json.RawMessage `json:"cover_filter"`
++
+ 	// Reproduce, localize and minimize crashers (default: true).
+ 	Reproduce bool `json:"reproduce"`
+ 
+diff --git a/pkg/rpctype/rpctype.go b/pkg/rpctype/rpctype.go
+index c370b0a0..aee70c60 100644
+--- a/pkg/rpctype/rpctype.go
++++ b/pkg/rpctype/rpctype.go
+@@ -129,3 +129,12 @@ type RunTestDoneArgs struct {
+ 	Info   []*ipc.ProgInfo
+ 	Error  string
+ }
++
++type GetWeightedPCsArgs struct {
++	Nop bool
++}
++
++type GetWeightedPCsRes struct {
++	EnableFilter bool
++	WeightedPCs  map[uint32]float32
++}
+diff --git a/syz-fuzzer/fuzzer.go b/syz-fuzzer/fuzzer.go
+index 16acd7a2..2463d9e9 100644
+--- a/syz-fuzzer/fuzzer.go
++++ b/syz-fuzzer/fuzzer.go
+@@ -258,6 +258,7 @@ func main() {
+ 		comparisonTracingEnabled: r.CheckResult.Features[host.FeatureComparisons].Enabled,
+ 		corpusHashes:             make(map[hash.Sig]struct{}),
+ 	}
++
+ 	gateCallback := fuzzer.useBugFrames(r, *flagProcs)
+ 	fuzzer.gate = ipc.NewGate(2**flagProcs, gateCallback)
+ 
+@@ -268,6 +269,7 @@ func main() {
+ 		calls[target.Syscalls[id]] = true
+ 	}
+ 	fuzzer.choiceTable = target.BuildChoiceTable(fuzzer.corpus, calls)
++	fuzzer.getWeightedPCs()
+ 
+ 	for pid := 0; pid < *flagProcs; pid++ {
+ 		proc, err := newProc(fuzzer, pid)
+@@ -560,3 +562,16 @@ func parseOutputType(str string) OutputType {
+ 		return OutputNone
+ 	}
+ }
++
++// Currently, only use GetWeightedPCsRes to check if filter enabled.
++// Weighted PC table will not be used.
++func (fuzzer *Fuzzer) getWeightedPCs() {
++	a := &rpctype.GetWeightedPCsArgs{}
++	r := &rpctype.GetWeightedPCsRes{EnableFilter: false}
++	if err := fuzzer.manager.Call("Manager.GetWeightedPCs", a, r); err != nil {
++		log.Fatalf("Manager.GetWeightedPCs call failed: %v", err)
++	}
++	if r.EnableFilter {
++		fuzzer.execOpts.Flags |= ipc.FlagEnableCoverageFilter
++	}
++}
+diff --git a/syz-manager/cover.go b/syz-manager/cover.go
+index 328f9fbd..03792a85 100644
+--- a/syz-manager/cover.go
++++ b/syz-manager/cover.go
+@@ -45,7 +45,7 @@ func coverToPCs(target *targets.Target, cov []uint32) []uint64 {
+ 	pcs := make([]uint64, 0, len(cov))
+ 	for _, pc := range cov {
+ 		fullPC := cover.RestorePC(pc, initCoverVMOffset)
+-		prevPC := cover.PreviousInstructionPC(target, fullPC)
++		prevPC := cover.PreviousInstructionPC(target.Arch, fullPC)
+ 		pcs = append(pcs, prevPC)
+ 	}
+ 	return pcs
+diff --git a/syz-manager/filter.go b/syz-manager/filter.go
+new file mode 100644
+index 00000000..9cf2415d
+--- /dev/null
++++ b/syz-manager/filter.go
+@@ -0,0 +1,247 @@
++// Copyright 2020 syzkaller project authors. All rights reserved.
++// Use of this source code is governed by Apache 2 LICENSE that can be found in the LICENSE file.
++
++package main
++
++import (
++	"encoding/binary"
++	"encoding/json"
++	"fmt"
++	"os"
++	"regexp"
++
++	"github.com/google/syzkaller/pkg/cover"
++	"github.com/google/syzkaller/pkg/log"
++)
++
++type CoverFilter struct {
++	enableFilter    bool
++	kcovFilterStart uint32
++	kcovFilterSize  uint32
++	kcovFilterEnd   uint32
++	weightedPCs     map[uint32]float32
++
++	pcsBitmapPath      string
++	targetLittleEndian bool
++	targetArch         string
++}
++
++func (mgr *Manager) initKcovFilter() {
++	covFilterConfig := make(map[string][]string)
++	if err := json.Unmarshal(mgr.cfg.CovFilter, &covFilterConfig); err != nil {
++		log.Logf(0, "no coverage filter is enabled")
++		mgr.kcovFilter.enableFilter = false
++		return
++	}
++	files := covFilterConfig["files"]
++	funcs := covFilterConfig["functions"]
++	rawPCs := covFilterConfig["pcs"]
++	if len(files) == 0 && len(funcs) == 0 && len(rawPCs) == 0 {
++		mgr.kcovFilter.enableFilter = false
++		return
++	}
++	mgr.kcovFilter.enableFilter = true
++	log.Logf(0, "initialize coverage information...")
++	if err := initCover(mgr.sysTarget, mgr.cfg.KernelObj, mgr.cfg.KernelSrc, mgr.cfg.KernelBuildSrc); err != nil {
++		log.Logf(0, "failed to generate coverage profile: %v", err)
++		log.Fatalf("coverage filter cannot be initialized without coverage profile")
++	}
++
++	mgr.kcovFilter.targetLittleEndian = mgr.sysTarget.LittleEndian
++	mgr.kcovFilter.targetArch = mgr.sysTarget.Arch
++	mgr.kcovFilter.pcsBitmapPath = mgr.cfg.Workdir + "/" + "syz-cover-bitmap"
++	mgr.kcovFilter.initWeightedPCs(files, funcs, rawPCs)
++}
++
++func (mgr *Manager) getWeightedPCs() bool {
++	return mgr.kcovFilter.enableFilter
++}
++
++func (filter *CoverFilter) initWeightedPCs(files, functions, rawPCsFiles []string) {
++	filter.weightedPCs = make(map[uint32]float32)
++	filesRegexp := getFileRegexp(files)
++	funcsRegexp := getFuncRegexp(functions)
++
++	enabledFiles := make(map[string]bool)
++	enabledFuncs := make(map[string]bool)
++	for _, f := range rawPCsFiles {
++		rawFile, err := os.Open(f)
++		if err != nil {
++			log.Logf(0, "failed to open raw PCs file: %v", err)
++		}
++		for {
++			var encode uint64
++			_, err := fmt.Fscanf(rawFile, "0x%x\n", &encode)
++			if err != nil {
++				break
++			}
++			pc := uint32(encode & 0xffffffff)
++			weight := float32((encode >> 32) & 0xffff)
++			filter.weightedPCs[pc] = weight
++		}
++		rawFile.Close()
++	}
++	pcs := reportGenerator.PCs()
++	for _, e := range pcs {
++		frame := e[len(e)-1]
++		fullpc := cover.NextInstructionPC(filter.targetArch, frame.PC)
++		pc := uint32(fullpc & 0xffffffff)
++		for _, r := range funcsRegexp {
++			if _, ok := filter.weightedPCs[pc]; ok {
++				enabledFuncs[frame.Func] = true
++				continue
++			}
++			if ok := r.MatchString(frame.Func); ok {
++				enabledFuncs[frame.Func] = true
++				filter.weightedPCs[pc] = 1.0
++			}
++		}
++		for _, r := range filesRegexp {
++			if ok := r.MatchString(frame.File); ok {
++				enabledFiles[frame.File] = true
++				enabledFuncs[frame.Func] = true
++				filter.weightedPCs[pc] = 1.0
++			}
++		}
++	}
++	for f := range enabledFuncs {
++		log.Logf(0, "enabled func: %s", f)
++	}
++	for f := range enabledFiles {
++		log.Logf(0, "enabled file: %s", f)
++	}
++}
++
++func getFileRegexp(files []string) []regexp.Regexp {
++	var regexps []regexp.Regexp
++	// `\*{2}$` match net/dccp/**
++	rMatchDoubleStart, err := regexp.Compile(`\*{2}$`)
++	if err != nil {
++		log.Fatalf("regular expression failed: %s", err)
++	}
++	// `[^\\*]\\*$` match net/sctp/*
++	rMatchOneStart, err := regexp.Compile(`[^\*]\*$`)
++	if err != nil {
++		log.Fatalf("regular expression failed: %s", err)
++	}
++	for _, f := range files {
++		if ok1 := rMatchDoubleStart.MatchString(f); ok1 {
++			f = `^` + f[:len(f)-2]
++		} else if ok2 := rMatchOneStart.MatchString(f); ok2 {
++			f = `^` + f[:len(f)-1] + `[^\/]*$`
++		} else {
++			f = f + `$`
++		}
++		r, err := regexp.Compile(f)
++		if err != nil {
++			log.Fatalf("regular expression failed: %s", err)
++		}
++		regexps = append(regexps, *r)
++	}
++	return regexps
++}
++
++func getFuncRegexp(funcs []string) []regexp.Regexp {
++	var regexps []regexp.Regexp
++	// `^[^\*].*\*$` match bar*
++	rMatchOneStart, err := regexp.Compile(`^[^\*].*\*$`)
++	if err != nil {
++		log.Fatalf("regular expression failed: %s", err)
++	}
++	// `^\*.*\*$` match *baz*
++	rMatchDoubleStart, err := regexp.Compile(`^\*.*\*$`)
++	if err != nil {
++		log.Fatalf("regular expression failed: %s", err)
++	}
++	for _, f := range funcs {
++		if ok1 := rMatchOneStart.MatchString(f); ok1 {
++			f = `^` + f[:len(f)-1]
++		} else if ok2 := rMatchDoubleStart.MatchString(f); ok2 {
++			f = f[1 : len(f)-1]
++		} else {
++			f = `^` + f + `$`
++		}
++		r, err := regexp.Compile(f)
++		if err != nil {
++			log.Fatalf("regular expression failed: %s", err)
++		}
++		regexps = append(regexps, *r)
++	}
++	return regexps
++}
++
++func (filter *CoverFilter) createBitmap() {
++	filter.detectRegion()
++	if filter.kcovFilterSize > 0 {
++		log.Logf(0, "coverage filter from %x to %x, size %x",
++			filter.kcovFilterStart, filter.kcovFilterEnd, filter.kcovFilterSize)
++	} else {
++		log.Fatalf("coverage filter is enabled but nothing will be filtered")
++	}
++
++	bitmapFile, err := os.OpenFile(filter.pcsBitmapPath, os.O_RDWR|os.O_CREATE, 0644)
++	if err != nil {
++		log.Fatalf("failed to open or create bitmap: %s", err)
++	}
++	defer bitmapFile.Close()
++	bitmap := filter.bitmapBytes()
++	_, err = bitmapFile.Write(bitmap)
++	if err != nil {
++		log.Fatalf("failed to write bitmap: %s", err)
++	}
++}
++
++func (filter *CoverFilter) detectRegion() {
++	filter.kcovFilterStart = 0xffffffff
++	filter.kcovFilterEnd = 0x0
++	for pc := range filter.weightedPCs {
++		if pc < filter.kcovFilterStart {
++			filter.kcovFilterStart = pc
++		}
++		if pc > filter.kcovFilterEnd {
++			filter.kcovFilterEnd = pc
++		}
++	}
++	// align
++	filter.kcovFilterStart &= 0xfffffff0
++	filter.kcovFilterEnd |= 0xf
++	filter.kcovFilterEnd++
++	filter.kcovFilterSize = 0
++	if filter.kcovFilterStart < filter.kcovFilterEnd {
++		filter.kcovFilterSize = filter.kcovFilterEnd - filter.kcovFilterStart
++	} else {
++		filter.kcovFilterSize = 0
++	}
++}
++
++func (filter *CoverFilter) bitmapBytes() []byte {
++	// The file starts with two uint32: kcovFilterStart and kcovFilterSize,
++	// and a bitmap with size (kcovFilterSize>>4)/8 + 1 bytes follow them.
++	start := make([]byte, 4)
++	filter.putUint32(start, filter.kcovFilterStart)
++	size := make([]byte, 4)
++	filter.putUint32(size, filter.kcovFilterSize)
++
++	// The lowest 4-bit is dropped,
++	// 8-bit = 1-byte, additional 1-byte to prevent overflow
++	bitmapSize := (filter.kcovFilterSize>>4)/8 + 1
++	bitmap := make([]byte, bitmapSize)
++	for pc := range filter.weightedPCs {
++		pc -= filter.kcovFilterStart
++		pc = pc >> 4
++		idx := pc / 8
++		shift := pc % 8
++		bitmap[idx] |= (1 << shift)
++	}
++	start = append(start, size...)
++	bitmap = append(start, bitmap...)
++	return bitmap
++}
++
++func (filter *CoverFilter) putUint32(bytes []byte, value uint32) {
++	if filter.targetLittleEndian {
++		binary.LittleEndian.PutUint32(bytes, value)
++	} else {
++		binary.BigEndian.PutUint32(bytes, value)
++	}
++}
+diff --git a/syz-manager/filter_test.go b/syz-manager/filter_test.go
+new file mode 100644
+index 00000000..e5b85ca0
+--- /dev/null
++++ b/syz-manager/filter_test.go
+@@ -0,0 +1,97 @@
++// Copyright 2020 syzkaller project authors. All rights reserved.
++// Use of this source code is governed by Apache 2 LICENSE that can be found in the LICENSE file.
++
++package main
++
++import (
++	"regexp"
++	"testing"
++
++	"github.com/google/syzkaller/prog"
++)
++
++func TestGetFileOrFuncRegExp(t *testing.T) {
++	files := []string{"net/ipv4/tcp.c", "net/socket.c"}
++	configFiles := []string{"net/**", "net/*", "net/socket.c"}
++	filesRegexp := getFileRegexp(configFiles)
++	if ok := testRegExp(filesRegexp[0], files, 2); !ok {
++		t.Fatalf("format \"net/**\" file match failed")
++	}
++	if ok := testRegExp(filesRegexp[1], files, 1); !ok {
++		t.Fatalf("format \"net/*\" file match failed")
++	}
++	if ok := testRegExp(filesRegexp[2], files, 1); !ok {
++		t.Fatalf("full file name match failed")
++	}
++
++	funcs := []string{"tcp_sendmsg", "do_tcp_setsockopt"}
++	configFunc := []string{"*tcp*", "tcp*", "do_tcp_setsockopt"}
++	funcRegexp := getFuncRegexp(configFunc)
++	if ok := testRegExp(funcRegexp[0], funcs, 2); !ok {
++		t.Fatalf("format \"*tcp*\" function match failed")
++	}
++	if ok := testRegExp(funcRegexp[1], funcs, 1); !ok {
++		t.Fatalf("format \"tcp*\" function match failed")
++	}
++	if ok := testRegExp(funcRegexp[2], funcs, 1); !ok {
++		t.Fatalf("full function name match failed")
++	}
++}
++
++func testRegExp(regExp regexp.Regexp, searchArray []string, expectedRet int) bool {
++	matched := make([]string, 0)
++	for _, e := range searchArray {
++		if ok := regExp.MatchString(e); ok {
++			matched = append(matched, e)
++		}
++	}
++	return len(matched) == expectedRet
++}
++
++func TestCreateBitmap(t *testing.T) {
++	target := getTarget(t, "test", "64")
++	filter := &CoverFilter{
++		enableFilter:       true,
++		weightedPCs:        make(map[uint32]float32),
++		targetLittleEndian: false,
++		targetArch:         target.Arch,
++	}
++	enablePCStart := uint32(0x81000002)
++	enablePCEnd := uint32(0x8120001d)
++	filter.weightedPCs[enablePCStart] = 1.0
++	filter.weightedPCs[enablePCEnd] = 1.0
++
++	filter.detectRegion()
++	if filter.kcovFilterStart != 0x81000000 ||
++		filter.kcovFilterEnd != 0x81200020 ||
++		filter.kcovFilterSize != 0x200020 {
++		t.Fatalf("filte.detectReigion test failed %x %x %x",
++			filter.kcovFilterStart, filter.kcovFilterEnd, filter.kcovFilterSize)
++	}
++	bitmap := filter.bitmapBytes()
++	bitmap = bitmap[8:]
++	for i, byte := range bitmap {
++		if i == 0 {
++			if byte != 0x1 {
++				t.Fatalf("filter.bitmapByte enable PC failed")
++			}
++		} else if i == (0x20001 / 0x8) {
++			if byte != byte&(1<<(0x20001%0x8)) {
++				t.Fatalf("filter.bitmapByte enable PC failed")
++			}
++		} else {
++			if byte != 0x0 {
++				t.Fatalf("filter.bitmapByte disable PC failed")
++			}
++		}
++	}
++}
++
++func getTarget(t *testing.T, os, arch string) *prog.Target {
++	t.Parallel()
++	target, err := prog.GetTarget(os, arch)
++	if err != nil {
++		t.Fatal(err)
++	}
++	return target
++}
+diff --git a/syz-manager/manager.go b/syz-manager/manager.go
+index 05af6d30..51b39ac4 100644
+--- a/syz-manager/manager.go
++++ b/syz-manager/manager.go
+@@ -88,6 +88,8 @@ type Manager struct {
+ 	// For checking that files that we are using are not changing under us.
+ 	// Maps file name to modification time.
+ 	usedFiles map[string]time.Time
++
++	kcovFilter *CoverFilter
+ }
+ 
+ const (
+@@ -182,12 +184,18 @@ func RunManager(cfg *mgrconfig.Config, target *prog.Target, sysTarget *targets.T
+ 		reproRequest:          make(chan chan map[string]bool),
+ 		usedFiles:             make(map[string]time.Time),
+ 		saturatedCalls:        make(map[string]bool),
++		kcovFilter:            &CoverFilter{enableFilter: false},
+ 	}
+ 
+ 	mgr.preloadCorpus()
+ 	mgr.initHTTP() // Creates HTTP server.
+ 	mgr.collectUsedFiles()
+ 
++	mgr.initKcovFilter()
++	if mgr.kcovFilter.enableFilter {
++		mgr.kcovFilter.createBitmap()
++	}
++
+ 	// Create RPC server for fuzzers.
+ 	mgr.serv, err = startRPCServer(mgr)
+ 	if err != nil {
+@@ -599,6 +607,13 @@ func (mgr *Manager) runInstanceInner(index int, instanceName string) (*report.Re
+ 		return nil, fmt.Errorf("failed to setup port forwarding: %v", err)
+ 	}
+ 
++	if mgr.kcovFilter.enableFilter {
++		_, err = inst.Copy(mgr.kcovFilter.pcsBitmapPath)
++		if err != nil {
++			return nil, fmt.Errorf("failed to copy bitmap: %v", err)
++		}
++	}
++
+ 	fuzzerBin, err := inst.Copy(mgr.cfg.SyzFuzzerBin)
+ 	if err != nil {
+ 		return nil, fmt.Errorf("failed to copy binary: %v", err)
+diff --git a/syz-manager/rpc.go b/syz-manager/rpc.go
+index 3cd3d2d0..980a447a 100644
+--- a/syz-manager/rpc.go
++++ b/syz-manager/rpc.go
+@@ -57,6 +57,7 @@ type RPCManagerView interface {
+ 	newInput(inp rpctype.RPCInput, sign signal.Signal) bool
+ 	candidateBatch(size int) []rpctype.RPCCandidate
+ 	rotateCorpus() bool
++	getWeightedPCs() bool
+ }
+ 
+ func startRPCServer(mgr *Manager) (*RPCServer, error) {
+@@ -329,3 +330,11 @@ func (serv *RPCServer) shutdownInstance(name string) []byte {
+ 	delete(serv.fuzzers, name)
+ 	return fuzzer.machineInfo
+ }
++
++func (serv *RPCServer) GetWeightedPCs(a *rpctype.GetWeightedPCsArgs, r *rpctype.GetWeightedPCsRes) error {
++	serv.mu.Lock()
++	defer serv.mu.Unlock()
++	enableFilter := serv.mgr.getWeightedPCs()
++	r.EnableFilter = enableFilter
++	return nil
++}
+-- 
+2.20.1
+

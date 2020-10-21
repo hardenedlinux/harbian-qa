@@ -43,6 +43,8 @@ We attach "signal len", "cover weight", "state len" and "Resource weight" to "/c
 
 No matter if you use coverage filter or not, you can pass a PCs table to patch syzkaller, and access the "/kernfunc" interface to get the information about how much of a function was covered in this fuzzer.
 
+* Currently, Syzkaller has already implemented a similar web interface `func_cov`. We would not maintain such a redundant interface.
+
 ![KernFunc](KernFunc.png)
 
 #### Check the coverage filter configuration

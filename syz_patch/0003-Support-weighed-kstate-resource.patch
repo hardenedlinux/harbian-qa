@@ -1,0 +1,924 @@
+From a0726aedd698565e09938403aa2ae013fa699a3e Mon Sep 17 00:00:00 2001
+From: Kaipeng Zeng <kaipeng94@gmail.con>
+Date: Tue, 20 Oct 2020 23:49:33 -0400
+Subject: [PATCH 3/3] Support weighed kstate resource
+
+---
+ executor/bitmap.h                        |  32 ++++
+ executor/executor.cc                     |  39 ++++-
+ pkg/ipc/ipc.go                           |  35 ++++-
+ pkg/kstate/kstate.go                     |  46 ++++++
+ pkg/mgrconfig/config.go                  |   2 +
+ pkg/rpctype/rpctype.go                   |   7 +-
+ prog/prog.go                             |  13 +-
+ prog/rand.go                             |  25 +++-
+ syz-fuzzer/fuzzer.go                     |  45 +++++-
+ syz-fuzzer/proc.go                       |  35 +++++
+ syz-manager/{filter.go => cov_filter.go} |   1 +
+ syz-manager/html.go                      |  30 ++--
+ syz-manager/manager.go                   |  12 ++
+ syz-manager/rpc.go                       |   6 +-
+ syz-manager/srt_filter.go                | 181 +++++++++++++++++++++++
+ 15 files changed, 484 insertions(+), 25 deletions(-)
+ create mode 100644 pkg/kstate/kstate.go
+ rename syz-manager/{filter.go => cov_filter.go} (99%)
+ create mode 100644 syz-manager/srt_filter.go
+
+diff --git a/executor/bitmap.h b/executor/bitmap.h
+index 156c1673..4a8cd954 100644
+--- a/executor/bitmap.h
++++ b/executor/bitmap.h
+@@ -8,10 +8,14 @@
+ #include <sys/mman.h>
+ #endif
+ 
++#define MAX_MASK 0x10
++
+ static byte* bitmap;
++uint16 state_mask[MAX_MASK];
+ static uint32 pcstart;
+ static uint32 pcsize;
+ static uint32 pcend;
++static int actual_max_mask = 0;
+ 
+ inline void init_bitmap()
+ {
+@@ -56,3 +60,31 @@ inline bool coverage_filter(uint64 pc)
+ 	uint32 shift = pc32 % 8;
+ 	return (bitmap[idx] & (1 << shift)) > 0;
+ }
++
++static void init_mask()
++{
++	int f = open("/syz-state-mask", O_RDONLY);
++	if (f < 0) {
++		debug("state mask is no found, state filter disabled");
++		return;
++	}
++
++	for (int i = 0; i < MAX_MASK; i++) {
++		ssize_t ret = read(f, &state_mask[i], sizeof(uint16));
++		if (ret != sizeof(uint16)) {
++			break;
++		}
++		actual_max_mask = i;
++	}
++}
++
++inline bool kstate_filter(uint64 state)
++{
++	uint16 state_fileID  = (uint16)((state >> 32) & 0xffff);
++	for (int i = 0; i < actual_max_mask; i++) {
++		if (state_fileID == state_mask[i]) {
++			return true;
++		}
++	}
++	return false;
++}
+diff --git a/executor/executor.cc b/executor/executor.cc
+index 78561236..3dfd40f1 100644
+--- a/executor/executor.cc
++++ b/executor/executor.cc
+@@ -282,9 +282,10 @@ struct call_reply {
+ 	uint32 reserrno;
+ 	uint32 flags;
+ 	uint32 signal_size;
++	uint32 kstate_size;
+ 	uint32 cover_size;
+ 	uint32 comps_size;
+-	// signal/cover/comps follow
++	// signal/kstate/cover/comps follow
+ };
+ 
+ enum {
+@@ -433,6 +434,7 @@ int main(int argc, char** argv)
+ 			cover_enable(&extra_cov, false, true);
+ 		}
+ 		init_bitmap();
++		init_mask();
+ 	}
+ 
+ 	int status = 0;
+@@ -871,8 +873,21 @@ void write_coverage_signal(cover_t* cov, uint32* signal_count_pos, uint32* cover
+ 	cover_data_t* cover_data = ((cover_data_t*)cov->data) + 1;
+ 	uint32 nsig = 0;
+ 	cover_data_t prev = 0;
++
++	uint32* state_count_pos = signal_count_pos + 1;
++	/* Collect kernel state less than 50 per syscall */
++	cover_data_t* state[0x50];
++	uint32 nstate = 0;
+ 	for (uint32 i = 0; i < cov->size; i++) {
+ 		cover_data_t pc = cover_data[i];
++		if (((uint64(pc) >> 48) & 0xfff0) == 0xefe0) {
++			if (nstate < 0x50 && kstate_filter(pc)) {
++				state[nstate] = &cover_data[i];
++				nstate++;
++			}
++			i += 1;
++			continue;
++		}
+ 		if (!cover_check(pc)) {
+ 			debug("got bad pc: 0x%llx\n", (uint64)pc);
+ 			doexit(0);
+@@ -889,6 +904,15 @@ void write_coverage_signal(cover_t* cov, uint32* signal_count_pos, uint32* cover
+ 	// Write out number of signals.
+ 	*signal_count_pos = nsig;
+ 
++	/* Write kernel state to shared memory */
++	*state_count_pos = nstate;
++	for (uint32 i = 0; i < nstate; i++) {
++		uint64 id = (uint64)(*state[i]);
++		uint64 val = (uint64) * (state[i] + 1);
++		write_output_64(id);
++		write_output_64(val);
++	}
++
+ 	if (!flag_collect_cover)
+ 		return;
+ 	// Write out real coverage (basic block PCs).
+@@ -902,8 +926,17 @@ void write_coverage_signal(cover_t* cov, uint32* signal_count_pos, uint32* cover
+ 	}
+ 	// Truncate PCs to uint32 assuming that they fit into 32-bits.
+ 	// True for x86_64 and arm64 without KASLR.
+-	for (uint32 i = 0; i < cover_size; i++)
++	for (uint32 i = 0; i < cover_size; i++) {
++		cover_data_t pc = cover_data[i];
++		if (((uint64(pc) >> 48) & 0xfff0) == 0xefe0) {
++			i += 2;
++			write_output(0x81000000);
++			write_output(0x81000000);
++			write_output(0x81000000);
++			continue;
++		}
+ 		write_output(cover_data[i]);
++	}
+ 	*cover_count_pos = cover_size;
+ }
+ #endif
+@@ -985,6 +1018,7 @@ void write_call_output(thread_t* th, bool finished)
+ 	write_output(reserrno);
+ 	write_output(call_flags);
+ 	uint32* signal_count_pos = write_output(0); // filled in later
++	/*uint32 * kstate_count_pos = */ write_output(0); // filled in later
+ 	uint32* cover_count_pos = write_output(0); // filled in later
+ 	uint32* comps_count_pos = write_output(0); // filled in later
+ 
+@@ -1029,6 +1063,7 @@ void write_call_output(thread_t* th, bool finished)
+ 	reply.reserrno = reserrno;
+ 	reply.flags = call_flags;
+ 	reply.signal_size = 0;
++	reply.kstate_size = 0;
+ 	reply.cover_size = 0;
+ 	reply.comps_size = 0;
+ 	if (write(kOutPipeFd, &reply, sizeof(reply)) != sizeof(reply))
+diff --git a/pkg/ipc/ipc.go b/pkg/ipc/ipc.go
+index d7f0cbc4..f05504d3 100644
+--- a/pkg/ipc/ipc.go
++++ b/pkg/ipc/ipc.go
+@@ -17,6 +17,7 @@ import (
+ 	"unsafe"
+ 
+ 	"github.com/google/syzkaller/pkg/cover"
++	"github.com/google/syzkaller/pkg/kstate"
+ 	"github.com/google/syzkaller/pkg/osutil"
+ 	"github.com/google/syzkaller/pkg/signal"
+ 	"github.com/google/syzkaller/prog"
+@@ -92,8 +93,9 @@ type CallInfo struct {
+ 	Signal []uint32 // feedback signal, filled if FlagSignal is set
+ 	Cover  []uint32 // per-call coverage, filled if FlagSignal is set and cover == true,
+ 	// if dedup == false, then cov effectively contains a trace, otherwise duplicates are removed
+-	Comps prog.CompMap // per-call comparison operands
+-	Errno int          // call errno (0 if the call was successful)
++	Comps prog.CompMap      // per-call comparison operands
++	State kstate.KernStates /* feedback kernel state */
++	Errno int               // call errno (0 if the call was successful)
+ }
+ 
+ type ProgInfo struct {
+@@ -358,6 +360,10 @@ func (env *Env) parseOutput(p *prog.Prog) (*ProgInfo, error) {
+ 			return nil, fmt.Errorf("call %v/%v/%v: signal overflow: %v/%v",
+ 				i, reply.index, reply.num, reply.signalSize, len(out))
+ 		}
++		if inf.State, ok = readKernState(&out, reply.stateSize); !ok {
++			return nil, fmt.Errorf("call %v/%v/%v: state overflow: %v/%v",
++				i, reply.index, reply.num, reply.stateSize, len(out))
++		}
+ 		if inf.Cover, ok = readUint32Array(&out, reply.coverSize); !ok {
+ 			return nil, fmt.Errorf("call %v/%v/%v: cover overflow: %v/%v",
+ 				i, reply.index, reply.num, reply.coverSize, len(out))
+@@ -375,6 +381,30 @@ func (env *Env) parseOutput(p *prog.Prog) (*ProgInfo, error) {
+ 	return info, nil
+ }
+ 
++func readKernState(outp *[]byte, size uint32) (kstate.KernStates, bool) {
++	if size == 0 {
++		return nil, true
++	}
++	fmt.Fprintf(os.Stdout, "%x state was read", size)
++	states := make(kstate.KernStates, size)
++	out := *outp
++	if int(size)*8*2 > len(out) {
++		return nil, false
++	}
++	for i := uint32(0); i < size; i++ {
++		id, _ := readUint64(outp)
++		val, _ := readUint64(outp)
++		state := kstate.KernState{
++			ID:    uint64(id),
++			Value: uint64(val),
++		}
++		states = append(states, state)
++		fmt.Fprintf(os.Stdout, "read a kernel state id: %x, value: %x\n", state.ID, state.Value)
++	}
++	/* state_size * size(uint64) * 3  */
++	return states, true
++}
++
+ func convertExtra(extraParts []CallInfo) CallInfo {
+ 	var extra CallInfo
+ 	extraCover := make(cover.Cover)
+@@ -528,6 +558,7 @@ type callReply struct {
+ 	errno      uint32
+ 	flags      uint32 // see CallFlags
+ 	signalSize uint32
++	stateSize  uint32
+ 	coverSize  uint32
+ 	compsSize  uint32
+ 	// signal/cover/comps follow
+diff --git a/pkg/kstate/kstate.go b/pkg/kstate/kstate.go
+new file mode 100644
+index 00000000..f2e416cf
+--- /dev/null
++++ b/pkg/kstate/kstate.go
+@@ -0,0 +1,46 @@
++package kstate
++
++type KernStates []KernState
++
++type KernState struct {
++	ID    uint64
++	Value uint64
++}
++
++func (states KernStates) Merge(id uint64, value uint64) KernStates {
++	for i, s := range states {
++		/* duplicate state set */
++		if (s.ID == id) && (s.Value == value) {
++			return states
++		}
++		/* The state can't be stably trigger */
++		if (s.Value != value) && (s.ID == id) {
++			states = append(states[:i], states[i+1:]...)
++			return states
++		}
++	}
++	states = append(states, KernState{ID: id, Value: value})
++	return states
++}
++
++func (states KernStates) Dedup() KernStates {
++	dedupMap := make(map[uint32]bool)
++	var retStates KernStates
++	for _, s := range states {
++		id := uint32(s.ID & 0xffffffff)
++		val := uint32(s.Value & 0xffffffff)
++		if _, ok := dedupMap[id ^ val]; !ok {
++			dedupMap[id ^ val] = true
++			retStates = append(retStates, s)
++		}
++	}
++	return retStates;
++}
++
++func (states KernStates) Len() int {
++	return len([]KernState(states))
++}
++
++func (state KernState) EncodeSyscallIdx(idx uint32) KernState {
++	return KernState{ID: (uint64(idx) << 32) | (state.ID & 0xffffffff), Value: state.Value}
++}
+diff --git a/pkg/mgrconfig/config.go b/pkg/mgrconfig/config.go
+index 9aad1879..9e1fb559 100644
+--- a/pkg/mgrconfig/config.go
++++ b/pkg/mgrconfig/config.go
+@@ -94,6 +94,8 @@ type Config struct {
+ 	// For each 'PC', the lowest 32-bit should be the lowest 32-bit of a kernel text address.
+ 	// The highest 32bit is the weight of that address.
+ 	CovFilter json.RawMessage `json:"cover_filter"`
++	/* For filtering and weighting kernel state */
++	KstateFilter json.RawMessage `json:"kstate_filter"`
+ 
+ 	// Reproduce, localize and minimize crashers (default: true).
+ 	Reproduce bool `json:"reproduce"`
+diff --git a/pkg/rpctype/rpctype.go b/pkg/rpctype/rpctype.go
+index aee70c60..833ec5c0 100644
+--- a/pkg/rpctype/rpctype.go
++++ b/pkg/rpctype/rpctype.go
+@@ -8,6 +8,7 @@ package rpctype
+ import (
+ 	"github.com/google/syzkaller/pkg/host"
+ 	"github.com/google/syzkaller/pkg/ipc"
++	"github.com/google/syzkaller/pkg/kstate"
+ 	"github.com/google/syzkaller/pkg/signal"
+ )
+ 
+@@ -16,6 +17,7 @@ type RPCInput struct {
+ 	Prog   []byte
+ 	Signal signal.Serial
+ 	Cover  []uint32
++	State  kstate.KernStates
+ }
+ 
+ type RPCCandidate struct {
+@@ -135,6 +137,7 @@ type GetWeightedPCsArgs struct {
+ }
+ 
+ type GetWeightedPCsRes struct {
+-	EnableFilter bool
+-	WeightedPCs  map[uint32]float32
++	EnableFilter   bool
++	WeightedPCs    map[uint32]float32
++	WeightedStates map[uint32]float32
+ }
+diff --git a/prog/prog.go b/prog/prog.go
+index 7fd8006e..17f99c85 100644
+--- a/prog/prog.go
++++ b/prog/prog.go
+@@ -5,13 +5,16 @@ package prog
+ 
+ import (
+ 	"fmt"
++
++	"github.com/google/syzkaller/pkg/kstate"
+ )
+ 
+ type Prog struct {
+-	Target   *Target
+-	Calls    []*Call
+-	Comments []string
+-	Weight   float32
++	Target     *Target
++	Calls      []*Call
++	Comments   []string
++	Weight     float32
++	ResPrioSum float32
+ }
+ 
+ type Call struct {
+@@ -19,6 +22,8 @@ type Call struct {
+ 	Args    []Arg
+ 	Ret     *ResultArg
+ 	Comment string
++	State   kstate.KernStates
++	ResPrio float32
+ }
+ 
+ type Arg interface {
+diff --git a/prog/rand.go b/prog/rand.go
+index cfe20fb0..05d78075 100644
+--- a/prog/rand.go
++++ b/prog/rand.go
+@@ -837,7 +837,16 @@ func (r *randGen) existingResource(s *state, res *ResourceType, dir Dir) Arg {
+ func (r *randGen) resourceCentric(s *state, t *ResourceType, dir Dir) (arg Arg, calls []*Call) {
+ 	var p *Prog
+ 	var resource *ResultArg
+-	for idx := range r.Perm(len(s.corpus)) {
++	var sumPrios int64 = 0
++	for _, tmp := range s.corpus {
++		sumPrios += int64(tmp.ResPrioSum)
++	}
++	for i := 0; i < len(s.corpus); i++ {
++		randVal := r.Int63n(sumPrios + 1)
++		found, idx := chooseResProgramIdx(randVal, s.corpus)
++		if !found {
++			return nil, nil
++		}
+ 		p = s.corpus[idx].Clone()
+ 		resources := getCompatibleResources(p, t.TypeName, r)
+ 		if len(resources) > 0 {
+@@ -889,6 +898,20 @@ func (r *randGen) resourceCentric(s *state, t *ResourceType, dir Dir) (arg Arg,
+ 	return MakeResultArg(t, dir, resource, 0), p.Calls
+ }
+ 
++func chooseResProgramIdx(randVal int64, corpus []*Prog) (bool, int) {
++	idx := 0
++	found := false
++	for i, p := range corpus {
++		randVal -= int64(p.ResPrioSum)
++		if randVal <= 0 {
++			found = true
++			idx = i
++			break
++		}
++	}
++	return found, idx
++}
++
+ func getCompatibleResources(p *Prog, resourceType string, r *randGen) (resources []*ResultArg) {
+ 	for _, c := range p.Calls {
+ 		ForeachArg(c, func(arg Arg, _ *ArgCtx) {
+diff --git a/syz-fuzzer/fuzzer.go b/syz-fuzzer/fuzzer.go
+index 8fc3cc44..6acdec1d 100644
+--- a/syz-fuzzer/fuzzer.go
++++ b/syz-fuzzer/fuzzer.go
+@@ -18,6 +18,7 @@ import (
+ 	"time"
+ 
+ 	"github.com/google/syzkaller/pkg/csource"
++	"github.com/google/syzkaller/pkg/kstate"
+ 	"github.com/google/syzkaller/pkg/hash"
+ 	"github.com/google/syzkaller/pkg/host"
+ 	"github.com/google/syzkaller/pkg/ipc"
+@@ -53,7 +54,9 @@ type Fuzzer struct {
+ 	corpusHashes map[hash.Sig]struct{}
+ 	corpusPrios  []int64
+ 	sumPrios     int64
+-	weightedPCs  map[uint32]float32
++
++	weightedPCs    map[uint32]float32
++	weightedStates map[uint32]float32
+ 
+ 	signalMu     sync.RWMutex
+ 	corpusSignal signal.Signal // signal of inputs in corpus
+@@ -455,6 +458,21 @@ func (fuzzer *FuzzerSnapshot) chooseProgram(r *rand.Rand) *prog.Prog {
+ 	return fuzzer.corpus[idx]
+ }
+ 
++func chooseResProgramIdx(randVal int64, corpus []*prog.Prog) (bool, int) {
++	idx := 0
++	found := false
++	for i, p := range corpus {
++		randVal -= int64(p.ResPrioSum)
++		if randVal <= 0 {
++			found = true
++			idx = i
++			break
++		}
++	}
++	return found, idx
++}
++
++
+ func (fuzzer *Fuzzer) addInputToCorpus(p *prog.Prog, sign signal.Signal, sig hash.Sig) {
+ 	fuzzer.corpusMu.Lock()
+ 	if _, ok := fuzzer.corpusHashes[sig]; !ok {
+@@ -579,6 +597,9 @@ func (fuzzer *Fuzzer) getWeightedPCs() {
+ 	if len(r.WeightedPCs) > 0 {
+ 		fuzzer.weightedPCs = r.WeightedPCs
+ 	}
++	if len(r.WeightedStates) > 0 {
++		fuzzer.weightedStates = r.WeightedStates
++	}
+ }
+ 
+ func (fuzzer *Fuzzer) calCoverWeight(pcs []uint32) float32 {
+@@ -590,3 +611,25 @@ func (fuzzer *Fuzzer) calCoverWeight(pcs []uint32) float32 {
+ 	}
+ 	return weight
+ }
++
++func (fuzzer *Fuzzer) fillCallsResPrio(p *prog.Prog) {
++	for i, call := range p.Calls {
++		for _, s := range call.State {
++			id := uint32(s.ID & 0xffffffff)
++			if w, ok := fuzzer.weightedStates[id]; ok {
++				p.Calls[i].ResPrio += w
++			}
++		}
++	}
++}
++
++func (fuzzer *Fuzzer) calStateWeight(states kstate.KernStates) float32 {
++	ret := float32(0)
++	for _, s := range states {
++		id := uint32(s.ID & 0xffffffff)
++		if w, ok := fuzzer.weightedStates[id]; ok {
++			ret += w
++		}
++	}
++	return ret
++}
+diff --git a/syz-fuzzer/proc.go b/syz-fuzzer/proc.go
+index a4b0fb10..7d4bd844 100644
+--- a/syz-fuzzer/proc.go
++++ b/syz-fuzzer/proc.go
+@@ -14,6 +14,7 @@ import (
+ 	"time"
+ 
+ 	"github.com/google/syzkaller/pkg/cover"
++	"github.com/google/syzkaller/pkg/kstate"
+ 	"github.com/google/syzkaller/pkg/hash"
+ 	"github.com/google/syzkaller/pkg/ipc"
+ 	"github.com/google/syzkaller/pkg/log"
+@@ -124,6 +125,7 @@ func (proc *Proc) triageInput(item *WorkTriage) {
+ 	notexecuted := 0
+ 	for i := 0; i < signalRuns; i++ {
+ 		info := proc.executeRaw(proc.execOptsCover, item.p, StatTriage)
++		fillCallsKstate(item.p, info)
+ 		if !reexecutionSuccess(info, &item.info, item.call) {
+ 			// The call was not executed or failed.
+ 			notexecuted++
+@@ -151,6 +153,7 @@ func (proc *Proc) triageInput(item *WorkTriage) {
+ 						continue
+ 					}
+ 					thisSignal, _ := getSignalAndCover(p1, info, call1)
++					fillCallsKstate(p1, info)
+ 					if newSignal.Intersection(thisSignal).Len() == newSignal.Len() {
+ 						return true
+ 					}
+@@ -161,6 +164,7 @@ func (proc *Proc) triageInput(item *WorkTriage) {
+ 
+ 	data := item.p.Serialize()
+ 	sig := hash.Hash(data)
++	reEncodeStateID(item.p)
+ 
+ 	log.Logf(2, "added new input for %v to corpus:\n%s", logCallName, data)
+ 	proc.fuzzer.sendInputToManager(rpctype.RPCInput{
+@@ -168,9 +172,12 @@ func (proc *Proc) triageInput(item *WorkTriage) {
+ 		Prog:   data,
+ 		Signal: inputSignal.Serialize(),
+ 		Cover:  inputCover.Serialize(),
++		State:  getProgStates(item.p),
+ 	})
+ 
+ 	item.p.Weight = proc.fuzzer.calCoverWeight(inputCover.Serialize())
++	item.p.ResPrioSum = proc.fuzzer.calStateWeight(getProgStates(item.p))
++
+ 	proc.fuzzer.addInputToCorpus(item.p, inputSignal, sig)
+ 
+ 	if item.flags&ProgSmashed == 0 {
+@@ -217,6 +224,34 @@ func (proc *Proc) smashInput(item *WorkSmash) {
+ 	}
+ }
+ 
++func fillCallsKstate(p *prog.Prog, info *ipc.ProgInfo) {
++	for i, ci := range info.Calls {
++		for _, s := range ci.State {
++			p.Calls[i].State = p.Calls[i].State.Merge(s.ID, s.Value)
++		}
++	}
++}
++
++func reEncodeStateID(p *prog.Prog) {
++	for syscallIdx, call := range p.Calls {
++		for stateIdx, s := range call.State {
++			p.Calls[syscallIdx].State[stateIdx] = s.EncodeSyscallIdx(uint32(syscallIdx))
++			log.Logf(0, "a state id %x in syscall-%d", p.Calls[syscallIdx].State[stateIdx].ID, syscallIdx)
++		}
++	}
++}
++
++func getProgStates(p *prog.Prog) kstate.KernStates {
++	var states kstate.KernStates
++	for _, call := range p.Calls {
++		for _, s := range call.State {
++			states = append(states, s)
++		}
++	}
++	states = states.Dedup()
++	return states
++}
++
+ func (proc *Proc) failCall(p *prog.Prog, call int) {
+ 	for nth := 0; nth < 100; nth++ {
+ 		log.Logf(1, "#%v: injecting fault into call %v/%v", proc.pid, call, nth)
+diff --git a/syz-manager/filter.go b/syz-manager/cov_filter.go
+similarity index 99%
+rename from syz-manager/filter.go
+rename to syz-manager/cov_filter.go
+index ea3d173d..f2035bbb 100644
+--- a/syz-manager/filter.go
++++ b/syz-manager/cov_filter.go
+@@ -246,6 +246,7 @@ func (filter *CoverFilter) putUint32(bytes []byte, value uint32) {
+ 	}
+ }
+ 
++
+ func (filter *CoverFilter) CalProgWeight(pcs []uint32) int {
+ 	prio := int(0)
+ 	for _, pc := range pcs {
+diff --git a/syz-manager/html.go b/syz-manager/html.go
+index 3e1b7788..92986294 100644
+--- a/syz-manager/html.go
++++ b/syz-manager/html.go
+@@ -182,10 +182,11 @@ func (mgr *Manager) httpCorpus(w http.ResponseWriter, r *http.Request) {
+ 			return
+ 		}
+ 		data.Inputs = append(data.Inputs, &UIInput{
+-			Sig:   sig,
+-			Short: p.String(),
+-			Cover: len(inp.Cover),
+-			Prio: mgr.kcovFilter.CalProgWeight(inp.Cover),
++			Sig:     sig,
++			Short:   p.String(),
++			Cover:   len(inp.Cover),
++			Weight:  int(mgr.kcovFilter.CalProgWeight(inp.Cover)),
++			ResPrio: int(mgr.stateFilter.CalStateWeight(inp.State)),
+ 		})
+ 	}
+ 	sort.Slice(data.Inputs, func(i, j int) bool {
+@@ -346,6 +347,12 @@ func (mgr *Manager) httpInput(w http.ResponseWriter, r *http.Request) {
+ 	}
+ 	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+ 	w.Write(inp.Prog)
++	for _, s := range inp.State {
++		varName := mgr.stateFilter.getStateName(s)
++		if varName != "" {
++			w.Write([]byte(fmt.Sprintf("syscall-%x: %s = 0x%x\n", (s.ID>>32)&0xffffffff, varName, s.Value)))
++		}
++	}
+ }
+ 
+ func (mgr *Manager) httpReport(w http.ResponseWriter, r *http.Request) {
+@@ -599,10 +606,11 @@ type UICorpus struct {
+ }
+ 
+ type UIInput struct {
+-	Sig   string
+-	Short string
+-	Cover int
+-	Prio  int
++	Sig     string
++	Short   string
++	Cover   int
++	Weight  int
++	ResPrio int
+ }
+ 
+ var summaryTemplate = html.CreatePage(`
+@@ -748,13 +756,15 @@ var corpusTemplate = html.CreatePage(`
+ 	<tr>
+ 		<th>Coverage</th>
+ 		<th>Program</th>
+-		<th>Prio</th>
++		<th>weight</th>
++		<th>ResPrio</th>
+ 	</tr>
+ 	{{range $inp := $.Inputs}}
+ 	<tr>
+ 		<td><a href='/cover?input={{$inp.Sig}}'>{{$inp.Cover}}</a></td>
+ 		<td><a href="/input?sig={{$inp.Sig}}">{{$inp.Short}}</a></td>
+-		<td>{{printf "%d" $inp.Prio}}</td>
++		<td><a href="/input?sig={{$inp.Sig}}">{{$inp.Weight}}</a></td>
++		<td><a href="/input?sig={{$inp.Sig}}">{{$inp.ResPrio}}</a></td>
+ 	</tr>
+ 	{{end}}
+ </table>
+diff --git a/syz-manager/manager.go b/syz-manager/manager.go
+index 51b39ac4..8898e274 100644
+--- a/syz-manager/manager.go
++++ b/syz-manager/manager.go
+@@ -90,6 +90,7 @@ type Manager struct {
+ 	usedFiles map[string]time.Time
+ 
+ 	kcovFilter *CoverFilter
++	stateFilter *StateFilter
+ }
+ 
+ const (
+@@ -185,6 +186,7 @@ func RunManager(cfg *mgrconfig.Config, target *prog.Target, sysTarget *targets.T
+ 		usedFiles:             make(map[string]time.Time),
+ 		saturatedCalls:        make(map[string]bool),
+ 		kcovFilter:            &CoverFilter{enableFilter: false},
++		stateFilter:           &StateFilter{enableFilter: false},
+ 	}
+ 
+ 	mgr.preloadCorpus()
+@@ -195,6 +197,10 @@ func RunManager(cfg *mgrconfig.Config, target *prog.Target, sysTarget *targets.T
+ 	if mgr.kcovFilter.enableFilter {
+ 		mgr.kcovFilter.createBitmap()
+ 	}
++	mgr.initStateFilter()
++	if mgr.stateFilter.enableFilter {
++		mgr.stateFilter.createMask()
++	}
+ 
+ 	// Create RPC server for fuzzers.
+ 	mgr.serv, err = startRPCServer(mgr)
+@@ -613,6 +619,12 @@ func (mgr *Manager) runInstanceInner(index int, instanceName string) (*report.Re
+ 			return nil, fmt.Errorf("failed to copy bitmap: %v", err)
+ 		}
+ 	}
++	if mgr.stateFilter.enableFilter {
++		_, err = inst.Copy(mgr.stateFilter.stateMaskPath)
++		if err != nil {
++			return nil, fmt.Errorf("failed to copy state mask: %v", err)
++		}
++	}
+ 
+ 	fuzzerBin, err := inst.Copy(mgr.cfg.SyzFuzzerBin)
+ 	if err != nil {
+diff --git a/syz-manager/rpc.go b/syz-manager/rpc.go
+index 864156c6..2cb02b16 100644
+--- a/syz-manager/rpc.go
++++ b/syz-manager/rpc.go
+@@ -58,6 +58,7 @@ type RPCManagerView interface {
+ 	candidateBatch(size int) []rpctype.RPCCandidate
+ 	rotateCorpus() bool
+ 	getWeightedPCs() (bool, map[uint32]float32)
++	getWeightedStates() map[uint32]float32
+ }
+ 
+ func startRPCServer(mgr *Manager) (*RPCServer, error) {
+@@ -334,8 +335,7 @@ func (serv *RPCServer) shutdownInstance(name string) []byte {
+ func (serv *RPCServer) GetWeightedPCs(a *rpctype.GetWeightedPCsArgs, r *rpctype.GetWeightedPCsRes) error {
+ 	serv.mu.Lock()
+ 	defer serv.mu.Unlock()
+-	enableFilter, weightedPCs := serv.mgr.getWeightedPCs()
+-	r.EnableFilter = enableFilter
+-	r.WeightedPCs = weightedPCs
++	r.EnableFilter, r.WeightedPCs = serv.mgr.getWeightedPCs()
++	r.WeightedStates = serv.mgr.getWeightedStates()
+ 	return nil
+ }
+diff --git a/syz-manager/srt_filter.go b/syz-manager/srt_filter.go
+new file mode 100644
+index 00000000..848018dc
+--- /dev/null
++++ b/syz-manager/srt_filter.go
+@@ -0,0 +1,181 @@
++// Copyright 2020 syzkaller project authors. All rights reserved.
++// Use of this source code is governed by Apache 2 LICENSE that can be found in the LICENSE file.
++
++package main
++
++import (
++	"encoding/binary"
++	"encoding/json"
++	"fmt"
++	"os"
++	"strings"
++
++	"github.com/google/syzkaller/pkg/log"
++	"github.com/google/syzkaller/pkg/kstate"
++)
++
++type StateFilter struct {
++	enableFilter   bool
++	weightedStates map[uint32]float32
++	stateName      map[uint32]string
++	fileIDMask     map[string]uint16
++
++	stateMaskPath      string
++	targetLittleEndian bool
++	maxStructMask      int
++	kernelSrcPath      string
++}
++
++func (mgr *Manager) initStateFilter() {
++	srtFilterConfig := make(map[string][]string)
++	if err := json.Unmarshal(mgr.cfg.KstateFilter, &srtFilterConfig); err != nil {
++		log.Logf(0, "no kernel state filter is enabled")
++		mgr.stateFilter.enableFilter = false
++		return
++	}
++	files := srtFilterConfig["files"]
++	rawStates := srtFilterConfig["states"]
++	if len(files) == 0 && len(rawStates) == 0 {
++		mgr.stateFilter.enableFilter = false
++		return
++	}
++	mgr.stateFilter.enableFilter = true
++
++	mgr.stateFilter.kernelSrcPath = mgr.cfg.KernelSrc
++	mgr.stateFilter.maxStructMask = 10
++	mgr.stateFilter.targetLittleEndian = mgr.sysTarget.LittleEndian
++	mgr.stateFilter.stateMaskPath = mgr.cfg.Workdir + "/" + "syz-state-mask"
++	mgr.stateFilter.initWeightedState(files, rawStates)
++}
++
++
++func (mgr *Manager) getWeightedStates() map[uint32]float32 {
++	return mgr.stateFilter.weightedStates
++}
++
++func (filter *StateFilter) initWeightedState(files, rawStates []string) {
++	filter.weightedStates = make(map[uint32]float32)
++	filter.stateName = make(map[uint32]string)
++	filter.fileIDMask = make(map[string]uint16)
++
++	for _, fName := range files {
++		fullSrcName := filter.kernelSrcPath + "/" + fName
++		filter.fileIDMask[fullSrcName] = getMaskFromFileName(fullSrcName)
++	}
++
++	for _, f := range rawStates {
++		rawFile, err := os.Open(f)
++		if err != nil {
++			log.Logf(0, "failed to open raw PCs file: %v", err)
++		}
++		for {
++			var srtName string
++			var weight float32
++			_, err := fmt.Fscanf(rawFile, "%s %f\n", &srtName, &weight)
++			if err != nil {
++				break
++			}
++			ID := getSrtIDFromName(srtName)
++			filter.weightedStates[ID] = weight
++			filter.stateName[ID] = srtName
++		}
++		rawFile.Close()
++	}
++
++	for f, id := range filter.fileIDMask {
++		log.Logf(0, "enabled kernel state file mask: %s(0x%x)", f, id)
++	}
++
++	for id, name := range filter.stateName {
++		log.Logf(0, "enabled kernel state: %s(0x%x)", name, id)
++	}
++}
++
++func getMaskFromFileName(s string) uint16 {
++	return crc16(s)
++}
++
++func getSrtIDFromName(s string) uint32 {
++	ID := uint32(0)
++	if strings.Contains(s, "->") {
++		srt := strings.Split(s, "->")
++		ID = encode(crc16(srt[0]), crc16(srt[1]))
++	} else {
++		log.Fatalf("wrong format %s", s)
++		return 0;
++	}
++	return ID
++}
++
++func encode(high, low uint16) uint32 {
++	return uint32(high) << 16 | uint32(low)
++}
++
++func crc16(s string) uint16 {
++	slen := len(s)
++	if slen < 2 {
++		return 0
++	}
++	s = s + "\n"
++	bytes := []byte(s)
++	data := uint16(0)
++	hash := uint16(0x3e7a)
++	crc := uint16(0xffff)
++	for i := 0; i < slen; i++ {
++		data = binary.LittleEndian.Uint16(bytes[i:i+2])
++		if ((crc&0x0001) ^ (data&0x0001)) > 0 {
++			crc = (crc >> 1) ^ (hash | 0x8005);
++		} else {
++			crc = crc >> 1
++		}
++		hash = data ^ hash
++	}
++	crc = ^crc
++	data = crc
++	crc = (crc << 8) | (data >> 8 &0xff)
++	return crc
++}
++
++func (filter *StateFilter) createMask() {
++	maskFile, err := os.OpenFile(filter.stateMaskPath, os.O_RDWR|os.O_CREATE, 0644)
++	if err != nil {
++		log.Fatalf("failed to open or create state mask file: %s", err)
++	}
++	for _, id := range filter.fileIDMask {
++		bytes := make([]byte, 2)
++		filter.putUint16(bytes, id)
++		_, err := maskFile.Write(bytes)
++		if err != nil {
++			log.Fatalf("failed to write state mask file: %s", err)
++		}
++	}
++	defer maskFile.Close()
++}
++
++func (filter *StateFilter) putUint16(bytes []byte, value uint16) {
++	if filter.targetLittleEndian {
++		binary.LittleEndian.PutUint16(bytes, value)
++	} else {
++		binary.BigEndian.PutUint16(bytes, value)
++	}
++}
++
++func (filter *StateFilter) CalStateWeight(states kstate.KernStates) uint32 {
++	weight := uint32(0)
++	for _, s := range states {
++		id := uint32(s.ID & 0xffffffff)
++		if w, ok := filter.weightedStates[id]; ok {
++			weight += uint32(w)
++		}
++	}
++	return weight
++}
++
++func (filter *StateFilter) getStateName(s kstate.KernState) string {
++	ret := ""
++	id := uint32(s.ID & 0xffffffff)
++	if n, ok := filter.stateName[id]; ok {
++		ret = n
++	}
++	return ret
++}
+-- 
+2.20.1
+
