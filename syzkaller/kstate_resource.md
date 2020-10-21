@@ -21,6 +21,7 @@ First, we need to implement a [LLVM pass](../static_analysis_tools/kern_instrume
 CFLAGS_*.o = -Xclang -load -Xclang PATH_TO_YOUR_PASS.so -fno-discard-value-names
 ```  
 to Makefile for the object file you need to instrument it. The kernel state id is the hash of structure name and field name.
+If you want track the whole kernel, try to add the mentioned CFLAGS to kcov-flag-$(CONFIG_CC_HAS_SANCOV_TRACE_PC).
 
 ### Implement the instrument function in kernel
 
@@ -31,7 +32,7 @@ Refer to our [implement](../static_analysis_tools/kern_instrument/kern_patch) of
 Clone syzkaller, run:
 ```  
 cd PATH_TO_SYZ_SRC
-git checkout a2cdad9
+git checkout ff4a334
 git apply PATH_TO_harbian-qa/syz_patch/*.patch
 ```   
 
@@ -60,7 +61,7 @@ Now, you can run syzkaller as usual, and you can find there is a list of kernel 
 
 ### Kernel instrument
 
-We reuse the KCOV interface instead of using a separate mode. So, we encode the state id with 0xfefe at the highest 16-bit. While syzkaller gets a kcov pc started with 0xfefe, it realizes this pc is a kstate id and the value and address of the state will occupy the followed 2*64-bit. No matter how many bit the variable used, we formalize to 64-bit. Noted if you want to collect other information, you have to implement a corresponding syzkaller for it.
+We reuse the KCOV interface instead of using a separate mode. So, we encode the state id with 0xefe at the highest 12-bit. While syzkaller gets a kcov pc started with 0xefe, it realizes this pc is a kstate id and the value and address of the state will occupy the followed 2*64-bit. No matter how many bit the variable is, we formalize to 64-bit. Noted if you want to collect other information, you have to implement a corresponding syzkaller for it.
 
 ### Syzkaller support
 
@@ -72,7 +73,7 @@ syz-executor have to pick out kernel states and send them out after all signal w
 
 Correspondingly, parseOutput in pkg/ipc.go is called by fuzzer and we add a readKernState for parse the executor output. And these kernel states information will be put into a structure called KernState in pkg/kstate/kstate.go. Every input from executor has an array for kernstate, and every prog has a state weight calculated from kernstates. Also, KernState support searching the map by its ID or ID^Value which called it hash.
 
-syz-fuzzer/proc.go: calStateWeight will calculate the weight of a prog. Minus count for eliminating the influence of the length of kstate. prog/rand.go: chooseReaProgramIdx function implement a prior choice of prog base on its states weight
+syz-fuzzer/fuzzer.go: calStateWeight will calculate the resouce weight of a prog. Minus count for eliminating the influence of the length of kstate. prog/rand.go: chooseReaProgramIdx function implement a prior choice of prog base on its states weight
 
 ## Kernel state guide fuzzing practice
 
@@ -80,7 +81,7 @@ We have explored two ways in assigning weight to resources.
 
 #### Get frequency of using kernel state
 
-This tool is what we mentioned above kstate_map. We use LLVM api static analyze the using of states in target functions. Without any awareness of the value of a state, it just encourages fuzzer to preferentially choose and extract those progs that frequently rewrite important states. In other words, the prog has  complex states.
+This tool is what we mentioned above kstate_map. We use LLVM api static analyze the using of states in target functions. Without any awareness of the value of a state, it just encourages fuzzer to preferentially choose and extract those progs that frequently rewrite important states. In other words, the prog has complex states.
 
 #### Specify kernel state value weight
 
