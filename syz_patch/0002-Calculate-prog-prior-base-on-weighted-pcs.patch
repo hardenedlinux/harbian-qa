@@ -1,0 +1,190 @@
+From bc3063ef6207e1fafa82723a57b58bc938cb77c5 Mon Sep 17 00:00:00 2001
+From: Kaipeng Zeng <kaipeng94@gmail.con>
+Date: Tue, 20 Oct 2020 23:47:23 -0400
+Subject: [PATCH 2/3] Calculate prog prior base on weighted pcs
+
+---
+ prog/prio.go          |  2 +-
+ prog/prog.go          |  1 +
+ syz-fuzzer/fuzzer.go  | 19 +++++++++++++++++--
+ syz-fuzzer/proc.go    |  1 +
+ syz-manager/filter.go | 14 ++++++++++++--
+ syz-manager/html.go   |  4 ++++
+ syz-manager/rpc.go    |  5 +++--
+ 7 files changed, 39 insertions(+), 7 deletions(-)
+
+diff --git a/prog/prio.go b/prog/prio.go
+index eee44cd4..3346c594 100644
+--- a/prog/prio.go
++++ b/prog/prio.go
+@@ -164,7 +164,7 @@ func (target *Target) calcDynamicPrio(corpus []*Prog) [][]float32 {
+ 			for _, c1 := range p.Calls[idx0+1:] {
+ 				id0 := c0.Meta.ID
+ 				id1 := c1.Meta.ID
+-				prios[id0][id1] += 1.0
++				prios[id0][id1] += 1.0 * p.Weight
+ 			}
+ 		}
+ 	}
+diff --git a/prog/prog.go b/prog/prog.go
+index bcc86fb0..7fd8006e 100644
+--- a/prog/prog.go
++++ b/prog/prog.go
+@@ -11,6 +11,7 @@ type Prog struct {
+ 	Target   *Target
+ 	Calls    []*Call
+ 	Comments []string
++	Weight   float32
+ }
+ 
+ type Call struct {
+diff --git a/syz-fuzzer/fuzzer.go b/syz-fuzzer/fuzzer.go
+index 2463d9e9..8fc3cc44 100644
+--- a/syz-fuzzer/fuzzer.go
++++ b/syz-fuzzer/fuzzer.go
+@@ -53,6 +53,7 @@ type Fuzzer struct {
+ 	corpusHashes map[hash.Sig]struct{}
+ 	corpusPrios  []int64
+ 	sumPrios     int64
++	weightedPCs  map[uint32]float32
+ 
+ 	signalMu     sync.RWMutex
+ 	corpusSignal signal.Signal // signal of inputs in corpus
+@@ -460,6 +461,9 @@ func (fuzzer *Fuzzer) addInputToCorpus(p *prog.Prog, sign signal.Signal, sig has
+ 		fuzzer.corpus = append(fuzzer.corpus, p)
+ 		fuzzer.corpusHashes[sig] = struct{}{}
+ 		prio := int64(len(sign))
++		if len(fuzzer.weightedPCs) > 0 {
++			prio = int64(p.Weight)
++		}
+ 		if sign.Empty() {
+ 			prio = 1
+ 		}
+@@ -563,8 +567,6 @@ func parseOutputType(str string) OutputType {
+ 	}
+ }
+ 
+-// Currently, only use GetWeightedPCsRes to check if filter enabled.
+-// Weighted PC table will not be used.
+ func (fuzzer *Fuzzer) getWeightedPCs() {
+ 	a := &rpctype.GetWeightedPCsArgs{}
+ 	r := &rpctype.GetWeightedPCsRes{EnableFilter: false}
+@@ -574,4 +576,17 @@ func (fuzzer *Fuzzer) getWeightedPCs() {
+ 	if r.EnableFilter {
+ 		fuzzer.execOpts.Flags |= ipc.FlagEnableCoverageFilter
+ 	}
++	if len(r.WeightedPCs) > 0 {
++		fuzzer.weightedPCs = r.WeightedPCs
++	}
++}
++
++func (fuzzer *Fuzzer) calCoverWeight(pcs []uint32) float32 {
++	weight := float32(0.0)
++	for _, pc := range pcs {
++		if _, ok := fuzzer.weightedPCs[pc]; ok {
++			weight += fuzzer.weightedPCs[pc]
++		}
++	}
++	return weight
+ }
+diff --git a/syz-fuzzer/proc.go b/syz-fuzzer/proc.go
+index fe19a17b..a4b0fb10 100644
+--- a/syz-fuzzer/proc.go
++++ b/syz-fuzzer/proc.go
+@@ -170,6 +170,7 @@ func (proc *Proc) triageInput(item *WorkTriage) {
+ 		Cover:  inputCover.Serialize(),
+ 	})
+ 
++	item.p.Weight = proc.fuzzer.calCoverWeight(inputCover.Serialize())
+ 	proc.fuzzer.addInputToCorpus(item.p, inputSignal, sig)
+ 
+ 	if item.flags&ProgSmashed == 0 {
+diff --git a/syz-manager/filter.go b/syz-manager/filter.go
+index 9cf2415d..ea3d173d 100644
+--- a/syz-manager/filter.go
++++ b/syz-manager/filter.go
+@@ -53,8 +53,8 @@ func (mgr *Manager) initKcovFilter() {
+ 	mgr.kcovFilter.initWeightedPCs(files, funcs, rawPCs)
+ }
+ 
+-func (mgr *Manager) getWeightedPCs() bool {
+-	return mgr.kcovFilter.enableFilter
++func (mgr *Manager) getWeightedPCs() (bool, map[uint32]float32){
++	return mgr.kcovFilter.enableFilter, mgr.kcovFilter.weightedPCs
+ }
+ 
+ func (filter *CoverFilter) initWeightedPCs(files, functions, rawPCsFiles []string) {
+@@ -245,3 +245,13 @@ func (filter *CoverFilter) putUint32(bytes []byte, value uint32) {
+ 		binary.BigEndian.PutUint32(bytes, value)
+ 	}
+ }
++
++func (filter *CoverFilter) CalProgWeight(pcs []uint32) int {
++	prio := int(0)
++	for _, pc := range pcs {
++		if _, ok := filter.weightedPCs[pc]; ok {
++			prio += int(filter.weightedPCs[pc])
++		}
++	}
++	return prio
++}
+diff --git a/syz-manager/html.go b/syz-manager/html.go
+index 789c416d..3e1b7788 100644
+--- a/syz-manager/html.go
++++ b/syz-manager/html.go
+@@ -185,6 +185,7 @@ func (mgr *Manager) httpCorpus(w http.ResponseWriter, r *http.Request) {
+ 			Sig:   sig,
+ 			Short: p.String(),
+ 			Cover: len(inp.Cover),
++			Prio: mgr.kcovFilter.CalProgWeight(inp.Cover),
+ 		})
+ 	}
+ 	sort.Slice(data.Inputs, func(i, j int) bool {
+@@ -601,6 +602,7 @@ type UIInput struct {
+ 	Sig   string
+ 	Short string
+ 	Cover int
++	Prio  int
+ }
+ 
+ var summaryTemplate = html.CreatePage(`
+@@ -746,11 +748,13 @@ var corpusTemplate = html.CreatePage(`
+ 	<tr>
+ 		<th>Coverage</th>
+ 		<th>Program</th>
++		<th>Prio</th>
+ 	</tr>
+ 	{{range $inp := $.Inputs}}
+ 	<tr>
+ 		<td><a href='/cover?input={{$inp.Sig}}'>{{$inp.Cover}}</a></td>
+ 		<td><a href="/input?sig={{$inp.Sig}}">{{$inp.Short}}</a></td>
++		<td>{{printf "%d" $inp.Prio}}</td>
+ 	</tr>
+ 	{{end}}
+ </table>
+diff --git a/syz-manager/rpc.go b/syz-manager/rpc.go
+index 980a447a..864156c6 100644
+--- a/syz-manager/rpc.go
++++ b/syz-manager/rpc.go
+@@ -57,7 +57,7 @@ type RPCManagerView interface {
+ 	newInput(inp rpctype.RPCInput, sign signal.Signal) bool
+ 	candidateBatch(size int) []rpctype.RPCCandidate
+ 	rotateCorpus() bool
+-	getWeightedPCs() bool
++	getWeightedPCs() (bool, map[uint32]float32)
+ }
+ 
+ func startRPCServer(mgr *Manager) (*RPCServer, error) {
+@@ -334,7 +334,8 @@ func (serv *RPCServer) shutdownInstance(name string) []byte {
+ func (serv *RPCServer) GetWeightedPCs(a *rpctype.GetWeightedPCsArgs, r *rpctype.GetWeightedPCsRes) error {
+ 	serv.mu.Lock()
+ 	defer serv.mu.Unlock()
+-	enableFilter := serv.mgr.getWeightedPCs()
++	enableFilter, weightedPCs := serv.mgr.getWeightedPCs()
+ 	r.EnableFilter = enableFilter
++	r.WeightedPCs = weightedPCs
+ 	return nil
+ }
+-- 
+2.20.1
+
