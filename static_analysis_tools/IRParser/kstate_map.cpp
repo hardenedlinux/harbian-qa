@@ -31,67 +31,51 @@ using namespace std;
 
 
 std::vector<std::string> getFuncListFromFile(std::string funcListFile);
-std::vector<std::string> listIRFile(std::string IRFileDir);
 std::vector<gepInfo> getGEPInfoFromFunc(Function *func);
 void writeDebugInfo(std::vector<gepInfo> info, std::string path);
 void writeFuncAddrMap(std::vector<gepInfo> info, std::string path);
 
 int main(int argc, const char *argv[]) {
     if (argc < 3) {
-        outs() << FAIL << "./kcov_map ir_dir func_list log_dir\n" << RESET;
+        outs() << FAIL << "./kcov_map ir_path func_list log_dir\n" << RESET;
         return 1;
     }
-    std::string IRFileDir    = argv[1];
+    std::string IRPath       = argv[1];
     std::string FuncListFile = argv[2];
     std::string LogDir       = argv[3];
 
     std::vector<std::string> FuncList = getFuncListFromFile(FuncListFile);
-    std::vector<std::string> IRFiles = listIRFile(IRFileDir);
     std::map<unsigned, gepInfo> gepInfoMap;
+    LLVMContext context;
+    SMDiagnostic error;
+    std::unique_ptr<Module> mod = parseIRFile(IRPath, error, context);
+    Module const *mod_const = mod.get();
+    if (mod_const == nullptr) {
+        outs() << FAIL_LINE("Failed to open " + IRPath + ".");
+        return 1;
+    }
+
     for (std::string funcName : FuncList) {
-        bool found = false;
-        /* Search which file is the function located in*/
-        for (std::string f : IRFiles) {
-            LLVMContext context;
-            SMDiagnostic error;
-            std::unique_ptr<Module> mod = parseIRFile(f, error, context);
-            Module const *mod_const = mod.get();
-            if (mod_const == nullptr) {
-                outs() << FAIL_LINE("Failed to open " + f + ".");
-                return 1;
-            }
-
-            Function *func = mod_const->getFunction(funcName);
-            if (func == nullptr) continue;
-
-            if (func != nullptr) {
-                if (func->size() == 0) {
-                    continue;
+        Function *func = mod_const->getFunction(funcName);
+        if (func != nullptr && func->size() > 0) {
+            outs() << SUCC_LINE("Function " + funcName + " was found");
+            std::vector<gepInfo> gepInfos = getGEPInfoFromFunc(func);
+            for (gepInfo i : gepInfos) {
+                if (gepInfoMap.find(i.getGEPointerID()) == gepInfoMap.end()) {
+                    gepInfoMap[i.getGEPointerID()] = i;
                 }
-                found = true;
-                outs() << SUCC_LINE("Function " + funcName + " was found");
-
-                std::vector<gepInfo> gepInfos = getGEPInfoFromFunc(func);
-                for (gepInfo i : gepInfos) {
-                    if (gepInfoMap.find(i.getGEPointerID()) != gepInfoMap.end()) {
-                        gepInfoMap[i.getGEPointerID()].incCount();
-                    } else {
-                        gepInfoMap[i.getGEPointerID()] = i;
-                        gepInfoMap[i.getGEPointerID()].incCount();
-                    }
-                }
-                /* Write log file of every functions */
-                writeDebugInfo(gepInfos, LogDir + "/" + funcName + "state.json");
-                writeFuncAddrMap(gepInfos, LogDir + "/" + funcName + ".state.map");
-                break;
+                gepInfoMap[i.getGEPointerID()].incCount();
             }
+            writeDebugInfo(gepInfos, LogDir + "/" + funcName + "state.json");
+            writeFuncAddrMap(gepInfos, LogDir + "/" + funcName + ".state.map");
+            continue;
         }
-        if (!found)
+        if (func == nullptr)
             outs() << FAIL_LINE("Function " + funcName + " was not found");
     }
-    /* struct a->b: HASH_ID WEIGHT */
+
     for (auto i : gepInfoMap) {
-        outs() << i.second.getStructName() << ": " << i.second.getGEPointerID() << " " << i.second.getCount() << "\n";
+        outs() << i.second.getStructName() << " " << i.second.getCount() << "\n";
     }
 }
 
@@ -110,24 +94,6 @@ std::vector<std::string> getFuncListFromFile(std::string funcListPath) {
     return funcList;
 }
 
-std::vector<std::string> listIRFile(std::string IRDirPath) {
-    std::vector<std::string> irList;
-    struct dirent *entry;
-    DIR *dir = opendir(IRDirPath.c_str());
-    if (dir == NULL) {
-        outs() << FAIL_LINE("Dir wrong");
-        return irList;
-    }
-    while ((entry = readdir(dir)) != NULL) {
-        std::string fn(entry->d_name);
-        if (fn.find(".ll") != std::string::npos)
-            irList.push_back(IRDirPath + "/" + entry->d_name);
-    }
-    closedir(dir);
-    return irList;
-}
-
-/* It's hard to track if GEPointer will be use in condition, we count every GEPOperation */
 std::vector<gepInfo> getGEPInfoFromFunc(Function *func) {
     std::map<string, bool> gepInfoMap;
     std::vector<gepInfo> ret;
@@ -144,8 +110,12 @@ std::vector<gepInfo> getGEPInfoFromFunc(Function *func) {
                 if (gepInst->getSourceElementType()->isStructTy()) {
                     std::string structName = gepInst->getSourceElementType()->getStructName();
                     std::string fieldName = gepInst->getName();
+                    if (fieldName == "") continue;
                     gepInfo thisGEP(structName, fieldName, width);
                     if (!gepInfoMap[thisGEP.getStructName()]) {
+                        if (gepInst->getResultElementType()->isPointerTy()) {
+                            continue;
+                        }
                         gepInfoMap[thisGEP.getStructName()] = true;
                         ret.push_back(thisGEP);
                     } else {
