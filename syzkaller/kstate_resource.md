@@ -20,7 +20,7 @@ First, we need to implement a [LLVM pass](../static_analysis_tools/kern_instrume
 ```  
 CFLAGS_*.o = -Xclang -load -Xclang PATH_TO_YOUR_PASS.so -fno-discard-value-names
 ```  
-to Makefile for the object file you need to instrument it. The kernel state id is the hash of structure name and field name.
+to Makefile for the object file you need to instrument it. The kernel state id is the crc of file name, structure name and field name.
 If you want track the whole kernel, try to add the mentioned CFLAGS to kcov-flag-$(CONFIG_CC_HAS_SANCOV_TRACE_PC).
 
 ### Implement the instrument function in kernel
@@ -39,7 +39,10 @@ git apply PATH_TO_harbian-qa/syz_patch/*.patch
 build syzakller as usual. Add the following line to configure file:
 
 ```  
-"kstatemap": "PATH_TO_KERNEL_STATE.map"
+"kstate_filter": {
+        "files": ["which_source_file_to_track", "base_on_filename_crc"],
+        "states": ["which_struct_field_to_track", "base_on_struct_field_crc"]
+    },
 ```  
 
 You can use our tool [kstate_map](../static_analysis_tools/IRParser/kstate_map.cpp) get the kernel state map. run:
@@ -71,7 +74,7 @@ syz-executor have to pick out kernel states and send them out after all signal w
 
 #### syz-fuzzer
 
-Correspondingly, parseOutput in pkg/ipc.go is called by fuzzer and we add a readKernState for parse the executor output. And these kernel states information will be put into a structure called KernState in pkg/kstate/kstate.go. Every input from executor has an array for kernstate, and every prog has a state weight calculated from kernstates. Also, KernState support searching the map by its ID or ID^Value which called it hash.
+Correspondingly, parseOutput in pkg/ipc.go is called by fuzzer and we add a readKernState for parse the executor output. And these kernel states information will be put into a structure called KernState in pkg/kstate/kstate.go. Every input from executor has an array for kernstate, and every prog has a state weight calculated from kernstates. Also, KernState support searching the map by its ID or ID^Value which called their hash.
 
 syz-fuzzer/fuzzer.go: calStateWeight will calculate the resouce weight of a prog. Minus count for eliminating the influence of the length of kstate. prog/rand.go: chooseReaProgramIdx function implement a prior choice of prog base on its states weight
 
