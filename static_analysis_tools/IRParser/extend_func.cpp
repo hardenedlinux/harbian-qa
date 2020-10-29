@@ -13,7 +13,6 @@
 #include <llvm/IR/DebugInfoMetadata.h>
 #include <llvm/IR/CFG.h>
 #include <llvm/IR/Metadata.h>
-#include <llvm/Analysis/CallGraph.h>
 
 #include <string>
 #include <iostream>
@@ -32,70 +31,46 @@ using namespace llvm;
 
 
 std::map<std::string, funcInfoInCFG> funcsInfo;
-std::map<std::string, funcInfoInCFG> thisModFuncsInfo;
 
 
 std::vector<std::string> readFuncList(std::string funcListPath);
-std::vector<std::string> getIRList(std::string IRDirPath);
-void getCalledFunc(CallGraph *CG, const Function *f, int blockNum, int level);
+void getCalledFunc(Module *mod, Function *func, int blockNum, int level);
 void writeToNewFuncList(std::vector<std::string> funcList, std::string oldPath);
 void writeToLogDir(std::string fn, std::string funcCallTree, std::string dirPath);
 
 
 int main(int argc, const char *argv[]) {
     if (argc < 5 || argv[1] == nullptr) {
-        outs() << "./extern_func functions_list ir_dir call_depth block_num log_dir\n";
+        outs() << "./extern_func functions_list ir_path call_depth block_num log_dir\n";
         return 1;
     }
     std::string FuncListPath = argv[1];
-    std::string IRDirPath = argv[2];
+    std::string IRPath = argv[2];
     unsigned depth = std::stoi(argv[3]);
     unsigned blockNum = std::stoi(argv[4]);
     std::string logDir = argv[5];
 
-    std::vector<std::string> IRList = getIRList(IRDirPath);
     std::vector<std::string> funcList = readFuncList(FuncListPath);
     std::vector<std::string> extFuncList;
 
-    for (std::string ir : IRList) {
-        LLVMContext ctx;
-        SMDiagnostic err;
-        std::unique_ptr<Module> mod = parseIRFile(ir, err, ctx);
-        if (mod == nullptr) {
-            outs() << FAIL << "Failed to open ir file: " << ir << "\n" << RESET;
-            continue;
-        }
-        Module *constMod = mod.get();
-        CallGraph CG(*constMod);
-        for (std::string fn : funcList) {
-            const Function *func = constMod->getFunction(fn);
-            if (func == nullptr || func->size() < 1)
-                continue;
-            getCalledFunc(&CG, func, blockNum, depth);
-        }
+    LLVMContext ctx;
+    SMDiagnostic err;
+    std::unique_ptr<Module> mod_unique = parseIRFile(IRPath, err, ctx);
+    if (mod_unique == nullptr) {
+        outs() << FAIL << "Failed to open ir file: " << IRPath << "\n" << RESET;
+        return 1;
     }
-    for (std::string ir : IRList) {
-        LLVMContext ctx;
-        SMDiagnostic err;
-        std::unique_ptr<Module> mod = parseIRFile(ir, err, ctx);
-        if (mod == nullptr) {
-            outs() << FAIL << "Failed to open ir file: " << ir << "\n" << RESET;
-            continue;
-        }
-        Module *constMod = mod.get();
-        CallGraph CG(*constMod);
-        for (auto &fn : funcsInfo) {
-            std::string funcName = fn.first;
-            const Function *func = constMod->getFunction(funcName);
-            if (func == nullptr || func->size() < 1)
-                continue;
-            thisModFuncsInfo[funcName] = fn.second;
-        }
+    Module *mod = mod_unique.get();
+
+    for (std::string fn : funcList) {
+        Function *func = mod->getFunction(fn);
+        getCalledFunc(std::move(mod), func, blockNum, depth);
     }
+
     for (std::string fn : funcList) {
         std::string funcCallTree;
-        if (thisModFuncsInfo.find(fn) != thisModFuncsInfo.end())
-            funcCallTree = funcsInfo[fn].callTree(thisModFuncsInfo, 0, depth);
+        if (funcsInfo.find(fn) != funcsInfo.end())
+            funcCallTree = funcsInfo[fn].callTree(funcsInfo, 0, depth);
         else {
             funcCallTree = fn;
             outs() << FAIL << fn << " was not found!\n";
@@ -103,9 +78,9 @@ int main(int argc, const char *argv[]) {
         writeToLogDir(fn, funcCallTree, logDir);
     }
     std::vector<std::string> newFuncList;
-    for (auto &fn : thisModFuncsInfo) {
+    for (auto &fn : funcsInfo) {
         if (fn.second.getBlockNum() > blockNum)
-            newFuncList.push_back(fn.first);
+        newFuncList.push_back(fn.first);
     }
     writeToNewFuncList(newFuncList, FuncListPath);
 }
@@ -125,47 +100,50 @@ std::vector<std::string> readFuncList(std::string funcListPath) {
     return funcList;
 }
 
-std::vector<std::string> getIRList(std::string IRDirPath) {
-    std::vector<std::string> ret;
-   struct dirent *entry;
-   DIR *dir = opendir(IRDirPath.c_str());
-   if (dir == NULL) {
-      return ret;
-   }
-   while ((entry = readdir(dir)) != NULL) {
-       ret.push_back(IRDirPath + "/" + entry->d_name);
-   }
-   closedir(dir);
-   return ret;
-}
-
 /* Recursively get the called functions, use blockNum and level limit functions */
-void getCalledFunc(CallGraph *CG, const Function *f, int blockNum, int level) {
-    const CallGraphNode *n = (*CG)[f];
+void getCalledFunc(Module *mod, Function *func, int blockNum, int level) {
     if (level < 1)
         return;
-    if (n == nullptr) {
-        outs() << FAIL << "Failed to get call graph node\n" << RESET;
+    if (func == nullptr) {
+        outs() << FAIL << "unvariable function\n"<< RESET;
         return;
     }
-    funcInfoInCFG *thisFunc = new funcInfoInCFG(f->getName(), f->size());
-    if (funcsInfo.find(f->getName()) == funcsInfo.end()) {
-        funcsInfo[f->getName()] = *thisFunc;
+    if (func->size() < 1) {
+        func = mod->getFunction(func->getName());
     }
-    for (auto i : *n) {
-        Function *calledFunc = i.second->getFunction();
-        if (calledFunc != nullptr) {
-            /* Skip the instument function */
-            if (calledFunc->getName().find("saniti") != std::string::npos)
-                continue;
-            if (calledFunc->getName().find("asan") != std::string::npos)
-                continue;
-            /* Recursive call with a depth level */
-            funcsInfo[f->getName()].addCalledFunc(calledFunc->getName());
-            getCalledFunc(CG, calledFunc, blockNum, level - 1);
+
+    if (func != nullptr) {
+        funcInfoInCFG *thisFuncInfo = new funcInfoInCFG(func->getName(), func->size());
+        if (funcsInfo.find(func->getName()) == funcsInfo.end())
+            funcsInfo[func->getName()] = *thisFuncInfo;
+        delete thisFuncInfo;
+    }
+
+    if (func != nullptr && func->size() > 0) {
+        for (BasicBlock &bb : *func) {
+            for (Instruction &i : bb) {
+                CallInst *callInst = dyn_cast<CallInst>(&i);
+                if (callInst != nullptr) {
+                    Function *calledFunc = callInst->getCalledFunction();
+                    if (calledFunc == nullptr) {
+                        calledFunc = dyn_cast<Function>(callInst->getCalledValue()->stripPointerCasts());
+                    }
+                    if (calledFunc != nullptr) {
+                        /* Skip the instument function */
+                        if (calledFunc->getName().find("saniti") != std::string::npos)
+                            continue;
+                        if (calledFunc->getName().find("asan") != std::string::npos)
+                            continue;
+                        if (calledFunc->getName().find("llvm.") != std::string::npos)
+                            continue;
+                        /* Recursive call with a depth level */
+                        funcsInfo[func->getName()].addCalledFunc(calledFunc->getName());
+                        getCalledFunc(mod, calledFunc, blockNum, level - 1);
+                    }
+                }
+            }
         }
     }
-    return;
 }
 
 void writeToNewFuncList(std::vector<std::string> funcList, std::string oldPath) {
