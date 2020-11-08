@@ -40,6 +40,9 @@ Fitness is motivation of evolution in GA. A appropriate fitness reward helps eff
 2. Sum of basic-block weight fitness.( Syzkaller)  
 3. Class code: lower error handle fitness.(VUzzer)  
 4. Statistical calculation of testcase.( Syzkaller)  
+
+Similar to VUzzer, we implement a customized syzkaller which support specifying the fuzz target and can be feasibly configure basic-block weight. Read this [document](syzkaller/cover_filter.md) for more information.
+
 * refer to the following survey  
 
 
@@ -75,7 +78,7 @@ Without any gradient, syzkaller won't collect any testcases to corpus until all 
 State:
 State(socket+setsockopt$1)+State(socket+setsockopt$2) != State(socket+setsockopt1+setsockopt$2) != State(socket+setsockopt$1+setsocketopt$2+sendmsg(ANY)) != State(socket+setsockopt$1+setsocketopt$2+sendmsg(EXPECT_FLAG))
 ```  
-If we try to collect state of testcases, it will lead fuzzer to generate more complex context testcase. In our practice, we static analyse which state is widely used in condition. Collect those testcases if they can trigger such state. Refer to syzkaller resource centric( block-stacking generate) mentioned before, these testcases will be resource( state-base block) which can be used to generate testcase. Refer to this [documentation](syzkaller/kstat_demo/README.md). But, that will maintain a lot of testcases in corpus, testcases should be weigted.
+If we try to collect state of testcases, it will lead fuzzer to generate more complex context testcase. In our practice, we static analyse which state is widely used in condition. Collect those testcases if they can trigger such state. Refer to syzkaller resource centric( block-stacking generate) mentioned before, these testcases will be resource( state-base block) which can be used to generate testcase. Refer to this [document](syzkaller/kstat_demo/README.md). But, that will maintain a lot of testcases in corpus, testcases should be weigted. Also, to avoid writing bpf manuly, we introduce another way to [track kernel state](syzkaller/kstate_resource.md).
 
 
 ### Shortage of Full Kernel Fuzzer
@@ -84,7 +87,7 @@ FKF is multi-solution search space, need a good trade off between explore and ex
 1. Syzkaller has no explicit fitness, but it maintain syscall-to-syscall markov chain for prios choise and mutation. The prios include static and dynamic prios. The dynamic prios come from calculating count of syscall pair in each testcase of corpus. Note that testcases may be conflict with each other.  
 2. Subsystem syscall set: syzkaller support enable/disable a subset of syscalls to fuzz.  
 3. Partly kernel fuzz: KCOV support only instement a part of source file in kernel.  
-4. Multi-policy fuzzer: base on syz-hub, customized fuzzer with different feedback share testcases with each other if the testcase is interested by other fuzzers. Refer to this [documentation](syzkaller/multi_policy/README.md).  
+4. Multi-policy fuzzer: base on syz-hub, customized targeted syz-manager with different feedback share testcases with each other if the testcases are interested by other syz-manager. Refer to this [document](syzkaller/multi_policy/README.md).  
 
 
 ### Satisfy the condition constraint
@@ -93,7 +96,7 @@ Of course, most ideas of offering information to mutating and generating mention
 
 
 #### Condition constraint satisfied by single input
-If we treat arguments of a function as a byte-base input. Some conditions constraint can be satisfied by mutating input of the function. For these conditions, the following ways can be used to improve the performence of fuzzer.
+If we treat arguments of a function as a byte-base input. Some conditions constraint can be satisfied by mutating input of the function. In this situation, the following ways can be used to improve the performence of fuzzer.
 1. Symbolic execution: static analysis of constraint, can't solve constraint indrectly from input, overhead.( KLEE)  
 2. Dynamic taint analysis( DTA): dynamically trace inputs used by conditions.( VUzzer)  
 3. Dynamic taint analysis: dynamically trace which inputs can satisfy which conditions efficiently.( GREYONE)  
@@ -112,18 +115,18 @@ Also, i attach a comparison of these differences of these ways.
 | KCOV_COMPARISON | path-dependent | instruction-level | sensitive | Syzkaller |  
 | Qemu TCG | path-dependent | instruction-level | sensitive | QemuTCG + AFL |  
 
-We can see comparison instrument can be use in DTA to solve nested condtion. But instrument depend on if condition is reachable. And taint data monitor like VUzzer hard to trace complex indirectly taint( eg. memory copy).
+We can see comparison instrument can be use in DTA to solve nested condtion. But instrument depend on if the branch is reachable. And taint data monitor like VUzzer hard to trace complex indirectly taint( eg. memory copy).
 
 
 #### Note that in Linux kernel fuzzer:
 
-Syzkaller has powerful syscall descriptions, search space of a single syscall input was greatly reduce. The truly diffculty is to reach branches are depend on syscalls combination and arguments combination.
+Syzkaller has powerful syscall descriptions, search space of a single syscall input was greatly reduce. The truly diffculty is to reach branches are depend on syscalls combination and propriate arguments.
 1. Syzkaller resource: recently syzkaller introduce a feature: resource centric. Syzkaller treat testcases as resource if they create or operate the same kind data structure( resource also). And use these resource to generate or mutate new testcase.  
 2. MoonShine: static analysis real world testcase to get the dependence of syscalls.  
 3. State-base resource: in our customized syzkaller, only testcase trigger a special state feedback can be resource. Further more, maintain a relationship between syscalls sequence and kernel state may help more.  
-Also refer to mentioned above crossover.  
+Also refer to the chapter crossover mentioned above.  
 
-Symbolic execution: if static analysis chose syscalls as entry, it will be effort and inefficient. Otherwise, if the entry is some kernel function in callstack may help more. Both [this paper](https://arxiv.org/abs/1903.02981) and [our fuzzer](syzkaller/kstat_demo/README.md) chose the second way.  Get function-level input by using kernel function hook. We also have a [documentation](static_analysis_tools/README.md) of comparing some symbolic execution tools.
+Symbolic execution: if static analysis chose syscalls as entry, it will be effort and inefficient. Otherwise, if the entry is some kernel function in callstack may help more. Both [this paper](https://arxiv.org/abs/1903.02981) and [our fuzzer](syzkaller/kstat_demo/README.md) chose the second way. Get function-level input by using kernel function hook. We also have a [document](static_analysis_tools/README.md) of comparing some symbolic execution tools. Also, most of time, since kernel state is attach to kernel data structure, track the data structure is other way to track kernel state. Refer to this [document](syzkaller/kstate_resource.md).
 
 
 ## Paper
