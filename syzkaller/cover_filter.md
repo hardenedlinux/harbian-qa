@@ -110,25 +110,26 @@ Build syzkaller as usual.
 
 #### Modify configure file
 
-Add the following options in syz-manager configure file:
+Currently, syzkaller support passing regular expression to coverage filter. Add the following options in syz-manager configure file:
 
 ```  
 "cover": true,
 "cover_filter": {
     "files": [
-        "net/core/sock.c",
-        "net/sctp/*", // all files in the dir
-        "net/dccp/**" // all files in all subdirs
+        "^net/core/sock.c$",
+        "^net/sctp/", // file name start with the string
+        "net/dccp/" // file name include the string
     ],
     "functions": [
-        "foo",
-        "bar*", // all functions starting with bar
-        "*baz*" // all functions containing baz
+        "^foo$",
+        "^bar", // all functions start with bar
+        "baz" // all functions containing baz
         ],
     "pcs": "external/file/with/weighted/raw/pc/list"
 }
 ```  
 
+Also refer to [syzkaller document](https://www.github.com/google/syzkaller/blob/master/pkg/mgrconfig/config.go#L109-L117).
 Now you can run a syzkaller with cover filter.
 
 ## Implement detail of cover filter
@@ -137,11 +138,11 @@ Now you can run a syzkaller with cover filter.
 
 ### Implement files and functions filter
 
-Syzkaller manager.reportGenerator holds the file and function information of per pc. At the beginning of syz-manager, we use cov_filter.go:initKcovFilter() initialize reportGenerator. Then we walk throught the whole pcs, use regular expression to pich up those pcs belong to coverage filter files or functions.
+Syzkaller manager.reportGenerator holds the file and function information of per pc. At the beginning of syz-manager, we use covfilter.go:createCoverageFilter() initialize reportGenerator. Then we walk throught all symbols and files, use regular expression to pich up those pcs belong to coverage filter functions and files.
 
 #### Read weighted pcs from funcaddr.map
 
-The configure specifies which funcaddr.map should be loaded and send to VM. Function initWeightedPCs in syz-manager/cov_filter.go will read the funcaddr.map and maintain a weightedPCs map in structure manager.kcovfilter. This weightedPCs map can be used while calculating the weight of prog in web UI.
+The configure specifies which funcaddr.map should be loaded and send to VM. Function initWeightedPCs in syz-manager/covfilter.go will read the funcaddr.map and maintain a coverfilter map in structure manager.Manager. This map can be used while calculating the weight of prog in web UI.
 
 #### RPC interface for sending addresses map to fuzzer
 
@@ -169,19 +170,19 @@ Syzkaller already has its prior choice base on signals length of the prog. We ha
 
 #### Read pcs map
 
-The executor/bitmap.h implement function for getting PCs table from the map.
+The executor/cov_filter.h implement function for getting PCs table from the map.
 
 ##### Fast cover filtering.
 
 Unlike manager and fuzzer, executor coverage filter run more frequently. Without a fast searching, if the PCs table grow up, the affect of performance can be a disaster. So we use a fast but rough way, bitmap, to address this program.
-We use bitmapBytes in syz-manager to create a bitmap for executor. 
+We use createCoverageBitmap in syz-manager to create a bitmap for executor.
 Because address align, the lowest 4-bit is dropped off. So, for quickly setting and accessing the bit which record if a pc should be filtered, we can search by:
 ```  
-uint32 pc32 -= pcstart;
+pc32 -= cov_filter->pcstart;
 pc32 = pc32 >> 4;
 uint32 idx = pc32 / 8;
 uint32 shift = pc32 % 8;
-bitmap[idx] & (1 << shift)
+return (cov_filter->bitmap[idx] & (1 << shift)) > 0;
 ```  
 The affect of performance will not grow up no mater how many PCs should be filtered.
 
