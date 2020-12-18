@@ -7,7 +7,7 @@
 
 Syzkaller is the state-of-the-art kernel fuzzer. It's effective because of its powerful syscalls descript and resource rules. Particularly, after resource centric was introducted to syzkaller, it can efficiently generate testcases with a complex context. It is the best choice if you want to fuzz your kernel.
 
-While syzkaller can do targeted fuzz only by constraining syscalls, we can observe that it's no so efficient if you don't want to fuzz the entir kernel, for example, fuzz a subsystem or several functions. So, We improve syzkaller by introducing coverage filter and kernel state resource, to do targeted fuzz. Coverage filter avoids syzkaller pay too much attention to exploring uninteresting code. Kernel state resource evaluates if the testcase potentially helps to explore target. Both of them help syzkaller to fuzz the targeted code deeply and efficiently. Moreover, some syscalls which are not written for the target, can help to explore targeted code also. But if you don't do coverage filter, target can hardly benefit from them.
+While syzkaller can do targeted fuzz only by constraining syscalls, we can observe that it's no so efficient if you don't want to fuzz the entir kernel, for example, fuzzing a subsystem or several kernel functions. So, We improve syzkaller by introducing coverage filter and kernel state resource, to do targeted fuzz. Coverage filter avoids syzkaller pay too much attention to exploring uninteresting code. Kernel state resource evaluates if a testcase potentially helps to explore target. Both of them help syzkaller to fuzz the targeted code deeply and efficiently. Moreover, some syscalls which are not written for the target, can help to explore targeted code also. But if you don't do coverage filter, target can hardly benefit from them.
 
 ## 2. Feature of customized syzkaller
 
@@ -22,6 +22,8 @@ These [patches](../syz_patch) base on syzkaller-a2cdad9.
 The original syzkaller can only by constraining enable and disable syscalls to do a targeted fuzzing. Lots of code will be covered although we are not interested. And collect the testcase that trigger such edge will occupy a considerable proportion in the corpus while syzkaller generating and mutating new testcases base on corpus statistic. So, it will slow down the exploring and exploiting of the target. Also, in some cases, you may want to specify a code position gradient to tell fuzzer how to evolve testcases to touch the target position gradually. Or, you just want to fuzz some functions more frequently, maybe because of its complexity or importance. To make syzkaller a more targeted fuzzer, we implement a coverage filter and integrate it into syzkaller. It is not so rare in [userspace fuzzer](http://sharcs-project.eu/m/filer_public/48/8c/488c5fb7-9aad-4c87-ab9c-5ff251ebc73d/vuzzer_ndss17.pdf). And we try to implement it without patching kernel and can be flexibly configured in syzkaller. Even PCs weight can be change dynamically in fuzzing time.
 
 More design detail and usage can be found [here](cover_filter.md). Except how to implement coverage filter efficiently, we also show you some examples of how to use LLVM analysis information to create weighted PCs table to tell customized syzkaller how to evolve testcases.
+
+* Coverage filter has been merged by syzkaller, refer to [final section](#6-features-merged-by-syzkaller).
 
 ## 2.2 Syzkaller resource base on kernel state
 
@@ -43,13 +45,15 @@ We attach "signal len", "cover weight", "state len" and "Resource weight" to "/c
 
 No matter if you use coverage filter or not, you can pass a PCs table to patch syzkaller, and access the "/kernfunc" interface to get the information about how much of a function was covered in this fuzzer.
 
-* Currently, Syzkaller has already implemented a similar web interface `func_cov`. We would not maintain such a redundant interface.
+* Currently, Syzkaller already has a interface `/funccover` cover this feature. We would not maintain such a redundant interface. Refer to [final section](#6-features-merged-by-syzkaller).
 
 ![KernFunc](KernFunc.png)
 
 #### Check the coverage filter configuration
 
 Access "/bitmap" interface to get the colored source code to check if your PCs table is right.
+
+* Currently, the filtered coverage report was merge by syzkaller, cover this feature. Refer to [final section](#6-features-merged-by-syzkaller).
 
 ![Bitmap](Bitmap.png)
 
@@ -123,5 +127,13 @@ But, we still couldn't extricate from writing syscalls script. We try to run syz
 
 ## 5. Acknowledgments
 
-* [Special thanks to Dmtry Vyukov and all contributors of syzkaller!](https://github.com/google/syzkaller)
-* [Thanks to LLVM-project!](https://github.com/llvm/llvm-project)
+* [Special thanks to Dmitry Vyukov and all contributors of syzkaller!](https://www.github.com/google/syzkaller)
+* [Thanks to LLVM-project!](https://www.github.com/llvm/llvm-project)
+
+## 6. Features merged by syzkaller
+
+1. Some [discussion](https://groups.google.com/g/syzkaller/c/IgwfGSdca3Q/) in syzkaller mailing list.
+2. [Support coverage filter](https://www.github.com/google/syzkaller/pull/2017).
+3. Some [cleanup and improvement](https://www.github.com/google/syzkaller/pull/2318) for coverage filter from Dmitry.
+4. [Support filter coverage filter report](https://www.github.com/google/syzkaller/pull/2343).
+5. When this article firstly posted, `/funccover` was not supported by syzkaller. Look at this [commit](https://www.github.com/google/syzkaller/commit/06cecac3179071158ad28688dbec0e09095d1a6d), `/funccover` display the overview of the entire kernel functions, and more accurate than our `/kernfunc` interface.
